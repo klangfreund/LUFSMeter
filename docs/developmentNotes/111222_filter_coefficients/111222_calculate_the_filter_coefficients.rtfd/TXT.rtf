@@ -1,0 +1,265 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138\cocoasubrtf230
+{\fonttbl\f0\fnil\fcharset0 Verdana;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red236\green236\blue236;\red52\green66\blue115;\red26\green26\blue26;
+\red253\green210\blue191;\red249\green251\blue254;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid101\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww13280\viewh20620\viewkind0
+\deftab720
+\pard\pardeftab720\sl400
+
+\f0\b\fs20 \cf0 \cb2 source: {\field{\*\fldinst{HYPERLINK "http://www.hydrogenaudio.org/forums/index.php?showtopic=86116&st=25"}}{\fldrslt http://www.hydrogenaudio.org/forums/index.php?showtopic=86116&st=25}}\
+written by pbelkner\
+\
+QUOTE (benski @ Jan 17 2011, 20:11) \
+\pard\pardeftab720\sl400
+
+\b0\fs26 \cf3 Correct. \
+\
+V are gain values and have no relation to sampling frequency\
+Q is a "magic number" that effects the shape of the filter.\
+\
+Fc stays constant - it's the nominal cutoff frequency. \uc0\u969  is tan(fc/fs *\u960 ) [it has been typo'd as \u937  in the paper, \u969 /\u937  are lowercase/uppercase pairs]. That is, it's the cutoff frequency as a percentage of the sampling rate, and "pre-warped" with tan() to match the frequency warping done by the bilinear transform. k is often used for \u969  in source code.\
+\pard\pardeftab720\sl400
+\cf4 \
+I've finally managed (thanks to the pointers provided by Raiden) to find a closed solution to the re-quantization problem for digital biquad filters as it appears in the context of (but not restricted to) BS.1770.\
+\
+Assume youv'e given the coefficients a1, a2, b0, b1, b2, b3 of a digital biquad filter for a particular sample frequency Fs (cf. e.g. {\field{\*\fldinst{HYPERLINK "http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt)"}}{\fldrslt \ul http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt)}}.\
+\
+The re-quantization problem consists in calculating the coefficents a1', a2', b0', b1', b2', and b3' of a digital biquad filter with the same characteristics as the given one, but for another sample frequency Fs'.\
+\
+The key to the solution are the pointers provided by Raiden:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl400
+\ls1\ilvl0\cf4 {\listtext	1.	}Brian Neunaber: {\field{\*\fldinst{HYPERLINK "http://www.scribd.com/doc/6531763/DirectForm-Filter-Parameter-Quantization"}}{\fldrslt \ul Parameter Quantization in Direct-Form Recursive Audio Filters}}\
+{\listtext	2.	}Raiden: {\field{\*\fldinst{HYPERLINK "http://www-public.tu-bs.de:8080/~y0035293/ITU-R-BS.1770-1-filters.pdf"}}{\fldrslt \ul ITU-R BS.1770-1 filter specifications}}, January 15, 2011\
+\pard\pardeftab720\sl400
+\cf4 According to [1] the coeffients a1, a2, b0, b1, b2 of the given digital biquad filter can be mapped to the parameters Fc, Q, Vl, Vb, and Vh of the corresponding analog filter by the following equations (using the notation from [2]):\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (1)\'a0\'a0\'a0\'a0(1 + K / Q + K^2) * a1\'a0\'a0=\'a0\'a02 * (K^2 - 1)\
+(2)\'a0\'a0\'a0\'a0(1 + K / Q + K^2) * a2\'a0\'a0=\'a0\'a01 - K / Q + K^2\
+(3)\'a0\'a0\'a0\'a0(1 + K / Q + K^2) * b0\'a0\'a0=\'a0\'a0Vh + Vb * K / Q + Vl * K^2\
+(4)\'a0\'a0\'a0\'a0(1 + K / Q + K^2) * b1\'a0\'a0=\'a0\'a02 * (Vl * K^2 - Vh)\
+(5)\'a0\'a0\'a0\'a0(1 + K / Q + K^2) * b2\'a0\'a0=\'a0\'a0Vh - Vb * K / Q + Vl * K^2\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+with\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (6) K = tan(pi * Fc / Fs).\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+In order to solve the above stated re-quantization problem we do the following:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl400
+\ls2\ilvl0\cf4 {\listtext	1.	}Solve the eqs (1) - (5) for Fc, Q, Vl, Vb, and Vh.\
+{\listtext	2.	}Use the equations\uc0\u8232 \u8232 
+\b \cf0 \cb5 CODE\uc0\u8232 
+\f1\b0 \cf3 \cb6 (1')\'a0\'a0\'a0\'a0(1 + K' / Q + K'^2) * a1'\'a0\'a0=\'a0\'a02 * (K'^2 - 1)\
+{\listtext	3.	}(2')\'a0\'a0\'a0\'a0(1 + K' / Q + K'^2) * a2'\'a0\'a0=\'a0\'a01 - K' / Q + K'^2\
+{\listtext	4.	}(3')\'a0\'a0\'a0\'a0(1 + K' / Q + K'^2) * b0'\'a0\'a0=\'a0\'a0Vh' + Vb' * K' / Q + Vl * K'^2\
+{\listtext	5.	}(4')\'a0\'a0\'a0\'a0(1 + K' / Q + K'^2) * b1'\'a0\'a0=\'a0\'a02 * (Vl * K'^2 - Vh)\
+{\listtext	6.	}(5')\'a0\'a0\'a0\'a0(1 + K' / Q + K'^2) * b2'\'a0\'a0=\'a0\'a0Vh - Vb * K' / Q + Vl * K^2\uc0\u8232 
+\f0 \cf4 \cb2 \uc0\u8232 with\u8232 \u8232 
+\b \cf0 \cb5 CODE\uc0\u8232 
+\f1\b0 \cf3 \cb6 (6') K' = tan(pi * Fc / Fs')\uc0\u8232 
+\f0 \cf4 \cb2 \uc0\u8232 in order to calculate the coefficents a1', a2', b0', b1', and b2' for a digital biquad filter with the same characteristcs Fc, Q, Vl, Vb, and Vh as the given one but for a different sample frequency Fs'.\
+\pard\pardeftab720\sl400
+\cf4 We start by solving eqs. (1) and (2) for K^2 and K/Q, respectively. By substituting\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 x11\'a0\'a0=\'a0\'a0a1 - 2\
+x12\'a0\'a0=\'a0\'a0a1\
+x1\'a0\'a0=\'a0\'a0-a1 - 2\
+\
+x21\'a0\'a0=\'a0\'a0a2 - 1\
+x22\'a0\'a0=\'a0\'a0a2 + 1\
+x2\'a0\'a0=\'a0\'a0-a2 + 1\
+\
+DX = x22 * x11 - x12 * x21\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+and using {\field{\*\fldinst{HYPERLINK "http://en.wikipedia.org/wiki/System_of_linear_equations"}}{\fldrslt \ul well known methods}} we arrive at\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (6)\'a0\'a0K^2\'a0\'a0=\'a0\'a0(x22 * x1 - x12 * x2) / DX\
+(7)\'a0\'a0K/Q\'a0\'a0=\'a0\'a0(x11 * x2 - x21 * x1) / DX\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+Next we solve eqs. (3), (4), and (5) for Vh, Vb, and Vl. Introducing\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (8) a0\'a0\'a0=\'a0\'a01 + K / Q + K^2\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+and reordering eqs. (3), (4), and (5) they read\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (3a)\'a0\'a0\'a0\'a0\'a0\'a0 Vh + K/Q * Vb +\'a0\'a0\'a0\'a0\'a0\'a0 K^2 * Vl\'a0\'a0=\'a0\'a0b0 * a0\
+(4a)\'a0\'a0-2 * Vh\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0+ (2 * K^2) * Vl\'a0\'a0=\'a0\'a0b1 * a0\
+(5a)\'a0\'a0\'a0\'a0\'a0\'a0 Vh - K/Q * Vb +\'a0\'a0\'a0\'a0\'a0\'a0 K^2 * Vl\'a0\'a0=\'a0\'a0b2 * a0\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+Now it's not hard any longer to find the solutions:\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0a0 * (b0 - b2)\
+(9)\'a0\'a0Vb\'a0\'a0=\'a0\'a0--------------\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 2 * K/Q\
+\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0a0 * (b0 + b1 + b2)\
+(10) Vl\'a0\'a0=\'a0\'a0-------------------\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a04 * K^2\
+\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0a0 * (b0 - b1 + b2)\
+(11) Vh\'a0\'a0=\'a0\'a0-------------------\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a04\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+Finally we observe from eqs. (6) and (6') the following:\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 (6)\'a0\'a0\'a0\'a0 K\'a0\'a0 =\'a0\'a0tan(pi * Fc / Fs)\
+(6)'\'a0\'a0\'a0\'a0K'\'a0\'a0=\'a0\'a0tan(pi * Fc / Fs')\
+(12)\'a0\'a0 K'\'a0\'a0=\'a0\'a0tan(atan(K) * Fs / Fs')\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+Eqs. (6) and (7) along with (9), (10), (11), and (12) provide everything we need for re-quantizing any given digital biquad filter. We demonstrate this by the following C code (please note that this code re-quantizes digital biqad filters on the fly, no pre-processing by an external algebra system ist needed).\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 typedef struct biquad \{\
+\'a0\'a0double fs;\
+\'a0\'a0double a1, a2;\
+\'a0\'a0double b0, b1, b2;\
+\} biquad_t;\
+\
+typedef struct biquad_ps \{\
+\'a0\'a0double k;\
+\'a0\'a0double q;\
+\'a0\'a0double vb;\
+\'a0\'a0double vl;\
+\'a0\'a0double vh;\
+\} biquad_ps_t;\
+\
+void biquad_get_ps(biquad_t *biquad, biquad_ps_t *ps)\
+\{\
+\'a0\'a0double x11 = biquad->a1 - 2;\
+\'a0\'a0double x12 = biquad->a1;\
+\'a0\'a0double x1 = -biquad->a1 - 2;\
+\
+\'a0\'a0double x21 = biquad->a2 - 1;\
+\'a0\'a0double x22 = biquad->a2 + 1;\
+\'a0\'a0double x2 = -biquad->a2 + 1;\
+\
+\'a0\'a0double dx = x22*x11 - x12*x21;\
+\'a0\'a0double k_sq = (x22*x1 - x12*x2)/dx;\
+\'a0\'a0double k_by_q = (x11*x2 - x21*x1)/dx;\
+\'a0\'a0double a0 = 1.0 + k_by_q + k_sq;\
+\
+\'a0\'a0ps->k = sqrt(k_sq);\
+\'a0\'a0ps->q = ps->k/k_by_q;\
+\'a0\'a0ps->vb = 0.5*a0*(biquad->b0 - biquad->b2)/k_by_q;\
+\'a0\'a0ps->vl = 0.25*a0*(biquad->b0 + biquad->b1 + biquad->b2)/k_sq;\
+\'a0\'a0ps->vh = 0.25*a0*(biquad->b0 - biquad->b1 + biquad->b2);\
+\}\
+\
+biquad_t *biquad_requantize(biquad_t *in, biquad_t *out)\
+\{\
+\'a0\'a0if (in->fs==out->fs)\
+\'a0\'a0\'a0\'a0return in;\
+\'a0\'a0else \{\
+\'a0\'a0\'a0\'a0biquad_ps_t ps;\
+\'a0\'a0\'a0\'a0double k, k_sq, k_by_q, a0;\
+\
+\'a0\'a0\'a0\'a0biquad_get_ps(in, &ps);\
+\'a0\'a0\'a0\'a0k=tan((in->fs/out->fs)*atan(ps.k));\
+\'a0\'a0\'a0\'a0k_sq = k*k;\
+\'a0\'a0\'a0\'a0k_by_q = k/ps.q;\
+\'a0\'a0\'a0\'a0a0 = 1.0 + k_by_q + k_sq;\
+\
+\'a0\'a0\'a0\'a0out->a1 = (2.0*(k_sq - 1.0))/a0;\
+\'a0\'a0\'a0\'a0out->a2 = (1.0 - k_by_q + k_sq)/a0;\
+\'a0\'a0\'a0\'a0out->b0 = (ps.vh + ps.vb*k_by_q + ps.vl*k_sq)/a0;\
+\'a0\'a0\'a0\'a0out->b1 = (2.0 * (ps.vl*k_sq - ps.vh))/a0;\
+\'a0\'a0\'a0\'a0out->b2 = (ps.vh - ps.vb*k_by_q + ps.vl*k_sq)/a0;\
+\
+\'a0\'a0\'a0\'a0return out;\
+\'a0\'a0\}\
+\}\
+\pard\pardeftab720\sl400
+
+\f0 \cf4 \
+The following code demonstrates how to re-quantize the 48 kHz BS.1770 pre-filter to it's 44.1 kHz equivalent using the above functions.\
+\
+\pard\pardeftab720\sl400
+
+\b \cf0 CODE\
+\pard\pardeftab720\sl400
+
+\f1\b0 \cf3 int main(int argc, char **argv)\
+\{\
+\'a0\'a0int i;\
+\
+\'a0\'a0biquad_t pre48000=\{\
+\'a0\'a0\'a0\'a0.fs=48000,\
+\'a0\'a0\'a0\'a0.a1=-1.69065929318241,\
+\'a0\'a0\'a0\'a0.a2=0.73248077421585,\
+\'a0\'a0\'a0\'a0.b0=1.53512485958697,\
+\'a0\'a0\'a0\'a0.b1=-2.69169618940638,\
+\'a0\'a0\'a0\'a0.b2=1.19839281085285\
+\'a0\'a0\};\
+\
+\'a0\'a0biquad_t pre44100=\{ .fs=44100 \};\
+\
+\'a0\'a0biquad_requantize(&pre48000, &pre44100);\
+\'a0\'a0printf("a1: %f, %f\\n", pre48000.a1, pre44100.a1);\
+\'a0\'a0printf("a2: %f, %f\\n", pre48000.a2, pre44100.a2);\
+\'a0\'a0printf("b1: %f, %f\\n", pre48000.b0, pre44100.b0);\
+\'a0\'a0printf("b2: %f, %f\\n", pre48000.b1, pre44100.b1);\
+\'a0\'a0printf("b3: %f, %f\\n", pre48000.b2, pre44100.b2);\
+\}\
+}

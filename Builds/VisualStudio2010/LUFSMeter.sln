@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{15E3FB38-4D4F-69AE-624B-E5091AF36576}") = "LUFSMeter", "LUFSMeter.vcxproj", "{4213893B-DA22-7B43-F4E3-F9C04DAAB66F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4213893B-DA22-7B43-F4E3-F9C04DAAB66F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4213893B-DA22-7B43-F4E3-F9C04DAAB66F}.Debug|Win32.Build.0 = Debug|Win32
+		{4213893B-DA22-7B43-F4E3-F9C04DAAB66F}.Release|Win32.ActiveCfg = Release|Win32
+		{4213893B-DA22-7B43-F4E3-F9C04DAAB66F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
