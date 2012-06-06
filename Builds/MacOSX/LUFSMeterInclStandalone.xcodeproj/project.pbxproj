@@ -27,8 +27,6 @@
 		22D1EDD7157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCC157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp */; };
 		22D1EDD8157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCE157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp */; };
 		22D1EDDF157E1E6700A5954F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5BB31015679D4B0FFD07DA /* Cocoa.framework */; };
-		22D1EDE9157E1E6700A5954F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22D1EDE7157E1E6700A5954F /* InfoPlist.strings */; };
-		22D1EDEF157E1E6700A5954F /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 22D1EDED157E1E6700A5954F /* Credits.rtf */; };
 		22D1EDFC157E1F2900A5954F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDFB157E1F2900A5954F /* Main.cpp */; };
 		22D1EDFD157E1F4000A5954F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B35CBDD2C4F7D5E58879412 /* AudioToolbox.framework */; };
 		22D1EDFE157E1F4000A5954F /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D43C9294C481BBB184066C69 /* AudioUnit.framework */; };
@@ -326,9 +324,6 @@
 		22D1EDE2157E1E6700A5954F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		22D1EDE3157E1E6700A5954F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		22D1EDE6157E1E6700A5954F /* LUFSMeterStandalone-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "LUFSMeterStandalone-Info.plist"; sourceTree = "<group>"; };
-		22D1EDE8157E1E6700A5954F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		22D1EDEC157E1E6700A5954F /* LUFSMeterStandalone-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LUFSMeterStandalone-Prefix.pch"; sourceTree = "<group>"; };
-		22D1EDEE157E1E6700A5954F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		22D1EDFA157E1F2900A5954F /* juce_StandaloneFilterWindow_modified.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_StandaloneFilterWindow_modified.h; path = ../../../Source/standalone/juce_StandaloneFilterWindow_modified.h; sourceTree = "<group>"; };
 		22D1EDFB157E1F2900A5954F /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../Source/standalone/Main.cpp; sourceTree = "<group>"; };
 		22D1EE40157E252A00A5954F /* CAXException.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CAXException.cpp; path = Extras/CoreAudio/PublicUtility/CAXException.cpp; sourceTree = DEVELOPER_DIR; };
@@ -1348,20 +1343,17 @@
 			isa = PBXGroup;
 			children = (
 				22D1EDF9157E1EFF00A5954F /* Source */,
-				22D1EDE5157E1E6700A5954F /* Supporting Files */,
+				22D1EDE5157E1E6700A5954F /* Resources */,
 			);
 			path = LUFSMeterStandalone;
 			sourceTree = "<group>";
 		};
-		22D1EDE5157E1E6700A5954F /* Supporting Files */ = {
+		22D1EDE5157E1E6700A5954F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				22D1EDE6157E1E6700A5954F /* LUFSMeterStandalone-Info.plist */,
-				22D1EDE7157E1E6700A5954F /* InfoPlist.strings */,
-				22D1EDEC157E1E6700A5954F /* LUFSMeterStandalone-Prefix.pch */,
-				22D1EDED157E1E6700A5954F /* Credits.rtf */,
 			);
-			name = "Supporting Files";
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		22D1EDF9157E1EFF00A5954F /* Source */ = {
@@ -1703,6 +1695,7 @@
 			isa = PBXGroup;
 			children = (
 				52EAD26B6056DD1E1ACE4180 /* Source */,
+				4A7389F5BF499FF37B3CD7B4 /* Resources */,
 			);
 			name = LUFSMeter;
 			sourceTree = "<group>";
@@ -2808,7 +2801,6 @@
 				22D1EDE4157E1E6700A5954F /* LUFSMeterStandalone */,
 				6C0F300947FD2402F4EE8AB8 /* Juce Modules */,
 				702772E00578827A0745E572 /* Juce Library Code */,
-				4A7389F5BF499FF37B3CD7B4 /* Resources */,
 				81BC6019ED96DF76D4FF3DCC /* Frameworks */,
 				464C5638B1ECF655BA004E8A /* Products */,
 			);
@@ -3111,8 +3103,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22D1EDE9157E1E6700A5954F /* InfoPlist.strings in Resources */,
-				22D1EDEF157E1E6700A5954F /* Credits.rtf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3278,25 +3268,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		22D1EDE7157E1E6700A5954F /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				22D1EDE8157E1E6700A5954F /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		22D1EDED157E1E6700A5954F /* Credits.rtf */ = {
-			isa = PBXVariantGroup;
-			children = (
-				22D1EDEE157E1E6700A5954F /* en */,
-			);
-			name = Credits.rtf;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		22D1EDF7157E1E6700A5954F /* Debug */ = {
