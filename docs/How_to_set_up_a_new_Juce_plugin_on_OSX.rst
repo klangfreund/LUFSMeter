@@ -1,6 +1,8 @@
+How to set up a new Juce plugin on OSX
+======================================
 
 0 Fix XCode 4.3.2
-=================
+-----------------
 
 0.1 In XCode: Go to XCode -> 'Open Developer Tool' 
 -> 'More Developer Tools...' and download the 'Audio Tools
@@ -14,7 +16,7 @@ FixedCoreAudioFilesForXCode4.3.2 .
 
 
 1 Audio Unit
-============
+------------
 
 1.1 Get Juce
 
@@ -31,7 +33,7 @@ standalone folder for now.
 1.5 Compile the LUFS meter plugin and ensure there are no errors.
 
 2. Standalone
-=============
+-------------
 
 2.1 Click to top icon on the right (LUFSMeter project icon). Click the big +
 button on the buttom called 'Add Target'. Select 'Mac OS X' ->
@@ -82,3 +84,15 @@ Prefix Header' to 'no'.
 2.9 Try to compile. Most likely you need to add some more files
 from /Applications/XCode.app/Contents/Developer/Extras/CoreAudio
 to 'Juce Library Code'/'Juce AU Wrapper'.
+
+3. VST
+------
+
+3.1 Download the VST 2.4 SDK (vst_sdk2_4_rev2.zip) by Steinberg.
+Either from
+http://www.steinberg.net/en/company/developer.html
+or from
+http://code.google.com/p/juced/source/browse/trunk/vst/?r=8
+
+3.2 Put the vstsdk2.4 folder anywhere you like and include it in the
+target 'LUFSMeter' -> Build Settings -> Header Search Paths .

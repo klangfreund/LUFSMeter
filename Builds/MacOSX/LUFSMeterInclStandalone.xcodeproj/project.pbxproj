@@ -2799,8 +2799,8 @@
 			children = (
 				5AFBA7D0E0ADE5FA02A7CDC7 /* LUFSMeter */,
 				22D1EDE4157E1E6700A5954F /* LUFSMeterStandalone */,
-				6C0F300947FD2402F4EE8AB8 /* Juce Modules */,
 				702772E00578827A0745E572 /* Juce Library Code */,
+				6C0F300947FD2402F4EE8AB8 /* Juce Modules */,
 				81BC6019ED96DF76D4FF3DCC /* Frameworks */,
 				464C5638B1ECF655BA004E8A /* Products */,
 			);
@@ -3360,6 +3360,7 @@
 					"$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility",
 					"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility",
 					"$(inherited)",
+					../../vstsdk2.4,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
@@ -3414,6 +3415,7 @@
 					"$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility",
 					"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility",
 					"$(inherited)",
+					../../vstsdk2.4,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";

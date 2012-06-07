@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="uJe08D" name="LUFSMeter" projectType="audioplug" version="0.1.0"
-              buildVST="0" buildAU="1" pluginName="LUFSMeter" pluginDesc="LUFSMeter"
+              buildVST="1" buildAU="1" pluginName="LUFSMeter" pluginDesc="LUFSMeter"
               pluginManufacturer="klangfreund" pluginManufacturerCode="Klan"
               pluginCode="LUFS" pluginChannelConfigs="{1, 1}, {2, 2}, {6,6}"
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
