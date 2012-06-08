@@ -39,7 +39,11 @@
  This is only compiled in a debug build.
  @see Logger::outputDebugString
  */
-#define DBGT(dbgtext)  { Time currentTime = Time::getCurrentTime(); bool includeDate = true; bool includeTime = true; bool includeSeconds = true; bool use24HourClock = true; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ": " + dbgtext) }
+    #define DBGT(dbgtext)  { Time currentTime = Time::getCurrentTime(); bool includeDate = true; bool includeTime = true; bool includeSeconds = true; bool use24HourClock = true; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ": " + dbgtext) }
+
+#else
+    #define DBGT(dbgtext)
+
 #endif
 
 #endif // __LUFSMETER_MACROS__

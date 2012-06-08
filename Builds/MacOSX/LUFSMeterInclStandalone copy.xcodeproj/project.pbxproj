@@ -3289,7 +3289,6 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				HEADER_SEARCH_PATHS = ../../vstsdk2.4;
 				INFOPLIST_FILE = "LUFSMeterStandalone/LUFSMeterStandalone-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
@@ -3312,10 +3311,8 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				HEADER_SEARCH_PATHS = ../../vstsdk2.4;
 				INFOPLIST_FILE = "LUFSMeterStandalone/LUFSMeterStandalone-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -3345,9 +3342,7 @@
 		B11BA56BF7F5E3FA44602528 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				DEPLOYMENT_POSTPROCESSING = NO;
 				EXCLUDED_SOURCE_FILE_NAMES = "$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))";
 				EXCLUDED_SOURCE_FILE_NAMES_x86_64 = "*Carbon*.cpp";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -3376,7 +3371,6 @@
 				SDKROOT = macosx;
 				SDKROOT_ppc = macosx10.5;
 				SRCROOT = ../..;
-				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = component;
 			};
 			name = Release;
@@ -3404,7 +3398,6 @@
 		E8F52FF75FE08102AB2384DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				COPY_PHASE_STRIP = NO;
 				EXCLUDED_SOURCE_FILE_NAMES = "$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))";
@@ -3435,7 +3428,6 @@
 				SDKROOT = macosx;
 				SDKROOT_ppc = macosx10.5;
 				SRCROOT = ../..;
-				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = component;
 			};
 			name = Debug;

@@ -44,6 +44,7 @@
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Debug"
+      ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable>
@@ -70,7 +71,7 @@
             BlueprintIdentifier = "22D1EDDC157E1E6700A5954F"
             BuildableName = "LUFSMeterStandalone.app"
             BlueprintName = "LUFSMeterStandalone"
-            ReferencedContainer = "container:LUFSMeter.xcodeproj">
+            ReferencedContainer = "container:LUFSMeterInclStandalone.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
