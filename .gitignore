@@ -7,6 +7,9 @@
 # Exclude OS X folder attributes
 .DS_Store
  
+# Excluded folders:
+_finalBinaries
+
 # Exclude user-specific XCode 3 and 4 files
 # *.mode1
 # *.mode1v3
