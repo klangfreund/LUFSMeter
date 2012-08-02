@@ -33,7 +33,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Macros.h"
 #include "filters/SecondOrderIIRFilter.h"
+#include <vector>
 
+using std::vector;
 
 /**
  Measures the loudness of an audio stream.
@@ -142,9 +144,7 @@ private:
     /** A gated window needs to be bigger than this value to
      contribute to the calculation of the relative threshold.
      
-     It is equal to 10^((Gamma_a) + 0.691)/10), where
-     Gamma_a = -70 LUFS.
-     (See 111215_integrated_loudness.tif)
+     absoluteThreshold = Gamma_a = -70 LUFS.
      */
     static const double absoluteThreshold;
     
@@ -154,12 +154,34 @@ private:
      set to minimalReturnValue.
      */
     static const float minimalReturnValue;
+    
     int numberOfBlocksToCalculateRelativeThreshold;
     double sumOfAllBlocksToCalculateRelativeThreshold;
     double relativeThreshold;
     
-    int numberOfBlocksToCalculateIntegratedLoudness;
-    double sumOfAllBlocksToCalculateIntegratedLoudness;    
+    
+    double lowestBlockLoudnessToConsider;
+    double highestBlockLoudnessToConsider;
+    /** The difference in loudness between two adjacent bins in the histogram.
+     Measured in LU;
+     */
+    double histogramLoudnessStepSize;
+    
+    /** Two adjacant bins in the histogram also correspond to two weighted
+     sums. They are related by this factor.
+     WeightedSum2 = WeightedSum1 * histogramWeightedSumStepFactor.
+     */
+    double histogramWeightedSumStepFactor;
+    
+    /** Storage for the loudnesses of all blocks since the last reset.
+     
+     Because the relative threshold varies, and all blocks with a loudness
+     bigger than the relative threshold are needed to calculate the gated
+     loudness (integrated loudness), it is mandatory to keep track of all
+     block loudnesses.
+     */
+    vector<int> histogramOfBlockLoudness;
+       
     float integratedLoudness;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);

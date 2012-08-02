@@ -29,14 +29,15 @@
 
 #include "Ebu128LoudnessMeter.h"
 
-// constants
-const double Ebu128LoudnessMeter::absoluteThreshold = 
-    std::pow(10.0, (-70.0 + 0.691)/10.0); // = 1.1724653045822981e-07
+// constants initialisation
+const double Ebu128LoudnessMeter::absoluteThreshold = -70.0;
 const float Ebu128LoudnessMeter::minimalReturnValue = -300.0f;
 
 
 Ebu128LoudnessMeter::Ebu128LoudnessMeter()
-    : bufferForMeasurement(2, 2048), // Initiate with some common values.
+    : bufferForMeasurement(2, 2048), // Initialise the buffer with some common values.
+    // Also initialise the two filters with the coefficients for a sample
+    // rate of 44100 Hz. These values are given in the ITU-R BS.1770-2.
     preFilter(1.53512485958697,  // b0
               -2.69169618940638, // b1
               1.19839281085285,  // b2
@@ -46,8 +47,18 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
                                     -2.0,              // b1
                                     1.0,               // b2
                                     -1.99004745483398, // a1
-                                    0.99007225036621)  // a2
+                                    0.99007225036621), // a2
+    // Specifications for the histogram.
+    // You might want to change them to e.g. achieve a higher resolution.
+    lowestBlockLoudnessToConsider(-80.0), // LUFS
+    highestBlockLoudnessToConsider(10.0), // LUFS
+    histogramLoudnessStepSize(0.1), // LU
+    histogramWeightedSumStepFactor(pow(10.0, histogramLoudnessStepSize/10.0)),
+    // Memory allocation for the histogram
+    histogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0)
 {
+    
+    
     // If this class is used wrong and processBlock
     // is called before prepareToPlay, divisions by zero
     // might occure. E.g. if numberOfSamplesInAllBins = 0.
@@ -59,7 +70,6 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
 
 Ebu128LoudnessMeter::~Ebu128LoudnessMeter()
 {
-    
 }
 
 void Ebu128LoudnessMeter::prepareToPlay (double sampleRate, 
@@ -68,7 +78,6 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
                                          int expectedRequestRate)
 {
     // Resize the buffer.
-    // The number of input channels 
     bufferForMeasurement.setSize(numberOfInputChannels, estimatedSamplesPerBlock);
     
     // Set up the two filters for the K-Filtering.
@@ -77,6 +86,7 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
     
     // Modify the expectedRequestRate if needed.
     // It needs to be at least 10 and a multiple of 10 because
+    //                --------------------------------
     // exactly every 0.1 second a gating block needs to be measured
     // (for the integrated loudness measurement).
     if (expectedRequestRate < 10)
@@ -89,19 +99,39 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
             //  20 -> 20
             //  21 -> 30
     }
-    DBGT("expectedRequestRate = " + String(expectedRequestRate))
+    // It also needs to be a divisor of the samplerate for accurate
+    // M and S values (the integrated loudness (I value) would not be
+    // affected by this inaccuracy.
+    while (int(sampleRate) % expectedRequestRate != 0)
+    {
+        expectedRequestRate += 10;
+        
+        if (expectedRequestRate > sampleRate/2)
+        {
+            expectedRequestRate = 10;
+            DBGT("Ebu128LoudnessMeter::prepareToPlay. Not possible to make "
+                 "expectedRequestRate a multiple of 10 and a divisor of the "
+                 "samplerate.")
+            break;
+        }
+    }
+    
+    DBGT("Ebu128LoudnessMeter::prepareToPlay, "
+         "expectedRequestRate = " + String(expectedRequestRate))
     
     // Figure out how many bins are needed.
-    int maxTimeOfAccumulation = 3; // seconds. Needed for the
-                                   // short term loudness measurement.
-    numberOfBins = expectedRequestRate * maxTimeOfAccumulation;
+    const int timeOfAccumulationForShortTerm = 3; // seconds.
+        //Needed for the short term loudness measurement.
+    numberOfBins = expectedRequestRate * timeOfAccumulationForShortTerm;
     numberOfSamplesPerBin = int (sampleRate / expectedRequestRate);
     numberOfSamplesInAllBins = numberOfBins * numberOfSamplesPerBin;
     
     numberOfBinsToCover100ms = int(0.1 * expectedRequestRate);
-    DBGT("numberOfBinsToCover100ms = " + String(numberOfBinsToCover100ms));
+    DBGT("Ebu128LoudnessMeter::prepareToPlay, "
+         "numberOfBinsToCover100ms = " + String(numberOfBinsToCover100ms));
     numberOfBinsToCover400ms = int(0.4 * expectedRequestRate);
-    DBGT("numberOfBinsToCover400ms = " + String(numberOfBinsToCover400ms));
+    DBGT("Ebu128LoudnessMeter::prepareToPlay, "
+         "numberOfBinsToCover400ms = " + String(numberOfBinsToCover400ms));
     numberOfSamplesIn400ms = numberOfBinsToCover400ms * numberOfSamplesPerBin;
     
     currentBin = 0;
@@ -147,23 +177,17 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
         momentaryLoudness.add(-300.0f);
     }
     
-    numberOfBlocksToCalculateRelativeThreshold = 0;
-    sumOfAllBlocksToCalculateRelativeThreshold = 0.0;
     relativeThreshold = absoluteThreshold;
-    
-    numberOfBlocksToCalculateIntegratedLoudness = 0;
-    sumOfAllBlocksToCalculateIntegratedLoudness = 0.0;
-    integratedLoudness = -300.0f;
+    resetTheIntegratedLoudness();
 }
 
 void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
 {
-    // Copy the buffer, such that all the upcoming calculations won't affect
-    // the audio output.
-    for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
-    {
-        bufferForMeasurement.copyFrom(k, 0, buffer, k, 0, buffer.getNumSamples());
-    }
+    // Copy the buffer, such that all upcoming calculations won't affect
+    // the audio output. We want the audio output to be exactly the same
+    // as the input!
+    bufferForMeasurement = buffer; // This copies the audio to another memory
+        // location using memcpy.
     
     // STEP 1: K-weighted filter.
     // -----------------------------
@@ -178,10 +202,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     
     // TEMP
     // Copy back to buffer to listen if everything went well.
-//    for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
-//    {
-//        buffer.copyFrom(k, 0, bufferForMeasurement, k, 0, bufferForMeasurement.getNumSamples());
-//    }
+    //   buffer = bufferForMeasurement;
     // END TEMP
     
     // STEP 2: Mean square.
@@ -190,7 +211,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     {
         float* theKthChannelData = bufferForMeasurement.getSampleData (k);
         for (int i = 0; i != bufferForMeasurement.getNumSamples(); ++i)
-            theKthChannelData[i] = theKthChannelData[i]*theKthChannelData[i];
+            theKthChannelData[i] = theKthChannelData[i] * theKthChannelData[i];
     }
         
     // STEP 3: Accumulate the samples and put the sum(s) into the right bin(s).
@@ -228,8 +249,8 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
             if (numberOfSamplesLeftInTheBuffer
                     < numberOfSamplesPerBin - numberOfSamplesInTheCurrentBin )
             {
-                // If the current bin wont be filled entirely with the remaining
-                // samples of the buffer.
+                // If all the samples from the buffer can be added to the
+                // current bin.
                 numberOfSamplesToPutIntoTheCurrentBin = numberOfSamplesLeftInTheBuffer;
                 remainingSamplesInBuffer = false;
             }
@@ -259,7 +280,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                                    + numberOfSamplesToPutIntoTheCurrentBin;
                 
                 // We have completely filled a bin.
-                // This is the moment the larger sums need to be updated.
+                // This is the instant the larger sums need to be updated.
                 for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
                 {
                     double sumOfAllBins = 0.0;
@@ -295,8 +316,12 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     }
                     *(averageOfTheLast400ms[k]) = sumOfBinsToCoverTheLast400ms / numberOfSamplesIn400ms;
                 }
+                
+                // INTEGRATED LOUDNESS
+                // ===================
                 // For the integrated loudness measurement, every 100ms
                 // we have to observe a gating window of length 400ms.
+                // We call this window 'gating black', according to BS.1770-2
                 if (numberOfBinsSinceLastGateMeasurement == numberOfBinsToCover100ms)
                 {
                     numberOfBinsSinceLastGateMeasurement = 0;
@@ -305,32 +330,66 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     // fulfills the equation
                     //   l_j > /Gamma_a
                     // ( see ITU-R BS.1770-2 equation (4) ).
-                    double weightedSum = 0.0;
-                    for (int k=0; k != averageOfTheLast400ms.size(); ++k)
+                    
+                    // Calculate the weighted sum of the current block,
+                    // (in 120725_integrated_loudness_revisited.tif, I call
+                    // this s_j)
+                    double weightedSumOfCurrentBlock = 0.0;
+                    const int numberOfChannels = averageOfTheLast400ms.size();
+                    for (int k=0; k != numberOfChannels; ++k)
                     {
-                        weightedSum += channelWeighting[k] * *averageOfTheLast400ms[k];
+                        weightedSumOfCurrentBlock += channelWeighting[k] * *averageOfTheLast400ms[k];
                     }
+                    
+                    // Calculate the j'th gating block loudness l_j
+                    double loudnessOfCurrentBlock = -0.691 + 10.*std::log10(weightedSumOfCurrentBlock);
                     
                     // Recalculate the relative threshold, if needed.
-                    if (weightedSum > absoluteThreshold)
+                    if (loudnessOfCurrentBlock > absoluteThreshold)
                     {
                         ++numberOfBlocksToCalculateRelativeThreshold;
-                        sumOfAllBlocksToCalculateRelativeThreshold += weightedSum;
+                        sumOfAllBlocksToCalculateRelativeThreshold += weightedSumOfCurrentBlock;
                         
-                        // According to ITU-R BS.1770-2 inequality (6).
-                        // See 111215_integrated_loudness.tif for the
-                        // rearrangement of this inequality.
-                        relativeThreshold = 0.1 *sumOfAllBlocksToCalculateRelativeThreshold/numberOfBlocksToCalculateRelativeThreshold;   
+                        // According to the definition of the relative
+                        // threshold in ITU-R BS.1770-2, page 6.
+                        relativeThreshold = -10.691 + 10.*std::log10(sumOfAllBlocksToCalculateRelativeThreshold/numberOfBlocksToCalculateRelativeThreshold);
                     }
                     
-                    // Recalculate the gated loudness, if needed.
-                    if (weightedSum > relativeThreshold)
+                    // Add the loudness of the current block to the histogram
+                    if (loudnessOfCurrentBlock > lowestBlockLoudnessToConsider &&
+                        loudnessOfCurrentBlock < highestBlockLoudnessToConsider)
                     {
-                        ++numberOfBlocksToCalculateIntegratedLoudness;
-                        sumOfAllBlocksToCalculateIntegratedLoudness += weightedSum;
-                        
-                        integratedLoudness = float(-0.691 + 10.*std::log10(sumOfAllBlocksToCalculateIntegratedLoudness/numberOfBlocksToCalculateIntegratedLoudness));
+                        const int binToAddItTo = floor((loudnessOfCurrentBlock-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
+                        histogramOfBlockLoudness[binToAddItTo] += 1;
                     }
+                    
+                    
+                    // Recalculate the gated loudness.
+                    const int binToStart = ceil((relativeThreshold - lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
+                    if (binToStart < histogramOfBlockLoudness.size())
+                    {
+                        double loudnessOfBin = lowestBlockLoudnessToConsider + (binToStart + 0.5)*histogramLoudnessStepSize;
+                        double weightedSumOfBin = pow(10.0, (loudnessOfBin + 0.691)/10.0);
+                        int nrOfBlocks = 0;
+                        double sumForIntegratedLoudness = 0.0;
+                        for (int i = binToStart;
+                             i < histogramOfBlockLoudness.size(); ++i)
+                        {
+                            const int nrOfBlocksInBin = histogramOfBlockLoudness[i];
+                            nrOfBlocks += nrOfBlocksInBin;
+                            sumForIntegratedLoudness += nrOfBlocksInBin * weightedSumOfBin;
+                            
+                            weightedSumOfBin *= histogramWeightedSumStepFactor;
+                        }
+                        
+//                        DBGT("weightedSumOfLastBin (used) = "
+//                             + String(weightedSumOfBin))
+//                        DBGT("weightedSumOfLastBin (directly calculated) = "
+//                             + String(pow(10.0, (lowestBlockLoudnessToConsider + (histogramOfBlockLoudness.size() + 0.5)*histogramLoudnessStepSize + 0.691)/10.0)))
+                        
+                        integratedLoudness = float(-0.691 + 10.*std::log10(sumForIntegratedLoudness/nrOfBlocks));
+                    }
+
                 }
                 else
                     ++numberOfBinsSinceLastGateMeasurement;
@@ -412,9 +471,13 @@ float Ebu128LoudnessMeter::getIntegratedLoudness()
 
 void Ebu128LoudnessMeter::resetTheIntegratedLoudness()
 {
-    numberOfBlocksToCalculateIntegratedLoudness = 0;
-    sumOfAllBlocksToCalculateIntegratedLoudness = 0.0;
     numberOfBlocksToCalculateRelativeThreshold = 0;
     sumOfAllBlocksToCalculateRelativeThreshold = 0.0;
+    
+    for (int i=0; i<histogramOfBlockLoudness.size(); ++i)
+    {
+        histogramOfBlockLoudness[i] = 0;
+    }
+    
     integratedLoudness = -300.0f;
 }
