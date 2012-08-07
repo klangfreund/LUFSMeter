@@ -368,18 +368,20 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     const int binToStart = ceil((relativeThreshold - lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
                     if (binToStart < histogramOfBlockLoudness.size())
                     {
-                        double loudnessOfBin = lowestBlockLoudnessToConsider + (binToStart + 0.5)*histogramLoudnessStepSize;
-                        double weightedSumOfBin = pow(10.0, (loudnessOfBin + 0.691)/10.0);
+                        double loudnessOfCurrentBin = lowestBlockLoudnessToConsider + (binToStart + 0.5)*histogramLoudnessStepSize;
+                        double weightedSumOfCurrentBin = pow(10.0, (loudnessOfCurrentBin + 0.691)/10.0);
                         int nrOfBlocks = 0;
                         double sumForIntegratedLoudness = 0.0;
-                        for (int i = binToStart;
-                             i < histogramOfBlockLoudness.size(); ++i)
+                        
+                        for (vector<int>::iterator currentBin = histogramOfBlockLoudness.begin() + binToStart; 
+                             currentBin != histogramOfBlockLoudness.end();
+                             ++currentBin)
                         {
-                            const int nrOfBlocksInBin = histogramOfBlockLoudness[i];
+                            const int nrOfBlocksInBin = *currentBin;
                             nrOfBlocks += nrOfBlocksInBin;
-                            sumForIntegratedLoudness += nrOfBlocksInBin * weightedSumOfBin;
+                            sumForIntegratedLoudness += nrOfBlocksInBin * weightedSumOfCurrentBin;
                             
-                            weightedSumOfBin *= histogramWeightedSumStepFactor;
+                            weightedSumOfCurrentBin *= histogramWeightedSumStepFactor;
                         }
                         
 //                        DBGT("weightedSumOfLastBin (used) = "
