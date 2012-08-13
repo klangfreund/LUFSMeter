@@ -38,6 +38,7 @@
 #include "gui/LevelBar.h"
 #include "gui/LevelNumeric.h"
 #include "gui/LevelHistory.h"
+#include "gui/PreferencesPane.h"
 
 
 //==============================================================================
@@ -45,7 +46,8 @@
 */
 class LUFSMeterAudioProcessorEditor   : public AudioProcessorEditor,
                                         public Timer,
-                                        public ButtonListener
+                                        public ButtonListener,
+                                        public SliderListener
 {
 public:
     LUFSMeterAudioProcessorEditor (LUFSMeterAudioProcessor* ownerFilter);
@@ -55,12 +57,16 @@ public:
     /** The standard Juce paint method. */
     void paint (Graphics& g);
     
-    void resized();
+    void resized ();
     
-    void timerCallback();
+    void timerCallback ();
     
-    /** The ButtonListener method*/
-    void buttonClicked(Button* button);
+    /** The ButtonListener method. */
+    void buttonClicked (Button* button);
+    
+    /** The SliderListener method. */
+    void sliderValueChanged (Slider* slider);
+    
 private:
     LUFSMeterAudioProcessor* getProcessor() const;
     void displayPositionInfo (const AudioPlayHead::CurrentPositionInfo& pos);
@@ -98,6 +104,12 @@ private:
     /** Level history graph. */
     LevelHistory levelHistory;
     
+    /** Preferences pane. */
+    PreferencesPane preferencesPane;
+    int preferencesPaneXPosition;
+    const int preferencesPaneYPosition;
+    const int preferencesPaneWidth;
+    const int preferencesPaneHeight;
     
     Label infoLabel;
     

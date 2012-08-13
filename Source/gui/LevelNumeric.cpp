@@ -48,7 +48,7 @@ Value & LevelNumeric::getLevelValueObject ()
 
 void LevelNumeric::valueChanged (Value & value)
 {
-    const int numberOfDecimalPlaces = 2;
+    const int numberOfDecimalPlaces = 1;
     currentLevelText = String((float)levelValue.getValue(), numberOfDecimalPlaces);
     
     if (currentLevelText != previousLevelText)

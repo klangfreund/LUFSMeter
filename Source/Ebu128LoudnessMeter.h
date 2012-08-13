@@ -81,7 +81,7 @@ public:
     
     float getIntegratedLoudness();
     
-    void resetTheIntegratedLoudness();
+    void reset();
     
 private:
     

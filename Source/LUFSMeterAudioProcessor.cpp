@@ -197,12 +197,36 @@ void LUFSMeterAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+    // Create an outer XML element..
+    XmlElement xml ("MYPLUGINSETTINGS");
+    
+    // add some attributes to it..
+    xml.setAttribute ("uiWidth", lastUIWidth);
+    xml.setAttribute ("uiHeight", lastUIHeight);
+    
+    // then use this helper function to stuff it into the binary blob and return it..
+    copyXmlToBinary (xml, destData);
 }
 
 void LUFSMeterAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    
+    // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
+    ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    
+    if (xmlState != 0)
+    {
+        // make sure that it's actually our type of XML object..
+        if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
+        {
+            // ok, now pull out our parameters..
+            lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
+            lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
+        }
+    }
 }
 
 float LUFSMeterAudioProcessor::getShortTermLoudness()
@@ -222,7 +246,7 @@ float LUFSMeterAudioProcessor::getIntegratedLoudness()
 
 void LUFSMeterAudioProcessor::reset()
 {
-    ebu128LoudnessMeter.resetTheIntegratedLoudness();
+    ebu128LoudnessMeter.reset();
 }
 
 

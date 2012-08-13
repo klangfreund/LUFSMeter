@@ -16,6 +16,8 @@
 		19E23B01541E13D09D002E4F /* AUBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D94A76318BCE1A427A466F7 /* AUBase.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		1EC19361AE8313855ED105F9 /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = 09565095764E4EA75279C297 /* juce_core.mm */; };
 		1EEC1C2F15F399B12A16495E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B7E6B8C6C2BEABF11369AD4 /* QuartzCore.framework */; };
+		22786A1E15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */; };
+		22786A1F15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */; };
 		22AD420774B192B65C8E2725 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B35CBDD2C4F7D5E58879412 /* AudioToolbox.framework */; };
 		22D1EDD0157E1D0C00A5954F /* Ebu128LoudnessMeter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDBC157E1D0C00A5954F /* Ebu128LoudnessMeter.cpp */; };
 		22D1EDD1157E1D0C00A5954F /* SecondOrderIIRFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDBF157E1D0C00A5954F /* SecondOrderIIRFilter.cpp */; };
@@ -299,6 +301,8 @@
 		20F09725768D0B1C15742309 /* juce_InterprocessConnectionServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_InterprocessConnectionServer.h; path = ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h; sourceTree = SOURCE_ROOT; };
 		2197FCF9495ABF415250CABD /* juce_MessageListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MessageListener.cpp; path = ../../JuceLibraryCode/modules/juce_events/messages/juce_MessageListener.cpp; sourceTree = SOURCE_ROOT; };
 		21AC2213B50DF71E0CC5713E /* juce_GraphicsContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GraphicsContext.cpp; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_GraphicsContext.cpp; sourceTree = SOURCE_ROOT; };
+		22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PreferencesPane.cpp; sourceTree = "<group>"; };
+		22786A1D15D3AFD000D474B1 /* PreferencesPane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesPane.h; sourceTree = "<group>"; };
 		22ACC6F8DF936BF5E3A61909 /* juce_ComboBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComboBox.cpp; path = ../../JuceLibraryCode/modules/juce_gui_basics/widgets/juce_ComboBox.cpp; sourceTree = SOURCE_ROOT; };
 		22BC1A007515EB73A051D798 /* MusicDeviceBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MusicDeviceBase.h; path = Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h; sourceTree = DEVELOPER_DIR; };
 		22D1EDBC157E1D0C00A5954F /* Ebu128LoudnessMeter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ebu128LoudnessMeter.cpp; path = ../../Source/Ebu128LoudnessMeter.cpp; sourceTree = "<group>"; };
@@ -1324,6 +1328,8 @@
 				22D1EDC9157E1D0C00A5954F /* LevelHistory.h */,
 				22D1EDCA157E1D0C00A5954F /* LevelNumeric.cpp */,
 				22D1EDCB157E1D0C00A5954F /* LevelNumeric.h */,
+				22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */,
+				22786A1D15D3AFD000D474B1 /* PreferencesPane.h */,
 			);
 			name = gui;
 			path = ../../Source/gui;
@@ -3203,6 +3209,7 @@
 				22D1EE12157E1F7E00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */,
 				22D1EE5E157E26BE00A5954F /* CAHostTimeBase.cpp in Sources */,
 				22D1EE61157E271000A5954F /* AUBaseHelper.cpp in Sources */,
+				22786A1F15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3264,6 +3271,7 @@
 				22D1EDD6157E1D0C00A5954F /* LevelNumeric.cpp in Sources */,
 				22D1EDD7157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */,
 				22D1EDD8157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */,
+				22786A1E15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

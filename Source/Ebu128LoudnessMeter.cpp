@@ -48,6 +48,7 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
                                     1.0,               // b2
                                     -1.99004745483398, // a1
                                     0.99007225036621), // a2
+    relativeThreshold (absoluteThreshold),
     // Specifications for the histogram.
     // You might want to change them to e.g. achieve a higher resolution.
     lowestBlockLoudnessToConsider(-80.0), // LUFS
@@ -55,7 +56,8 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     histogramLoudnessStepSize(0.1), // LU
     histogramWeightedSumStepFactor(pow(10.0, histogramLoudnessStepSize/10.0)),
     // Memory allocation for the histogram
-    histogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0)
+    histogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0),
+    integratedLoudness (minimalReturnValue)
 {
     
     
@@ -168,17 +170,16 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
             channelWeighting.add(1.0);
     }
     
-    // Initialize the loudness measurements (the values measured in LUFS).
-    shortTermLoudness.clear();
+    // momentary and short term loudness.
     momentaryLoudness.clear();
+    shortTermLoudness.clear();
     for (int k=0; k != numberOfInputChannels; ++k)
     {
-        shortTermLoudness.add(-300.0f);
-        momentaryLoudness.add(-300.0f);
-    }
+        momentaryLoudness.add(minimalReturnValue);
+        shortTermLoudness.add(minimalReturnValue);
+    } 
     
-    relativeThreshold = absoluteThreshold;
-    resetTheIntegratedLoudness();
+    reset();
 }
 
 void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
@@ -471,8 +472,27 @@ float Ebu128LoudnessMeter::getIntegratedLoudness()
     return integratedLoudness;
 }
 
-void Ebu128LoudnessMeter::resetTheIntegratedLoudness()
+void Ebu128LoudnessMeter::reset()
 {
+    // the bins
+    for (int k=0; k != bin.size(); ++k)
+    {
+        OwnedArray<double>* binsForTheKthChannel = bin[k];
+        for (int i=0; i != binsForTheKthChannel->size(); ++i)
+        {
+            double* ithBin = binsForTheKthChannel->getUnchecked(i);
+            *ithBin = 0.0;
+        }
+    }
+    
+    // momentary and short term loudness.
+    for (int k=0; k != momentaryLoudness.size(); ++k)
+    {
+        momentaryLoudness.set(k, minimalReturnValue);
+        shortTermLoudness.set(k, minimalReturnValue);
+    }    
+    
+    // integrated loudness
     numberOfBlocksToCalculateRelativeThreshold = 0;
     sumOfAllBlocksToCalculateRelativeThreshold = 0.0;
     
@@ -481,5 +501,6 @@ void Ebu128LoudnessMeter::resetTheIntegratedLoudness()
         histogramOfBlockLoudness[i] = 0;
     }
     
-    integratedLoudness = -300.0f;
+    relativeThreshold = absoluteThreshold;
+    integratedLoudness = minimalReturnValue;
 }

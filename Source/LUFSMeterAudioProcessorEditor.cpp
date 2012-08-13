@@ -46,7 +46,11 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     momentaryLoudnessCaption (String::empty, "M"),
     shortTermLoudnessCaption (String::empty, "S"),
     integratedLoudnessCaption (String::empty, "I"),
-    levelHistory (integratedLoudnessValue)
+    levelHistory (integratedLoudnessValue),
+    preferencesPaneXPosition (-380),
+    preferencesPaneYPosition(50),
+    preferencesPaneWidth (400),
+    preferencesPaneHeight(300)
 {
     // Add the background grid
     addAndMakeVisible (&backgroundGrid);
@@ -98,6 +102,13 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     resetButton.setButtonText("reset");
     resetButton.setColour(TextButton::buttonColourId, Colours::green);
     addAndMakeVisible (&resetButton);
+    
+    // Add the preferences pane
+    addAndMakeVisible(&preferencesPane);
+    preferencesPane.showOrHidePreferences.addListener(this);
+    preferencesPane.loudnessBarSize.addListener(this);
+    preferencesPane.loudnessBarSize.setRange(5.0, 300.0, 1);
+    preferencesPane.loudnessBarSize.setValue(getProcessor()->loudnessBarSize);
 
     
     // Add the triangular resizer component for the bottom-right of the UI.
@@ -132,60 +143,79 @@ void LUFSMeterAudioProcessorEditor::paint (Graphics& g)
 void LUFSMeterAudioProcessorEditor::resized()
 {
     // DBGT("Height of main component = " + String(getHeight()))
-    
+
+    const int levelBarWidth = jmax( getProcessor()->loudnessBarSize, 5);
+    const int spaceBetweenBars = jmin(levelBarWidth/5, 10); // This distance is 
+        // also used for the border on the right side.
+    const int heightOfNumericValues = levelBarWidth/3;
+    const int heightOfLoudnessCaptions = heightOfNumericValues;
+    distanceBetweenLevelBarAndBottom = heightOfNumericValues + heightOfLoudnessCaptions;
     const int levelBarBottomPosition = getHeight() - distanceBetweenLevelBarAndBottom;
     const int levelBarNumericTopPosition = getHeight() - distanceBetweenLevelBarAndBottom;
-    const int levelBarCaptionTopPosition = getHeight() - 16;
-    const int levelBarWidth = 50;
+    const int levelBarCaptionTopPosition = getHeight() - heightOfLoudnessCaptions;
+    
     const int backgroundGridCaptionWidth = 30;
+    
+    // Font for the loudnessCaptions
+    const int fontHeight = heightOfLoudnessCaptions;
+    const Font fontForCaptions (fontHeight);
     
     backgroundGrid.setBounds(0,
                              distanceBetweenLevelBarAndTop,
                              getWidth(),
                              levelBarBottomPosition - distanceBetweenLevelBarAndTop);
     
-    backgroundGridCaption.setBounds(getWidth()-220, 0, backgroundGridCaptionWidth, getHeight());
-
-    integratedLoudnessBar.setBounds(getWidth()-180, 
-                                      distanceBetweenLevelBarAndTop, 
-                                      levelBarWidth, 
-                                      levelBarBottomPosition - distanceBetweenLevelBarAndTop);
-    shortTermLoudnessBar.setBounds(getWidth()-120,
-                                     distanceBetweenLevelBarAndTop,
-                                     levelBarWidth,
-                                     levelBarBottomPosition - distanceBetweenLevelBarAndTop);
-    momentaryLoudnessBar.setBounds(getWidth()-60,
-                                     distanceBetweenLevelBarAndTop,
-                                     levelBarWidth,
-                                     levelBarBottomPosition - distanceBetweenLevelBarAndTop);
+    const int momentaryLoudnessBarX = getWidth() - spaceBetweenBars - levelBarWidth;
+    momentaryLoudnessBar.setBounds(momentaryLoudnessBarX,
+                                   distanceBetweenLevelBarAndTop,
+                                   levelBarWidth,
+                                   levelBarBottomPosition - distanceBetweenLevelBarAndTop);
+    momentaryLoudnessNumeric.setBounds (momentaryLoudnessBarX,
+                                        levelBarNumericTopPosition,
+                                        levelBarWidth,
+                                        heightOfNumericValues);
+    momentaryLoudnessCaption.setBounds(momentaryLoudnessBarX,
+                                       levelBarCaptionTopPosition,
+                                       levelBarWidth,
+                                       heightOfLoudnessCaptions);
+    momentaryLoudnessCaption.setFont(fontForCaptions);
     
-    momentaryLoudnessNumeric.setBounds (getWidth()-60,
+    const int shortTermLoudnessBarX = momentaryLoudnessBarX - spaceBetweenBars - levelBarWidth;
+    shortTermLoudnessBar.setBounds(shortTermLoudnessBarX,
+                                   distanceBetweenLevelBarAndTop,
+                                   levelBarWidth,
+                                   levelBarBottomPosition - distanceBetweenLevelBarAndTop);
+    shortTermLoudnessNumeric.setBounds (shortTermLoudnessBarX,
                                         levelBarNumericTopPosition,
                                         levelBarWidth,
-                                        16);
-    shortTermLoudnessNumeric.setBounds (getWidth()-120,
-                                        levelBarNumericTopPosition,
-                                        levelBarWidth,
-                                        16);
-    integratedLoudnessNumeric.setBounds (getWidth()-180,
+                                        heightOfNumericValues);
+    shortTermLoudnessCaption.setBounds(shortTermLoudnessBarX,
+                                       levelBarCaptionTopPosition,
+                                       levelBarWidth,
+                                       heightOfLoudnessCaptions);
+    shortTermLoudnessCaption.setFont(fontForCaptions);
+    
+    const int integratedLoudnessBarX = shortTermLoudnessBarX - spaceBetweenBars - levelBarWidth;
+    integratedLoudnessBar.setBounds(integratedLoudnessBarX, 
+                                    distanceBetweenLevelBarAndTop, 
+                                    levelBarWidth, 
+                                    levelBarBottomPosition - distanceBetweenLevelBarAndTop);
+    integratedLoudnessNumeric.setBounds (integratedLoudnessBarX,
                                          levelBarNumericTopPosition,
                                          levelBarWidth,
-                                         16);
+                                         heightOfNumericValues);
+    integratedLoudnessCaption.setBounds(integratedLoudnessBarX,
+                                        levelBarCaptionTopPosition,
+                                        levelBarWidth,
+                                        heightOfLoudnessCaptions);
+    integratedLoudnessCaption.setFont(fontForCaptions);
     
-    momentaryLoudnessCaption.setBounds(getWidth()-60,
-                                       levelBarCaptionTopPosition,
-                                       levelBarWidth,
-                                       16);
-    shortTermLoudnessCaption.setBounds(getWidth()-120,
-                                       levelBarCaptionTopPosition,
-                                       levelBarWidth,
-                                       16);
-    integratedLoudnessCaption.setBounds(getWidth()-180,
-                                       levelBarCaptionTopPosition,
-                                       levelBarWidth,
-                                       16);
+    const int backgroundGridCaptionX = integratedLoudnessBarX - spaceBetweenBars - backgroundGridCaptionWidth;
+    backgroundGridCaption.setBounds(backgroundGridCaptionX, 0, backgroundGridCaptionWidth, levelBarBottomPosition + 32);
+
+
     
-    levelHistory.setBounds(0, distanceBetweenLevelBarAndTop, jmax(getWidth()-220, 0), getHeight()-distanceBetweenLevelBarAndTop);
+    levelHistory.setBounds(0, distanceBetweenLevelBarAndTop, jmax(backgroundGridCaptionX, 0), levelBarBottomPosition + 32 - distanceBetweenLevelBarAndTop);
     
 //    const bool broadcastChangeMessage = false;
 //    momentaryLoudnessCaption.setText("M", broadcastChangeMessage);
@@ -194,7 +224,12 @@ void LUFSMeterAudioProcessorEditor::resized()
     infoLabel.setBounds (10, 4, 380, 25);
     
 //    resetButton.setBounds(10, getHeight()-35, 80, 25);
-    resetButton.setBounds(10, 10, 80, 25);
+    resetButton.setBounds(25, 12, 80, 25);
+    
+    preferencesPane.setBounds(preferencesPaneXPosition,
+                              preferencesPaneYPosition,
+                              preferencesPaneWidth,
+                              preferencesPaneHeight);
     
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
     
@@ -296,5 +331,43 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
     {
         getProcessor()->reset();
         levelHistory.reset();
+    }
+    else if (button == &(preferencesPane.showOrHidePreferences))
+    {
+        if (preferencesPane.showOrHidePreferences.getToggleStateValue() == var(0))
+        // not toggled
+        {
+            preferencesPaneXPosition = -380;
+        }
+        else
+        // toggled
+        {
+            preferencesPaneXPosition = 0;
+        }
+        
+        ComponentAnimator& animator = Desktop::getInstance().getAnimator();
+        
+        const Rectangle<int> finalBounds = Rectangle<int>(preferencesPaneXPosition,
+                                                          preferencesPaneYPosition,
+                                                          preferencesPaneWidth,
+                                                          preferencesPaneHeight);
+        const float finalAlpha = 0.5f;
+        const int animationDurationMilliseconds = 300;
+        const bool useProxyComponent = false;
+        const double startSpeed = 0.0;
+        const double endSpeed = 0.0;
+        animator.animateComponent(&preferencesPane, finalBounds, finalAlpha, animationDurationMilliseconds, useProxyComponent , startSpeed, endSpeed);
+    }
+}
+
+void LUFSMeterAudioProcessorEditor::sliderValueChanged (Slider* slider)
+{
+    if (slider == &(preferencesPane.loudnessBarSize))
+    {
+        // Set the value in the LUFSMeterAudioProcessor instance
+        getProcessor()->loudnessBarSize = preferencesPane.loudnessBarSize.getValue();
+        
+        // Update the GUI
+        resized();
     }
 }
