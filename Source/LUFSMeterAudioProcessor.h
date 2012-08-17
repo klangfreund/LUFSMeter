@@ -124,7 +124,9 @@ public:
     int lastUIHeight;
     
     // Plugin settings
-    int loudnessBarSize;
+    int loudnessBarWidth;
+    Value loudnessBarMinValue;
+    Value loudnessBarMaxValue;
     
 
 private:

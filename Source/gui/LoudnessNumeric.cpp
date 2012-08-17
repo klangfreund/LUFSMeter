@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- LevelNumeric.cpp
+ LoudnessNumeric.cpp
  
  
  This file is part of the LUFS Meter audio measurement plugin.
@@ -27,26 +27,26 @@
  */
 
 
-#include "LevelNumeric.h"
+#include "LoudnessNumeric.h"
 
 
 //==============================================================================
-LevelNumeric::LevelNumeric ()
+LoudnessNumeric::LoudnessNumeric ()
 {
     levelValue.addListener(this);
 }
 
-LevelNumeric::~LevelNumeric ()
+LoudnessNumeric::~LoudnessNumeric ()
 {
     levelValue.removeListener(this);
 }
 
-Value & LevelNumeric::getLevelValueObject ()
+Value & LoudnessNumeric::getLevelValueObject ()
 {
     return levelValue;
 }
 
-void LevelNumeric::valueChanged (Value & value)
+void LoudnessNumeric::valueChanged (Value & value)
 {
     const int numberOfDecimalPlaces = 1;
     currentLevelText = String((float)levelValue.getValue(), numberOfDecimalPlaces);
@@ -61,7 +61,7 @@ void LevelNumeric::valueChanged (Value & value)
 }
 
 //==============================================================================
-void LevelNumeric::paint (Graphics& g)
+void LoudnessNumeric::paint (Graphics& g)
 {   
     // Temp, for debugging:
     // g.fillAll(Colours::red);

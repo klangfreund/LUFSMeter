@@ -16,6 +16,8 @@
 		19E23B01541E13D09D002E4F /* AUBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D94A76318BCE1A427A466F7 /* AUBase.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		1EC19361AE8313855ED105F9 /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = 09565095764E4EA75279C297 /* juce_core.mm */; };
 		1EEC1C2F15F399B12A16495E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B7E6B8C6C2BEABF11369AD4 /* QuartzCore.framework */; };
+		22385A0115DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 223859FF15DD77C100858034 /* LoudnessBarRangeSlider.cpp */; };
+		22385A0215DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 223859FF15DD77C100858034 /* LoudnessBarRangeSlider.cpp */; };
 		22786A1E15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */; };
 		22786A1F15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */; };
 		22AD420774B192B65C8E2725 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B35CBDD2C4F7D5E58879412 /* AudioToolbox.framework */; };
@@ -23,9 +25,9 @@
 		22D1EDD1157E1D0C00A5954F /* SecondOrderIIRFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDBF157E1D0C00A5954F /* SecondOrderIIRFilter.cpp */; };
 		22D1EDD2157E1D0C00A5954F /* BackgroundGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC2157E1D0C00A5954F /* BackgroundGrid.cpp */; };
 		22D1EDD3157E1D0C00A5954F /* BackgroundGridCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC4157E1D0C00A5954F /* BackgroundGridCaption.cpp */; };
-		22D1EDD4157E1D0C00A5954F /* LevelBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC6157E1D0C00A5954F /* LevelBar.cpp */; };
-		22D1EDD5157E1D0C00A5954F /* LevelHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC8157E1D0C00A5954F /* LevelHistory.cpp */; };
-		22D1EDD6157E1D0C00A5954F /* LevelNumeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCA157E1D0C00A5954F /* LevelNumeric.cpp */; };
+		22D1EDD4157E1D0C00A5954F /* LoudnessBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC6157E1D0C00A5954F /* LoudnessBar.cpp */; };
+		22D1EDD5157E1D0C00A5954F /* LoudnessHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC8157E1D0C00A5954F /* LoudnessHistory.cpp */; };
+		22D1EDD6157E1D0C00A5954F /* LoudnessNumeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCA157E1D0C00A5954F /* LoudnessNumeric.cpp */; };
 		22D1EDD7157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCC157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp */; };
 		22D1EDD8157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCE157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp */; };
 		22D1EDDF157E1E6700A5954F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5BB31015679D4B0FFD07DA /* Cocoa.framework */; };
@@ -47,9 +49,9 @@
 		22D1EE0B157E1F7E00A5954F /* SecondOrderIIRFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDBF157E1D0C00A5954F /* SecondOrderIIRFilter.cpp */; };
 		22D1EE0C157E1F7E00A5954F /* BackgroundGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC2157E1D0C00A5954F /* BackgroundGrid.cpp */; };
 		22D1EE0D157E1F7E00A5954F /* BackgroundGridCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC4157E1D0C00A5954F /* BackgroundGridCaption.cpp */; };
-		22D1EE0E157E1F7E00A5954F /* LevelBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC6157E1D0C00A5954F /* LevelBar.cpp */; };
-		22D1EE0F157E1F7E00A5954F /* LevelHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC8157E1D0C00A5954F /* LevelHistory.cpp */; };
-		22D1EE10157E1F7E00A5954F /* LevelNumeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCA157E1D0C00A5954F /* LevelNumeric.cpp */; };
+		22D1EE0E157E1F7E00A5954F /* LoudnessBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC6157E1D0C00A5954F /* LoudnessBar.cpp */; };
+		22D1EE0F157E1F7E00A5954F /* LoudnessHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDC8157E1D0C00A5954F /* LoudnessHistory.cpp */; };
+		22D1EE10157E1F7E00A5954F /* LoudnessNumeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCA157E1D0C00A5954F /* LoudnessNumeric.cpp */; };
 		22D1EE11157E1F7E00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCC157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp */; };
 		22D1EE12157E1F7E00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EDCE157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp */; };
 		22D1EE28157E20EA00A5954F /* juce_AAX_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA01DA3843FC71BF5E1802FA /* juce_AAX_Wrapper.cpp */; };
@@ -100,6 +102,8 @@
 		22D1EE5B157E264D00A5954F /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7889615E9BB127C86B0515B7 /* MusicDeviceBase.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		22D1EE5E157E26BE00A5954F /* CAHostTimeBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EE5C157E26BD00A5954F /* CAHostTimeBase.cpp */; };
 		22D1EE61157E271000A5954F /* AUBaseHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EE5F157E270F00A5954F /* AUBaseHelper.cpp */; };
+		22E09F5515DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */; };
+		22E09F5615DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */; };
 		25279A4DDDFBAC89152CF05F /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 145898DC2D895308E17A83D6 /* juce_audio_processors.mm */; };
 		29E5C5B890D757BA4314F116 /* juce_AAX_Wrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B5835FB2DB0F224846378CD /* juce_AAX_Wrapper.mm */; };
 		2CB6CBFA9A4FDC2683AA26D6 /* juce_gui_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = 95981600C32D73FE9F0D8FC8 /* juce_gui_basics.mm */; };
@@ -301,6 +305,8 @@
 		20F09725768D0B1C15742309 /* juce_InterprocessConnectionServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_InterprocessConnectionServer.h; path = ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h; sourceTree = SOURCE_ROOT; };
 		2197FCF9495ABF415250CABD /* juce_MessageListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MessageListener.cpp; path = ../../JuceLibraryCode/modules/juce_events/messages/juce_MessageListener.cpp; sourceTree = SOURCE_ROOT; };
 		21AC2213B50DF71E0CC5713E /* juce_GraphicsContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GraphicsContext.cpp; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_GraphicsContext.cpp; sourceTree = SOURCE_ROOT; };
+		223859FF15DD77C100858034 /* LoudnessBarRangeSlider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudnessBarRangeSlider.cpp; sourceTree = "<group>"; };
+		22385A0015DD77C100858034 /* LoudnessBarRangeSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudnessBarRangeSlider.h; sourceTree = "<group>"; };
 		22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PreferencesPane.cpp; sourceTree = "<group>"; };
 		22786A1D15D3AFD000D474B1 /* PreferencesPane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesPane.h; sourceTree = "<group>"; };
 		22ACC6F8DF936BF5E3A61909 /* juce_ComboBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComboBox.cpp; path = ../../JuceLibraryCode/modules/juce_gui_basics/widgets/juce_ComboBox.cpp; sourceTree = SOURCE_ROOT; };
@@ -313,12 +319,12 @@
 		22D1EDC3157E1D0C00A5954F /* BackgroundGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BackgroundGrid.h; sourceTree = "<group>"; };
 		22D1EDC4157E1D0C00A5954F /* BackgroundGridCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BackgroundGridCaption.cpp; sourceTree = "<group>"; };
 		22D1EDC5157E1D0C00A5954F /* BackgroundGridCaption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BackgroundGridCaption.h; sourceTree = "<group>"; };
-		22D1EDC6157E1D0C00A5954F /* LevelBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelBar.cpp; sourceTree = "<group>"; };
-		22D1EDC7157E1D0C00A5954F /* LevelBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelBar.h; sourceTree = "<group>"; };
-		22D1EDC8157E1D0C00A5954F /* LevelHistory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelHistory.cpp; sourceTree = "<group>"; };
-		22D1EDC9157E1D0C00A5954F /* LevelHistory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelHistory.h; sourceTree = "<group>"; };
-		22D1EDCA157E1D0C00A5954F /* LevelNumeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelNumeric.cpp; sourceTree = "<group>"; };
-		22D1EDCB157E1D0C00A5954F /* LevelNumeric.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelNumeric.h; sourceTree = "<group>"; };
+		22D1EDC6157E1D0C00A5954F /* LoudnessBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudnessBar.cpp; sourceTree = "<group>"; };
+		22D1EDC7157E1D0C00A5954F /* LoudnessBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudnessBar.h; sourceTree = "<group>"; };
+		22D1EDC8157E1D0C00A5954F /* LoudnessHistory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudnessHistory.cpp; sourceTree = "<group>"; };
+		22D1EDC9157E1D0C00A5954F /* LoudnessHistory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudnessHistory.h; sourceTree = "<group>"; };
+		22D1EDCA157E1D0C00A5954F /* LoudnessNumeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudnessNumeric.cpp; sourceTree = "<group>"; };
+		22D1EDCB157E1D0C00A5954F /* LoudnessNumeric.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudnessNumeric.h; sourceTree = "<group>"; };
 		22D1EDCC157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LUFSMeterAudioProcessor.cpp; path = ../../Source/LUFSMeterAudioProcessor.cpp; sourceTree = "<group>"; };
 		22D1EDCD157E1D0C00A5954F /* LUFSMeterAudioProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LUFSMeterAudioProcessor.h; path = ../../Source/LUFSMeterAudioProcessor.h; sourceTree = "<group>"; };
 		22D1EDCE157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LUFSMeterAudioProcessorEditor.cpp; path = ../../Source/LUFSMeterAudioProcessorEditor.cpp; sourceTree = "<group>"; };
@@ -340,6 +346,8 @@
 		22D1EE5D157E26BD00A5954F /* CAHostTimeBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CAHostTimeBase.h; path = Extras/CoreAudio/PublicUtility/CAHostTimeBase.h; sourceTree = DEVELOPER_DIR; };
 		22D1EE5F157E270F00A5954F /* AUBaseHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUBaseHelper.cpp; path = Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBaseHelper.cpp; sourceTree = DEVELOPER_DIR; };
 		22D1EE60157E270F00A5954F /* AUBaseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUBaseHelper.h; path = Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBaseHelper.h; sourceTree = DEVELOPER_DIR; };
+		22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BackgroundVerticalLinesAndCaption.cpp; sourceTree = "<group>"; };
+		22E09F5415DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.h */ = {isa = PBXFileReference; fileEncoding = 4; path = BackgroundVerticalLinesAndCaption.h; sourceTree = "<group>"; };
 		22E808B8157E41400045DB9B /* Macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Macros.h; path = ../../Source/Macros.h; sourceTree = "<group>"; };
 		2331E4187C13891B7A8D17DC /* juce_ArrayAllocationBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ArrayAllocationBase.h; path = ../../JuceLibraryCode/modules/juce_core/containers/juce_ArrayAllocationBase.h; sourceTree = SOURCE_ROOT; };
 		238B4169F8F216775674B8BF /* juce_MemoryInputStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MemoryInputStream.cpp; path = ../../JuceLibraryCode/modules/juce_core/streams/juce_MemoryInputStream.cpp; sourceTree = SOURCE_ROOT; };
@@ -1322,12 +1330,16 @@
 				22D1EDC3157E1D0C00A5954F /* BackgroundGrid.h */,
 				22D1EDC4157E1D0C00A5954F /* BackgroundGridCaption.cpp */,
 				22D1EDC5157E1D0C00A5954F /* BackgroundGridCaption.h */,
-				22D1EDC6157E1D0C00A5954F /* LevelBar.cpp */,
-				22D1EDC7157E1D0C00A5954F /* LevelBar.h */,
-				22D1EDC8157E1D0C00A5954F /* LevelHistory.cpp */,
-				22D1EDC9157E1D0C00A5954F /* LevelHistory.h */,
-				22D1EDCA157E1D0C00A5954F /* LevelNumeric.cpp */,
-				22D1EDCB157E1D0C00A5954F /* LevelNumeric.h */,
+				22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */,
+				22E09F5415DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.h */,
+				22D1EDC6157E1D0C00A5954F /* LoudnessBar.cpp */,
+				22D1EDC7157E1D0C00A5954F /* LoudnessBar.h */,
+				223859FF15DD77C100858034 /* LoudnessBarRangeSlider.cpp */,
+				22385A0015DD77C100858034 /* LoudnessBarRangeSlider.h */,
+				22D1EDC8157E1D0C00A5954F /* LoudnessHistory.cpp */,
+				22D1EDC9157E1D0C00A5954F /* LoudnessHistory.h */,
+				22D1EDCA157E1D0C00A5954F /* LoudnessNumeric.cpp */,
+				22D1EDCB157E1D0C00A5954F /* LoudnessNumeric.h */,
 				22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */,
 				22786A1D15D3AFD000D474B1 /* PreferencesPane.h */,
 			);
@@ -3202,14 +3214,16 @@
 				22D1EE0B157E1F7E00A5954F /* SecondOrderIIRFilter.cpp in Sources */,
 				22D1EE0C157E1F7E00A5954F /* BackgroundGrid.cpp in Sources */,
 				22D1EE0D157E1F7E00A5954F /* BackgroundGridCaption.cpp in Sources */,
-				22D1EE0E157E1F7E00A5954F /* LevelBar.cpp in Sources */,
-				22D1EE0F157E1F7E00A5954F /* LevelHistory.cpp in Sources */,
-				22D1EE10157E1F7E00A5954F /* LevelNumeric.cpp in Sources */,
+				22D1EE0E157E1F7E00A5954F /* LoudnessBar.cpp in Sources */,
+				22D1EE0F157E1F7E00A5954F /* LoudnessHistory.cpp in Sources */,
+				22D1EE10157E1F7E00A5954F /* LoudnessNumeric.cpp in Sources */,
 				22D1EE11157E1F7E00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */,
 				22D1EE12157E1F7E00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */,
 				22D1EE5E157E26BE00A5954F /* CAHostTimeBase.cpp in Sources */,
 				22D1EE61157E271000A5954F /* AUBaseHelper.cpp in Sources */,
 				22786A1F15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
+				22385A0215DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */,
+				22E09F5615DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3266,12 +3280,14 @@
 				22D1EDD1157E1D0C00A5954F /* SecondOrderIIRFilter.cpp in Sources */,
 				22D1EDD2157E1D0C00A5954F /* BackgroundGrid.cpp in Sources */,
 				22D1EDD3157E1D0C00A5954F /* BackgroundGridCaption.cpp in Sources */,
-				22D1EDD4157E1D0C00A5954F /* LevelBar.cpp in Sources */,
-				22D1EDD5157E1D0C00A5954F /* LevelHistory.cpp in Sources */,
-				22D1EDD6157E1D0C00A5954F /* LevelNumeric.cpp in Sources */,
+				22D1EDD4157E1D0C00A5954F /* LoudnessBar.cpp in Sources */,
+				22D1EDD5157E1D0C00A5954F /* LoudnessHistory.cpp in Sources */,
+				22D1EDD6157E1D0C00A5954F /* LoudnessNumeric.cpp in Sources */,
 				22D1EDD7157E1D0C00A5954F /* LUFSMeterAudioProcessor.cpp in Sources */,
 				22D1EDD8157E1D0C00A5954F /* LUFSMeterAudioProcessorEditor.cpp in Sources */,
 				22786A1E15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
+				22385A0115DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */,
+				22E09F5515DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

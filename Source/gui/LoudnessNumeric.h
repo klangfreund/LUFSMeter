@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- LevelHistory.h
+ LoudnessNumeric.h
  
  
  This file is part of the LUFS Meter audio measurement plugin.
@@ -27,68 +27,37 @@
  */
 
 
-#ifndef __LEVEL_HISTORY__
-#define __LEVEL_HISTORY__
+#ifndef __LOUDNESS_NUMERIC__
+#define __LOUDNESS_NUMERIC__
 
-#include <vector>
-#include <algorithm> // to use std::rotate
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "../Macros.h"
 
 
+
 //==============================================================================
 /**
-   A graph that shows the course of a value over time for a given period of
-   time.
 */
-class LevelHistory  : public Component,
-                      public Timer
+class LoudnessNumeric  : public Component,
+                         public Value::Listener
 {
 public:
-    LevelHistory (const Value & levelValueToReferTo);
+    LoudnessNumeric ();
     
-    ~LevelHistory ();
+    ~LoudnessNumeric ();
     
     Value & getLevelValueObject ();
-
-    void timerCallback();
-    void resized();
-    void paint (Graphics& g);
     
-    void reset ();
+    void valueChanged (Value & value);
+
+    void paint (Graphics& g);
     
 private:
     
-    Value currentLevelValue;
-    
-    float maximumLevel;
-    float minimumLevel;
-    
-    float stretch;
-    float offset;
-    
-    /** The time interval that is displayed.
-     Measured in seconds.
-     */
-    int specifiedTimeRange;
-    float lineThickness;
-    float desiredNumberOfPixelsBetweenTwoPoints;
-    int textBoxWidth;
-    int distanceBetweenLeftBorderAndText;
-    
-    float fullTimeRange;
-    float numberOfPixelsBetweenTwoPoints;
-    
-    /** A circular buffer to hold the past level values.
-     
-     Holds the y coordinates for the graph.
-     */
-    std::vector<float> circularBufferForYPositions;
-    std::vector<float>::iterator mostRecentYPosition;
-    
-    int distanceBetweenGraphAndBottom;
-    int heightOfGraph;
+    Value levelValue;
+    String currentLevelText;
+    String previousLevelText;
 };
 
 
-#endif  // __LEVEL_HISTORY__
+#endif  // __LOUDNESS_NUMERIC__

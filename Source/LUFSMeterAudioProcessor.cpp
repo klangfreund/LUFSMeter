@@ -33,10 +33,14 @@
 
 //==============================================================================
 LUFSMeterAudioProcessor::LUFSMeterAudioProcessor()
+:
+    // Set up some default values..
+    lastUIWidth (600),
+    lastUIHeight (300),
+    loudnessBarWidth (50),
+    loudnessBarMinValue (var(-41)),
+    loudnessBarMaxValue (var(-14))
 {
-    // Set up some default values..    
-    lastUIWidth = 600;
-    lastUIHeight = 300;
 }
 
 LUFSMeterAudioProcessor::~LUFSMeterAudioProcessor()
@@ -204,6 +208,9 @@ void LUFSMeterAudioProcessor::getStateInformation (MemoryBlock& destData)
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
+    xml.setAttribute("loudnessBarWidth", loudnessBarWidth);
+    xml.setAttribute("loudnessBarMinValue", int(loudnessBarMinValue.getValue()));
+    xml.setAttribute("loudnessBarMaxValue", int(loudnessBarMaxValue.getValue()));
     
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -225,6 +232,9 @@ void LUFSMeterAudioProcessor::setStateInformation (const void* data, int sizeInB
             // ok, now pull out our parameters..
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
+            loudnessBarWidth = xmlState->getIntAttribute ("loudnessBarWidth", loudnessBarWidth);
+            loudnessBarMinValue.setValue (xmlState->getIntAttribute ("loudnessBarMinValue"));
+            loudnessBarMaxValue.setValue(xmlState->getIntAttribute ("loudnessBarMaxValue"));
         }
     }
 }

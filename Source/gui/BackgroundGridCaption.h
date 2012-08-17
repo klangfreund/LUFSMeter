@@ -38,19 +38,26 @@
 /**
  Let this component spread from the top to the bottom of the window.
 */
-class BackgroundGridCaption  : public Component
+class BackgroundGridCaption  : public Component,
+                               public Value::Listener
 {
 public:
-    BackgroundGridCaption (int distanceBetweenLevelBarAndTop_,
-                           int distanceBetweenLevelBarAndBottom_);
+    BackgroundGridCaption (const int distanceBetweenLevelBarAndTop_,
+                           const int distanceBetweenLevelBarAndBottom_,
+                           const Value & minLoudnessToReferTo,
+                           const Value & maxLoudnessToReferTo);
     
     ~BackgroundGridCaption ();
 
     void paint (Graphics& g);
     
 private:
+    void valueChanged (Value & value);
+    
     int distanceBetweenLevelBarAndTop;
     int distanceBetweenLevelBarAndBottom;
+    Value minLoudness;
+    Value maxLoudness;
     int numberOfLines;
 
 };

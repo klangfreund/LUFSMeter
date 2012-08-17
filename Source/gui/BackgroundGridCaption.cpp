@@ -31,12 +31,18 @@
 
 
 //==============================================================================
-BackgroundGridCaption::BackgroundGridCaption (int distanceBetweenLevelBarAndTop_,
-                                              int distanceBetweenLevelBarAndBottom_)
+BackgroundGridCaption::BackgroundGridCaption (const int distanceBetweenLevelBarAndTop_,
+                                              const int distanceBetweenLevelBarAndBottom_,
+                                              const Value & minLoudnessToReferTo,
+                                              const Value & maxLoudnessToReferTo)
   : distanceBetweenLevelBarAndTop (distanceBetweenLevelBarAndTop_),
     distanceBetweenLevelBarAndBottom (distanceBetweenLevelBarAndBottom_),
     numberOfLines (10)
 {
+    minLoudness.referTo(minLoudnessToReferTo);
+    minLoudness.addListener(this);
+    maxLoudness.referTo(maxLoudnessToReferTo);
+    maxLoudness.addListener(this);
 }
 
 BackgroundGridCaption::~BackgroundGridCaption ()
@@ -55,28 +61,37 @@ void BackgroundGridCaption::paint (Graphics& g)
     float halfFontHeight = fontHeight/2.0f;
     const Font font (fontHeight);
     g.setFont(font);
-    const int maximumNumberOfTextLines = 1;
     const float topLeftX = 0.0f;
     const float distanceBetweenTopAndBottomLine = getHeight() - distanceBetweenLevelBarAndTop - distanceBetweenLevelBarAndBottom;
-    int caption = -14;
+    double caption = maxLoudness.getValue();
+    const double delta = (double(maxLoudness.getValue()) - double(minLoudness.getValue()))/double(numberOfLines-1);
     for (int i=0; i<numberOfLines; i++)
     {
         float positionOfLine = floor( (int)( distanceBetweenLevelBarAndTop + (float)i * distanceBetweenTopAndBottomLine / (numberOfLines-1) )) - 0.5;
         // - 0.5 ensures that the line will be drawn on a single row of pixels. 
         // Otherwise, two rows of pixels would have been used for one line.
         float topLeftY = positionOfLine - halfFontHeight;
-        g.drawFittedText(String(caption), 
+        const int maximumNumberOfTextLines = 1;
+        const float minimumHorizontalScale = 0.7f;
+        int numberOfDecimalPlaces = 1;
+        if (std::abs(caption-round(caption)) < 0.05)
+        {
+            numberOfDecimalPlaces = 0;
+        }
+        g.drawFittedText(String(caption, numberOfDecimalPlaces), 
                          topLeftX, 
                          topLeftY, 
                          getWidth(), 
                          fontHeight, 
                          juce::Justification::centred,
-                         maximumNumberOfTextLines);
+                         maximumNumberOfTextLines,
+                         minimumHorizontalScale);
         
-        caption -= 3;
+        caption -= delta;
     }
     
     // Print the units.
+    const int maximumNumberOfTextLines = 1;
     g.drawFittedText("LUFS", 
                      topLeftX, 
                      getHeight() - 1.5f * fontHeight, 
@@ -84,4 +99,11 @@ void BackgroundGridCaption::paint (Graphics& g)
                      fontHeight, 
                      juce::Justification::centred,
                      maximumNumberOfTextLines);
+}
+
+void BackgroundGridCaption::valueChanged (Value & value)
+{
+    // Either the minLoudness or the maxLoudness has changed.
+    // Time for a repaint.
+    repaint();
 }

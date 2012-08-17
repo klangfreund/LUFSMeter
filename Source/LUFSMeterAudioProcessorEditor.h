@@ -35,9 +35,10 @@
 #include "LUFSMeterAudioProcessor.h"
 #include "gui/BackgroundGrid.h"
 #include "gui/BackgroundGridCaption.h"
-#include "gui/LevelBar.h"
-#include "gui/LevelNumeric.h"
-#include "gui/LevelHistory.h"
+#include "gui/BackgroundVerticalLinesAndCaption.h"
+#include "gui/LoudnessBar.h"
+#include "gui/LoudnessNumeric.h"
+#include "gui/LoudnessHistory.h"
 #include "gui/PreferencesPane.h"
 
 
@@ -83,18 +84,18 @@ private:
     int distanceBetweenLevelBarAndBottom;
     
     BackgroundGrid backgroundGrid;
-    
     BackgroundGridCaption backgroundGridCaption;
+    BackgroundVerticalLinesAndCaption backgroundVerticalLinesAndCaption;
     
     /* Level meters. */
-    LevelBar momentaryLoudnessBar;
-    LevelBar shortTermLoudnessBar;
-    LevelBar integratedLoudnessBar;
+    LoudnessBar momentaryLoudnessBar;
+    LoudnessBar shortTermLoudnessBar;
+    LoudnessBar integratedLoudnessBar;
     
     /* Level values numeric. */
-    LevelNumeric momentaryLoudnessNumeric;
-    LevelNumeric shortTermLoudnessNumeric;
-    LevelNumeric integratedLoudnessNumeric;
+    LoudnessNumeric momentaryLoudnessNumeric;
+    LoudnessNumeric shortTermLoudnessNumeric;
+    LoudnessNumeric integratedLoudnessNumeric;
     
     /** Level meter captions. */
     Label momentaryLoudnessCaption;
@@ -102,10 +103,11 @@ private:
     Label integratedLoudnessCaption;
     
     /** Level history graph. */
-    LevelHistory levelHistory;
+    LoudnessHistory loudnessHistory;
     
     /** Preferences pane. */
     PreferencesPane preferencesPane;
+    bool preferencesPaneVisible;
     int preferencesPaneXPosition;
     const int preferencesPaneYPosition;
     const int preferencesPaneWidth;

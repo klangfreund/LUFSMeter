@@ -1,11 +1,11 @@
 /*
  ===============================================================================
  
- PreferencesPane.h
-  
+ LoudnessBarRangeSlider.cpp
+ 
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2012 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -26,45 +26,34 @@
  ===============================================================================
  */
 
-#ifndef __PREFERENCES_PANE__
-#define __PREFERENCES_PANE__
 
-#include "../../JuceLibraryCode/JuceHeader.h"
 #include "LoudnessBarRangeSlider.h"
-#include "../Macros.h"
-
 
 
 //==============================================================================
-/**
-*/
-class PreferencesPane  : public Component
+LoudnessBarRangeSlider::LoudnessBarRangeSlider ()
 {
-public:
-    PreferencesPane ();
-    
-    ~PreferencesPane ();
+    setSliderStyle (Slider::TwoValueHorizontal);
+}
 
-    void paint (Graphics& g);
-    
-    void mouseDown(const juce::MouseEvent &event);
-    
-    void resized();
-    
-    TextButton showOrHidePreferences;
-    Slider loudnessBarSize;
-    LoudnessBarRangeSlider loudnessBarRange;
-    
-private:
-    
-    // Temp
-    Colour backgroundColour;
-    
-    int preferencesTitleHeight;
-    int borderSize;
-    int topRightHandleWidth;
-    
-};
+LoudnessBarRangeSlider::~LoudnessBarRangeSlider ()
+{
 
+}
 
-#endif  // __PREFERENCES_PANE__
+void LoudnessBarRangeSlider::valueChanged()
+{
+    const int minimalIntervalBetweenMinAndMax = 1;
+    
+    if (getMinValue() == getMaxValue())
+    {
+        if (getMaxValue() + minimalIntervalBetweenMinAndMax <= getMaximum())
+        {
+            setMaxValue(getMaxValue() + minimalIntervalBetweenMinAndMax);
+        }
+        else
+        {
+            setMinValue(getMinValue() - minimalIntervalBetweenMinAndMax);
+        }
+    }
+}

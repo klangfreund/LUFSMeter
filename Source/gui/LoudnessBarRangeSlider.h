@@ -1,11 +1,11 @@
 /*
  ===============================================================================
  
- PreferencesPane.h
-  
+ LoudnessBarRangeSlider.h
+ 
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2012 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -26,45 +26,33 @@
  ===============================================================================
  */
 
-#ifndef __PREFERENCES_PANE__
-#define __PREFERENCES_PANE__
+
+#ifndef __LOUDNESS_BAR_RANGE_SLIDER__
+#define __LOUDNESS_BAR_RANGE_SLIDER__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
-#include "LoudnessBarRangeSlider.h"
 #include "../Macros.h"
 
 
 
 //==============================================================================
-/**
+/** A two value horizontal slider where the two values have a given interval
+ (or distance) between each other.
+ 
+ This distance is hardcoded in the variable minimalIntervalBetweenMinAndMax
+ in the method valueChanged().
 */
-class PreferencesPane  : public Component
+class LoudnessBarRangeSlider  : public Slider
 {
 public:
-    PreferencesPane ();
+    LoudnessBarRangeSlider ();
     
-    ~PreferencesPane ();
-
-    void paint (Graphics& g);
-    
-    void mouseDown(const juce::MouseEvent &event);
-    
-    void resized();
-    
-    TextButton showOrHidePreferences;
-    Slider loudnessBarSize;
-    LoudnessBarRangeSlider loudnessBarRange;
+    ~LoudnessBarRangeSlider ();
     
 private:
-    
-    // Temp
-    Colour backgroundColour;
-    
-    int preferencesTitleHeight;
-    int borderSize;
-    int topRightHandleWidth;
-    
+    void valueChanged ();
+
 };
 
 
-#endif  // __PREFERENCES_PANE__
+#endif  // __LOUDNESS_BAR_RANGE_SLIDER__

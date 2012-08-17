@@ -33,11 +33,30 @@
 //==============================================================================
 PreferencesPane::PreferencesPane ()
 :
-    backgroundColour (Colours::green)
+    backgroundColour (Colours::darkgreen),
+    preferencesTitleHeight (20),
+    borderSize (3),
+    topRightHandleWidth (20)
 {
-    addAndMakeVisible(&showOrHidePreferences);  
+    setAlpha(0.5);
     
+    showOrHidePreferences.setButtonText("Preferences");
+    showOrHidePreferences.setColour(TextButton::buttonColourId, Colours::black);
+    showOrHidePreferences.setColour(TextButton::textColourOffId, Colours::white);
+    addAndMakeVisible(&showOrHidePreferences);
+ 
+    const bool isReadOnly = false;
+    const int textEntryBoxWidth = 0;
+    const int textEntryBoxHeight = 0; 
+    loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
+    loudnessBarSize.setPopupDisplayEnabled(true, this);
+    loudnessBarSize.setTextValueSuffix(" pixels");
     addAndMakeVisible(&loudnessBarSize);
+    
+    loudnessBarRange.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
+    loudnessBarRange.setPopupDisplayEnabled(true, this);
+    loudnessBarRange.setTextValueSuffix(" LUFS");
+    addAndMakeVisible(&loudnessBarRange);
 }
 
 PreferencesPane::~PreferencesPane ()
@@ -48,8 +67,14 @@ PreferencesPane::~PreferencesPane ()
 void PreferencesPane::paint (Graphics& g)
 {
     // Draw the background
+    const int roundedCornerRadius = (preferencesTitleHeight + 2*borderSize)/2;
     g.setColour(backgroundColour);
-    g.fillAll();
+    // Draw the main area
+    g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
+      // Remove the rounded corners on the left
+    g.fillRect(0, 0, roundedCornerRadius, getHeight());
+    // Draw the handle on the top right
+    g.fillRoundedRectangle(0, 0, getWidth(), preferencesTitleHeight + 2*borderSize, roundedCornerRadius);
 }
 
 void PreferencesPane::mouseDown(const juce::MouseEvent &event)
@@ -70,11 +95,16 @@ void PreferencesPane::mouseDown(const juce::MouseEvent &event)
 
 void PreferencesPane::resized()
 {
-    const int buttonsize = 20;
-    showOrHidePreferences.setBounds(getWidth() - buttonsize, 2, buttonsize, buttonsize);
+//    const int leftBorder = 5;
+//    const int topBorder = 5; 
+    showOrHidePreferences.setBounds(borderSize, borderSize, getWidth() - 2*borderSize, preferencesTitleHeight);
     
-    const int leftBorder = 5;
-    const int topBorder = 5;
     const int sliderHeight = 20;
-    loudnessBarSize.setBounds(leftBorder, topBorder, getWidth()-buttonsize, sliderHeight);
+//    const int rightBorder = 20;
+    const int loudnessBarSizeY = 2*borderSize + preferencesTitleHeight;
+    const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
+    loudnessBarSize.setBounds(borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
+    
+    const int loudnessBarRangeY = loudnessBarSizeY + sliderHeight + borderSize;
+    loudnessBarRange.setBounds(borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
 }

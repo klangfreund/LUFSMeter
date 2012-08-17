@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- LevelHistory.cpp
+ LoudnessHistory.cpp
  
  
  This file is part of the LUFS Meter audio measurement plugin.
@@ -27,16 +27,16 @@
  */
 
 
-#include "LevelHistory.h"
+#include "LoudnessHistory.h"
 
 
 //==============================================================================
-LevelHistory::LevelHistory (const Value & levelValueToReferTo)
+LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
+                                  const Value & minLoudnessToReferTo,
+                                  const Value & maxLoudnessToReferTo)
   : currentLevelValue (var(0.0f)),
-    maximumLevel (-14.0f),
-    minimumLevel (-41.0f),
 //    timeRange (240),
-    specifiedTimeRange (20),
+    specifiedTimeRange (20), // seconds
     lineThickness (2.0f),
 //    desiredNumberOfPixelsBetweenTwoPoints (3.0f),
     desiredNumberOfPixelsBetweenTwoPoints (6.0f),
@@ -45,43 +45,42 @@ LevelHistory::LevelHistory (const Value & levelValueToReferTo)
     mostRecentYPosition (circularBufferForYPositions.begin()),
     distanceBetweenGraphAndBottom (32)
 {
-    currentLevelValue.referTo (levelValueToReferTo);
+    currentLevelValue.referTo (loudnessValueToReferTo);
+    minLoudness.referTo (minLoudnessToReferTo);
+    minLoudness.addListener(this);
+    maxLoudness.referTo (maxLoudnessToReferTo);
+    maxLoudness.addListener(this);
+
+    DBGT("minLoudness = " + minLoudness.getValue().toString())
+    DBGT("maxLoudness = " + maxLoudness.getValue().toString())
     
-    // These two values define a linear mapping
-    //    f(x) = stretch * x + offset
-    // for which
-    //    f(minimumLevel) = 0
-    //    f(maximumLevel) = 1
-    stretch = 1.0f/(maximumLevel-minimumLevel);
-    offset = -minimumLevel * stretch;
-    
-//    // To prevent some crap at the initial stage
-//    heightOfGraph = 10;
+    determineStretchAndOffset();
     
     // Memory allocation for the circularLevelBuffer as well as starting
     // the timer will be done by this.
     resized();
 }
 
-LevelHistory::~LevelHistory ()
+LoudnessHistory::~LoudnessHistory ()
 {
 }
 
-Value & LevelHistory::getLevelValueObject ()
+Value & LoudnessHistory::getLevelValueObject ()
 {
     return currentLevelValue;
 }
 
-void LevelHistory::timerCallback()
+void LoudnessHistory::timerCallback()
 {
     // Ensure that the currentLevel is in the interval
     // [minimumLevel, maximumLevel].
-    float currentLevel = jmax(float(currentLevelValue.getValue()), minimumLevel);
-    currentLevel = jmin(currentLevel, maximumLevel);
+//    float currentLevel = jmax(float(currentLevelValue.getValue()), float(minLoudness.getValue()));
+//    currentLevel = jmin(currentLevel, float(maxLoudness.getValue()));
+    float currentLevel = currentLevelValue.getValue();
     
     float levelHeightInPercent = stretch*currentLevel + offset;
     
-    float yPositionForCurrentLevel = (1.0f - levelHeightInPercent)*heightOfGraph;
+    float yPositionForCurrentLevel = (1.0f - levelHeightInPercent)*getHeight();
     
     
     // Adjust the position of the iterator...
@@ -94,13 +93,11 @@ void LevelHistory::timerCallback()
     *mostRecentYPosition = yPositionForCurrentLevel;
 
     // Mark this component as "dirty" to make the OS send a paint message soon.
-    const int xPos = 0;
-    const int yPos = 0;
-    repaint(xPos, yPos, getWidth(), heightOfGraph + lineThickness);
+    repaint();
 }
 
 //==============================================================================
-void LevelHistory::resized()
+void LoudnessHistory::resized()
 {
     // Figure out the full time range.
     if (getWidth() > distanceBetweenLeftBorderAndText + textBoxWidth)
@@ -114,9 +111,8 @@ void LevelHistory::resized()
     }
     
     // Some old values, needed for the rescaling
-    int oldHeightOfGraph = heightOfGraph;
+    int oldHeight = getHeight();
     
-    heightOfGraph = jmax(getHeight() - distanceBetweenGraphAndBottom, 0);
     
     int numberOfPoints = getWidth()/desiredNumberOfPixelsBetweenTwoPoints + 1;
     numberOfPixelsBetweenTwoPoints = getWidth()/jmax(double(numberOfPoints-1.0),1.0);
@@ -140,22 +136,23 @@ void LevelHistory::resized()
                         circularBufferForYPositions.end());
         }
     }
-    // The copy of the old state.
+    // Copy this old (sorted) state.
     std::vector<float> oldCircularBufferForYPositions (circularBufferForYPositions);
     
-    // Preallocate memory needed for the pastLevelValues.
+    // Preallocate memory needed for the circularBufferForYPositions.
     std::vector<float>::size_type numberOfValues = numberOfPoints;
-    circularBufferForYPositions.resize(numberOfValues, heightOfGraph);
+    circularBufferForYPositions.resize(numberOfValues);
+    reset();
      
     // Rescaling, part 2
     // =================
     if (circularBufferForYPositions.size() > 1 
         && oldCircularBufferForYPositions.size() > 1 
-        && oldHeightOfGraph > 0)
+        && oldHeight > 0)
     {
         // Figure out the new yPosition of every entry in the buffer.
     
-        double stretchFactorYDirection = double(heightOfGraph)/double(oldHeightOfGraph);
+        double stretchFactorYDirection = double(getHeight())/double(oldHeight);
         double numberOfPixelsBetweenOldValues = double(getWidth())/double(oldCircularBufferForYPositions.size() - 1);
         double xPosition = 0.0;
         
@@ -207,55 +204,8 @@ void LevelHistory::resized()
         // Will set the new interval, starting right now.
 }
 
-void LevelHistory::paint (Graphics& g)
+void LoudnessHistory::paint (Graphics& g)
 {
-    // Draw the vertical lines and the time caption
-    if (getWidth() > distanceBetweenLeftBorderAndText + textBoxWidth)
-    {
-        // Draw the left most vertical line behind the graph.
-        g.setColour(Colour(40,40,40));
-        const float xOfFirstLine = floor(distanceBetweenLeftBorderAndText + textBoxWidth/2.0) + 0.5;
-            // "+0.5" causes the line to lie on a row of pixels and not between.
-        g.drawLine(xOfFirstLine, 0, xOfFirstLine, heightOfGraph + 8);
-        
-        // Draw the text
-        g.setColour(Colour(60,60,60));
-        float fontHeight = 16.0f;
-        const Font font (fontHeight);
-        g.setFont(font);
-        const int maximumNumberOfTextLines = 1;
-        const float topLeftY = getHeight() - 1.5f * fontHeight;
-        
-        g.drawFittedText("-" + String(specifiedTimeRange) + "s", 
-                         distanceBetweenLeftBorderAndText, 
-                         topLeftY, 
-                         textBoxWidth, 
-                         fontHeight, 
-                         juce::Justification::centred,
-                         maximumNumberOfTextLines);
-        
-        // Draw the middle line and text
-        int minimalDistanceBetweenText = 6; // pixels
-        if (getWidth() > distanceBetweenLeftBorderAndText + 2*textBoxWidth + minimalDistanceBetweenText)
-        {
-            // Draw the vertical line behind the graph.
-            g.setColour(Colour(40,40,40));
-            const float xOfSecondLine = floor((getWidth() - xOfFirstLine)/2.0 + xOfFirstLine) + 0.5;
-            // "+0.5" causes the line to lie on a row of pixels and not between.
-            g.drawLine(xOfSecondLine, 0, xOfSecondLine, heightOfGraph + 8);
-            
-            // Draw the text
-            g.setColour(Colour(60,60,60));
-            g.setFont(font);
-            g.drawFittedText("-" + String(specifiedTimeRange/2) + "s", 
-                             xOfSecondLine - 0.5*textBoxWidth, 
-                             topLeftY, 
-                             textBoxWidth, 
-                             fontHeight, 
-                             juce::Justification::centred,
-                             maximumNumberOfTextLines);
-        }
-    }
     
     // Draw the graph.
     g.setColour(Colours::green);
@@ -288,12 +238,46 @@ void LevelHistory::paint (Graphics& g)
     while (nextYPosition != mostRecentYPosition);
 }
 
-void LevelHistory::reset ()
+void LoudnessHistory::reset ()
 {
+    float minLoudnessToSet = -300.0f;
+    float levelHeightInPercent = stretch*minLoudnessToSet + offset;
+    float yPosition = (1.0f - levelHeightInPercent)*getHeight();
+    
+    
     for (std::vector<float>::iterator i = circularBufferForYPositions.begin(); 
          i != circularBufferForYPositions.end(); 
          i++)
     {
-        *i = heightOfGraph;
+        *i = yPosition;
     }
+}
+
+void LoudnessHistory::valueChanged (Value & value)
+{
+    const float oldStretch = stretch;
+    const float oldOffset = offset;
+    
+    // minLoudness or maxLoudness has changed.
+    // Therefore:
+    determineStretchAndOffset();
+    
+    // And rescale
+    for (std::vector<float>::iterator yPos = circularBufferForYPositions.begin();
+         yPos != circularBufferForYPositions.end(); ++yPos)
+    {
+        // Derivation on 120817_loudness_history_min_max_value_changes.tif
+        *yPos = (1.0 - (stretch/oldStretch * (1.0 - *yPos/getHeight() - oldOffset) + offset)) * getHeight();
+    }
+}
+
+void LoudnessHistory::determineStretchAndOffset()
+{
+    // These two values define a linear mapping
+    //    f(x) = stretch * x + offset
+    // for which
+    //    f(minimumLevel) = 0
+    //    f(maximumLevel) = 1
+    stretch = 1.0f/(double(maxLoudness.getValue()) - double(minLoudness.getValue()));
+    offset = -double(minLoudness.getValue()) * stretch;
 }

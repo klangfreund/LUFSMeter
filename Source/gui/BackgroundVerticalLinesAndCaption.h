@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- LevelNumeric.h
+ BackgroundHorizontalLinesAndCaption.h
  
  
  This file is part of the LUFS Meter audio measurement plugin.
@@ -27,37 +27,37 @@
  */
 
 
-#ifndef __LEVEL_NUMERIC__
-#define __LEVEL_NUMERIC__
+#ifndef __BACKGROUND_VERTICAL_LINES_AND_CAPTION__
+#define __BACKGROUND_VERTICAL_LINES_AND_CAPTION__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "../Macros.h"
 
 
-
 //==============================================================================
 /**
+   The vertical lines together with their captions.
 */
-class LevelNumeric  : public Component,
-                      public Value::Listener
+class BackgroundVerticalLinesAndCaption  : public Component
 {
 public:
-    LevelNumeric ();
+    BackgroundVerticalLinesAndCaption ();
     
-    ~LevelNumeric ();
+    ~BackgroundVerticalLinesAndCaption ();
     
-    Value & getLevelValueObject ();
-    
-    void valueChanged (Value & value);
-
+    void resized();
     void paint (Graphics& g);
     
 private:
-    
-    Value levelValue;
-    String currentLevelText;
-    String previousLevelText;
+    /** The time interval that is displayed.
+     Measured in seconds.
+     */
+    int specifiedTimeRange;
+    int textBoxWidth;
+    int distanceBetweenLeftBorderAndText;
+    int distanceBetweenGraphAndBottom;
+    int heightOfGraph;
 };
 
 
-#endif  // __LEVEL_NUMERIC__
+#endif  // __BACKGROUND_VERTICAL_LINES_AND_CAPTION__

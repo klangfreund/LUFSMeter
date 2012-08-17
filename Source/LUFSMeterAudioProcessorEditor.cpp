@@ -39,24 +39,24 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     integratedLoudnessValue (var(-300.0)),
     distanceBetweenLevelBarAndTop (10),
     distanceBetweenLevelBarAndBottom (32),
-    backgroundGridCaption (distanceBetweenLevelBarAndTop, distanceBetweenLevelBarAndBottom),
-    momentaryLoudnessBar (momentaryLoudnessValue),
-    shortTermLoudnessBar (shortTermLoudnessValue),
-    integratedLoudnessBar (integratedLoudnessValue),
+    backgroundGridCaption (distanceBetweenLevelBarAndTop, distanceBetweenLevelBarAndBottom, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    momentaryLoudnessBar (momentaryLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    shortTermLoudnessBar (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    integratedLoudnessBar (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     momentaryLoudnessCaption (String::empty, "M"),
     shortTermLoudnessCaption (String::empty, "S"),
     integratedLoudnessCaption (String::empty, "I"),
-    levelHistory (integratedLoudnessValue),
+    loudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    preferencesPaneVisible (false),
     preferencesPaneXPosition (-380),
     preferencesPaneYPosition(50),
     preferencesPaneWidth (400),
     preferencesPaneHeight(300)
 {
-    // Add the background grid
+    // Add the background
     addAndMakeVisible (&backgroundGrid);
-    
-    // Add the background grid caption
     addAndMakeVisible (&backgroundGridCaption);
+    addAndMakeVisible(&backgroundVerticalLinesAndCaption);
     
     // TEMP:
     // Add a label that will display the current timecode and status..
@@ -95,7 +95,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&integratedLoudnessCaption);
     
     // Add the level history graph.
-    addAndMakeVisible (&levelHistory);
+    addAndMakeVisible (&loudnessHistory);
     
     // Add the reset button
     resetButton.addListener(this);
@@ -104,11 +104,15 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&resetButton);
     
     // Add the preferences pane
-    addAndMakeVisible(&preferencesPane);
     preferencesPane.showOrHidePreferences.addListener(this);
     preferencesPane.loudnessBarSize.addListener(this);
     preferencesPane.loudnessBarSize.setRange(5.0, 300.0, 1);
-    preferencesPane.loudnessBarSize.setValue(getProcessor()->loudnessBarSize);
+    preferencesPane.loudnessBarSize.setValue(getProcessor()->loudnessBarWidth);
+    preferencesPane.loudnessBarRange.addListener(this);
+    preferencesPane.loudnessBarRange.setRange(-100, 0.0, 1);
+    preferencesPane.loudnessBarRange.getMinValueObject().referTo(getProcessor()->loudnessBarMinValue);
+    preferencesPane.loudnessBarRange.getMaxValueObject().referTo(getProcessor()->loudnessBarMaxValue);
+    addAndMakeVisible(&preferencesPane);
 
     
     // Add the triangular resizer component for the bottom-right of the UI.
@@ -120,6 +124,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // the filter's settings.
     setSize (ownerFilter->lastUIWidth,
              ownerFilter->lastUIHeight);
+    
+    loudnessHistory.reset();
     
     // Start the timer which will refresh the GUI elements.
     const int refreshIntervalInMilliseconds = 50;
@@ -144,7 +150,7 @@ void LUFSMeterAudioProcessorEditor::resized()
 {
     // DBGT("Height of main component = " + String(getHeight()))
 
-    const int levelBarWidth = jmax( getProcessor()->loudnessBarSize, 5);
+    const int levelBarWidth = jmax( getProcessor()->loudnessBarWidth, 5);
     const int spaceBetweenBars = jmin(levelBarWidth/5, 10); // This distance is 
         // also used for the border on the right side.
     const int heightOfNumericValues = levelBarWidth/3;
@@ -154,7 +160,7 @@ void LUFSMeterAudioProcessorEditor::resized()
     const int levelBarNumericTopPosition = getHeight() - distanceBetweenLevelBarAndBottom;
     const int levelBarCaptionTopPosition = getHeight() - heightOfLoudnessCaptions;
     
-    const int backgroundGridCaptionWidth = 30;
+    const int backgroundGridCaptionWidth = 35;
     
     // Font for the loudnessCaptions
     const int fontHeight = heightOfLoudnessCaptions;
@@ -213,9 +219,8 @@ void LUFSMeterAudioProcessorEditor::resized()
     const int backgroundGridCaptionX = integratedLoudnessBarX - spaceBetweenBars - backgroundGridCaptionWidth;
     backgroundGridCaption.setBounds(backgroundGridCaptionX, 0, backgroundGridCaptionWidth, levelBarBottomPosition + 32);
 
-
-    
-    levelHistory.setBounds(0, distanceBetweenLevelBarAndTop, jmax(backgroundGridCaptionX, 0), levelBarBottomPosition + 32 - distanceBetweenLevelBarAndTop);
+    backgroundVerticalLinesAndCaption.setBounds(0, distanceBetweenLevelBarAndTop, jmax(backgroundGridCaptionX, 0), levelBarBottomPosition + 32 - distanceBetweenLevelBarAndTop);
+    loudnessHistory.setBounds(0, distanceBetweenLevelBarAndTop, jmax(backgroundGridCaptionX, 0), levelBarBottomPosition - distanceBetweenLevelBarAndTop);
     
 //    const bool broadcastChangeMessage = false;
 //    momentaryLoudnessCaption.setText("M", broadcastChangeMessage);
@@ -305,22 +310,20 @@ void LUFSMeterAudioProcessorEditor::displayPositionInfo (const AudioPlayHead::Cu
 // This timer periodically updates the labels.
 void LUFSMeterAudioProcessorEditor::timerCallback()
 {
-    LUFSMeterAudioProcessor* ourProcessor = getProcessor();
-    
-    AudioPlayHead::CurrentPositionInfo newPos (ourProcessor->lastPosInfo);
+    AudioPlayHead::CurrentPositionInfo newPos (getProcessor()->lastPosInfo);
     
     if (lastDisplayedPosition != newPos)
         displayPositionInfo (newPos);
     
-    float momentaryLoudnessOfFirstChannel = (ourProcessor->getMomentaryLoudness()).getFirst();
+    float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
     jassert(momentaryLoudnessOfFirstChannel > -400)
     momentaryLoudnessValue.setValue(momentaryLoudnessOfFirstChannel);
     
-    float shortTermLoudness = ourProcessor->getShortTermLoudness();
+    float shortTermLoudness = getProcessor()->getShortTermLoudness();
     jassert(shortTermLoudness > -400)
     shortTermLoudnessValue.setValue(shortTermLoudness);
 
-    float integratedLoudness = ourProcessor->getIntegratedLoudness();
+    float integratedLoudness = getProcessor()->getIntegratedLoudness();
     jassert(integratedLoudness > -400)
     integratedLoudnessValue.setValue(integratedLoudness);
 }
@@ -330,19 +333,19 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
     if (button == &resetButton)
     {
         getProcessor()->reset();
-        levelHistory.reset();
+        loudnessHistory.reset();
     }
     else if (button == &(preferencesPane.showOrHidePreferences))
     {
-        if (preferencesPane.showOrHidePreferences.getToggleStateValue() == var(0))
-        // not toggled
-        {
-            preferencesPaneXPosition = -380;
-        }
-        else
-        // toggled
+        if (!preferencesPaneVisible)
         {
             preferencesPaneXPosition = 0;
+            preferencesPaneVisible = true;
+        }
+        else
+        {
+            preferencesPaneXPosition = -380;
+            preferencesPaneVisible = false;
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();
@@ -365,7 +368,16 @@ void LUFSMeterAudioProcessorEditor::sliderValueChanged (Slider* slider)
     if (slider == &(preferencesPane.loudnessBarSize))
     {
         // Set the value in the LUFSMeterAudioProcessor instance
-        getProcessor()->loudnessBarSize = preferencesPane.loudnessBarSize.getValue();
+        getProcessor()->loudnessBarWidth = preferencesPane.loudnessBarSize.getValue();
+        
+        // Update the GUI
+        resized();
+    }
+    else if (slider == &(preferencesPane.loudnessBarRange))
+    {
+        // Set the value in the LUFSMeterAudioProcessor instance
+        getProcessor()->loudnessBarMinValue = preferencesPane.loudnessBarRange.getMinValue();
+        getProcessor()->loudnessBarMaxValue = preferencesPane.loudnessBarRange.getMaxValue();
         
         // Update the GUI
         resized();

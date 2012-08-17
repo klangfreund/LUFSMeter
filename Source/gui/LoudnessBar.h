@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- LevelBar.h
+ LoudnessBar.h
  
  
  This file is part of the LUFS Meter audio measurement plugin.
@@ -27,8 +27,8 @@
  */
 
 
-#ifndef __LEVEL_BAR__
-#define __LEVEL_BAR__
+#ifndef __LOUDNESS_BAR__
+#define __LOUDNESS_BAR__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "../Macros.h"
@@ -37,23 +37,25 @@
 
 //==============================================================================
 /**
- A vertical level meter.
+ A vertical loudness meter.
  
  Usage: Create a Value object v to which this level bar can "listen" to.
  Every time v is changed it will update itself. You don't have to add the
- level bar directly to the listeners of v (v.addListener(&LevelBar)).
+ loudness bar directly to the listeners of v (v.addListener(&LoudnessBar)).
  But you need to ensure that its internal value referes to the same
  value source as your value object v:
  
- -  LevelBar.getLevelValueObject().referTo(v);
+ -  LoudnessBar.getLevelValueObject().referTo(v);
 */
-class LevelBar  : public Component,
+class LoudnessBar  : public Component,
                   public Value::Listener
 {
 public:
-    LevelBar (const Value & levelValueToReferTo);
+    LoudnessBar (const Value & levelValueToReferTo,
+                 const Value & minValueToReferTo,
+                 const Value & maxValueToReferTo);
     
-    ~LevelBar ();
+    ~LoudnessBar ();
     
     Value & getLevelValueObject ();
     
@@ -62,12 +64,23 @@ public:
     void paint (Graphics& g);
     
 private:
-    float maximumLevel;
-    float minimumLevel;
+    /** Recalculates the values 'stretch' and 'offset' by the values of
+     'minLoudness' and 'maxLoudness'.
+     
+     The two values stretch and offset define a linear mapping
+        f(x) = stretch * x + offset
+     for which
+        f(minimumLevel) = 0
+        f(maximumLevel) = 1 .
+     */
+    void determineStretchAndOffset();
+    
     float stretch;
     float offset;
     
     Value levelValue;
+    Value minLoudness;
+    Value maxLoudness;
     
     /** Defines one border of the region which needs to be repainted. */
     float currentLevel;
@@ -76,4 +89,4 @@ private:
 };
 
 
-#endif  // __LEVEL_BAR__
+#endif  // __LOUDNESS_BAR__
