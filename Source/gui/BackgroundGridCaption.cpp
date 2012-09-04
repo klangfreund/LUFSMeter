@@ -67,14 +67,17 @@ void BackgroundGridCaption::paint (Graphics& g)
     const double delta = (double(maxLoudness.getValue()) - double(minLoudness.getValue()))/double(numberOfLines-1);
     for (int i=0; i<numberOfLines; i++)
     {
-        float positionOfLine = floor( (int)( distanceBetweenLevelBarAndTop + (float)i * distanceBetweenTopAndBottomLine / (numberOfLines-1) )) - 0.5;
+        float positionOfLine = floor( float(int(( distanceBetweenLevelBarAndTop)) + float(i) * distanceBetweenTopAndBottomLine / (numberOfLines-1) )) - 0.5;
         // - 0.5 ensures that the line will be drawn on a single row of pixels. 
         // Otherwise, two rows of pixels would have been used for one line.
         float topLeftY = positionOfLine - halfFontHeight;
         const int maximumNumberOfTextLines = 1;
         const float minimumHorizontalScale = 0.7f;
         int numberOfDecimalPlaces = 1;
-        if (std::abs(caption-round(caption)) < 0.05)
+
+		// on Windows, there is no round(d).
+		// floor(d+0.5) == round(d)
+        if (std::abs(caption - floor(caption + 0.5)) < 0.05)
         {
             numberOfDecimalPlaces = 0;
         }

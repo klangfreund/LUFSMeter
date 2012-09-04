@@ -46,10 +46,13 @@ In
 Start -> Control Panel -> Folder Options -> View
 uncheck the "Hide extensions for known file types".
 
+Don't work on a virtual box shared folder, copy the files over to the
+local drive of your virtual (or real) machine.
+
 JuceDemo
 --------
 
-Open juce/extras/JuceDemo/Builds/VisualStudio2010/"Juce Demo.vcxproj"
+Open juce/extras/JuceDemo/Builds/VisualStudio2010/"Juce Demo.sln"
 with Visual C++ Express 2010 and press F5 (or Debug -> "Start Debugging")
 
 It should work out of the box. (Thank you so much, Jules!)
@@ -57,7 +60,7 @@ It should work out of the box. (Thank you so much, Jules!)
 LUFS Meter
 ----------
 
-Open LUFSMeter.vcxproj .
+Open LUFSMeter.sln .
 Go to Project -> LUFSMeter Properties... 
 Choose "All Configurations" on the dropdown menu on the top left.
 
@@ -88,7 +91,7 @@ View -> "Other Windows" -> "Error List"
 
 Release build
 -------------
-
+ 
 .. Select
 .. Tools -> Settings -> Expert Settings
 .. 
@@ -120,7 +123,7 @@ Finally, change your toolset. In the Properties menu of your project, under Conf
 Installer
 =========
 
-Use WinRAR and create a selfextracting exe with a license agreement window.
+Use WinRAR (Commands -> Add files to archive) and create a selfextracting (SFX) exe with a license agreement window (Add comment).
 
 other options
 http://stackoverflow.com/questions/3767/what-is-the-best-choice-for-building-windows-installers,

@@ -57,16 +57,16 @@ void BackgroundGrid::paint (Graphics& g)
     const float endX = getWidth();
     float distanceBetweenTopAndBottomLine = getHeight() - topBorder - bottomBorder;
     // Draw the top line
-    float startY = floor((int)topBorder) + 0.5;
+    float startY = floor(float(int(topBorder))) + 0.5;
         // With - 0.5, this line would have not been drawn if topBorder = 0.
     float endY = startY;
     g.drawLine(startX, startY, endX, endY);
     // Draw the remaining lines
     for (int i=1; i<numberOfLines; i++)
     {
-        float distanceFromTop = topBorder + (float)i * distanceBetweenTopAndBottomLine / (numberOfLines-1);
+        float distanceFromTop = topBorder + float(i) * distanceBetweenTopAndBottomLine / (numberOfLines-1);
         // Draw a horizontal line
-        float startY = floor((int)distanceFromTop) - 0.5;
+        float startY = floor(float(int(distanceFromTop))) - 0.5;
         //   float startY = getHeight()/2 + 0.5f;
         // Be aware: integer division.
         // Int. division - 0.5 ensures that the line will be drawn on a single
