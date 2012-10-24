@@ -48,6 +48,7 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
                                     1.0,               // b2
                                     -1.99004745483398, // a1
                                     0.99007225036621), // a2
+
     relativeThreshold (absoluteThreshold),
     // Specifications for the histogram.
     // You might want to change them to e.g. achieve a higher resolution.
@@ -385,12 +386,14 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                             weightedSumOfCurrentBin *= histogramWeightedSumStepFactor;
                         }
                         
-//                        DBGT("weightedSumOfLastBin (used) = "
-//                             + String(weightedSumOfBin))
-//                        DBGT("weightedSumOfLastBin (directly calculated) = "
-//                             + String(pow(10.0, (lowestBlockLoudnessToConsider + (histogramOfBlockLoudness.size() + 0.5)*histogramLoudnessStepSize + 0.691)/10.0)))
-                        
-                        integratedLoudness = float(-0.691 + 10.*std::log10(sumForIntegratedLoudness/nrOfBlocks));
+                        if (nrOfBlocks > 0) // nrOfBlocks > 0  =>  sumForIntegratedLoudness > 0.0
+                        {
+                            integratedLoudness = float(-0.691 + 10.*std::log10(sumForIntegratedLoudness/nrOfBlocks));
+                        }
+                        else
+                        {
+                            integratedLoudness = minimalReturnValue;
+                        }
                     }
 
                 }

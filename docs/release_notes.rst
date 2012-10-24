@@ -12,7 +12,7 @@ Version 0.2
 
 * Refined core algorithm for the integrated loudness measurement.
 
-* Added a preference pane to the main window (below the reset button).
+* Preference pane added to the main window (below the reset button).
 
 * Adjustable size of the loudness bars (which also affects the size of
   the numeric values).
