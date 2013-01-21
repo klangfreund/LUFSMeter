@@ -11,8 +11,8 @@
 _finalBinaries
 
 # VST SDK
-vstsdk2.4/pluginterfaces/
-vstsdk2.4/public.sdk/
+# vstsdk2.4/pluginterfaces/
+# vstsdk2.4/public.sdk/
 
 # Exclude user-specific XCode 3 and 4 files
 # *.mode1
