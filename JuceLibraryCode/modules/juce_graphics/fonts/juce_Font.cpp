@@ -39,7 +39,7 @@ typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 //==============================================================================
-class TypefaceCache  : public DeletedAtShutdown
+class TypefaceCache  : private DeletedAtShutdown
 {
 public:
     TypefaceCache()
@@ -59,6 +59,12 @@ public:
     {
         faces.clear();
         faces.insertMultiple (-1, CachedFace(), numToCache);
+    }
+
+    void clear()
+    {
+        setSize (faces.size());
+        defaultFace = nullptr;
     }
 
     Typeface::Ptr findTypefaceFor (const Font& font)
@@ -122,10 +128,7 @@ public:
 private:
     struct CachedFace
     {
-        CachedFace() noexcept
-            : lastUsageCount (0)
-        {
-        }
+        CachedFace() noexcept  : lastUsageCount (0) {}
 
         // Although it seems a bit wacky to store the name here, it's because it may be a
         // placeholder rather than a real one, e.g. "<Sans-Serif>" vs the actual typeface name.
@@ -149,6 +152,11 @@ juce_ImplementSingleton_SingleThreaded (TypefaceCache)
 void Typeface::setTypefaceCacheSize (int numFontsToCache)
 {
     TypefaceCache::getInstance()->setSize (numFontsToCache);
+}
+
+void Typeface::clearTypefaceCache()
+{
+    TypefaceCache::getInstance()->clear();
 }
 
 //==============================================================================
@@ -254,11 +262,6 @@ Font::Font (const String& typefaceName, const float fontHeight, const int styleF
                                     FontStyleHelpers::getStyleName (styleFlags),
                                     FontValues::limitFontHeight (fontHeight),
                                     (styleFlags & underlined) != 0))
-{
-}
-
-Font::Font (const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {
 }
 
@@ -374,6 +377,13 @@ void Font::setTypefaceStyle (const String& typefaceStyle)
         font->typeface = nullptr;
         font->ascent = 0;
     }
+}
+
+Font Font::withTypefaceStyle (const String& newStyle) const
+{
+    Font f (*this);
+    f.setTypefaceStyle (newStyle);
+    return f;
 }
 
 StringArray Font::getAvailableStyles() const
@@ -581,6 +591,7 @@ void Font::setItalic (const bool shouldBeItalic)
 
 void Font::setUnderline (const bool shouldBeUnderlined)
 {
+    dupeInternalIfShared();
     font->underline = shouldBeUnderlined;
 }
 
@@ -685,7 +696,7 @@ Font Font::fromString (const String& fontDescription)
     if (name.isEmpty())
         name = getDefaultSansSerifFontName();
 
-    String sizeAndStyle (fontDescription.substring (separator + 1));
+    String sizeAndStyle (fontDescription.substring (separator + 1).trimStart());
 
     float height = sizeAndStyle.getFloatValue();
     if (height <= 0)

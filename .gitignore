@@ -10,6 +10,10 @@
 # Excluded folders:
 _finalBinaries
 
+# VST SDK
+vstsdk2.4/pluginterfaces/
+vstsdk2.4/public.sdk/
+
 # Exclude user-specific XCode 3 and 4 files
 # *.mode1
 # *.mode1v3

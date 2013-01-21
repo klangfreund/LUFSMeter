@@ -31,6 +31,8 @@
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
+- (void) applicationDidEnterBackground: (UIApplication*) application;
+- (void) applicationWillEnterForeground: (UIApplication*) application;
 
 @end
 
@@ -41,13 +43,27 @@
     initialiseJuce_GUI();
 
     JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
-    if (! app->initialiseApp (String::empty))
+    if (! app->initialiseApp())
         exit (0);
 }
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
     JUCEApplicationBase::appWillTerminateByForce();
+}
+
+- (void) applicationDidEnterBackground: (UIApplication*) application
+{
+    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+    if (app != nullptr)
+        app->suspended();
+}
+
+- (void) applicationWillEnterForeground: (UIApplication*) application
+{
+    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+    if (app != nullptr)
+        app->resumed();
 }
 
 @end

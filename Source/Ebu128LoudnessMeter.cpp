@@ -171,13 +171,13 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
             channelWeighting.add(1.0);
     }
     
-    // momentary and short term loudness.
+    // Momentary and short term loudness.
     momentaryLoudness.clear();
     shortTermLoudness.clear();
     for (int k=0; k != numberOfInputChannels; ++k)
     {
-        momentaryLoudness.add(minimalReturnValue);
-        shortTermLoudness.add(minimalReturnValue);
+        momentaryLoudness.add (minimalReturnValue);
+        shortTermLoudness.add (minimalReturnValue);
     } 
     
     reset();
@@ -458,7 +458,7 @@ const Array<float>& Ebu128LoudnessMeter::getMomentaryLoudness()
         if (*averageOfTheLast400ms[k] > 0.0f)
         {
             // This refers to equation (2) in ITU-R BS.1770-2
-            kthChannelMomentaryLoudness = jmax(float(-0.691 + 10.* std::log10(*averageOfTheLast400ms[k])), minimalReturnValue);
+            kthChannelMomentaryLoudness = jmax (float (-0.691 + 10.* std::log10(*averageOfTheLast400ms[k])), minimalReturnValue);
         }
         else
         {
@@ -491,7 +491,7 @@ void Ebu128LoudnessMeter::reset()
     // momentary and short term loudness.
     for (int k=0; k != momentaryLoudness.size(); ++k)
     {
-        momentaryLoudness.set(k, minimalReturnValue);
+        momentaryLoudness.set(k, var(minimalReturnValue));
         shortTermLoudness.set(k, minimalReturnValue);
     }    
     

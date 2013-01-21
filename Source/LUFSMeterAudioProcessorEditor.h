@@ -39,6 +39,7 @@
 #include "gui/LoudnessBar.h"
 #include "gui/LoudnessNumeric.h"
 #include "gui/LoudnessHistory.h"
+#include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
 
 
@@ -76,6 +77,7 @@ private:
     
     /** Shared values. */
     Value momentaryLoudnessValue;
+    Value momentaryLoudnessValues;
     Value shortTermLoudnessValue;
     Value integratedLoudnessValue;
     
@@ -88,7 +90,7 @@ private:
     BackgroundVerticalLinesAndCaption backgroundVerticalLinesAndCaption;
     
     /* Level meters. */
-    LoudnessBar momentaryLoudnessBar;
+    MultiChannelLoudnessBar momentaryLoudnessBar;
     LoudnessBar shortTermLoudnessBar;
     LoudnessBar integratedLoudnessBar;
     

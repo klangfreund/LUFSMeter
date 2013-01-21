@@ -311,7 +311,7 @@ public:
             deleteTempChannels();
 
             jassert (activePlugins.contains (this));
-            activePlugins.removeValue (this);
+            activePlugins.removeFirstMatchingValue (this);
         }
 
         if (activePlugins.size() == 0)
@@ -1252,19 +1252,19 @@ public:
             editor->setTopLeftPosition (0, 0);
             addAndMakeVisible (editor);
 
-          #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
 
             registerMouseWheelHook();
-          #endif
+           #endif
         }
 
         ~EditorCompWrapper()
         {
-          #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             unregisterMouseWheelHook();
-          #endif
+           #endif
 
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
                                  // have been transferred to another parent which takes over ownership.
@@ -1309,6 +1309,10 @@ public:
 
             const int cw = child->getWidth();
             const int ch = child->getHeight();
+
+           #if JUCE_MAC && JUCE_64BIT
+            setTopLeftPosition (0, getHeight() - ch);
+           #endif
 
             wrapper.resizeHostWindow (cw, ch);
 

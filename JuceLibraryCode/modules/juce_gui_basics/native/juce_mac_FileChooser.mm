@@ -89,8 +89,12 @@ class TemporaryMainMenuWithStandardCommands
 {
 public:
     TemporaryMainMenuWithStandardCommands()
-        : oldMenu (MenuBarModel::getMacMainMenu())
+        : oldMenu (MenuBarModel::getMacMainMenu()), oldAppleMenu (nullptr)
     {
+        const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu();
+        if (appleMenu != nullptr)
+            oldAppleMenu = new PopupMenu (*appleMenu);
+
         MenuBarModel::setMacMainMenu (nullptr);
 
         NSMenu* menu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Edit")];
@@ -115,15 +119,20 @@ public:
                                           action: nil  keyEquivalent: nsEmptyString()];
         [[NSApp mainMenu] setSubmenu: menu forItem: item];
         [menu release];
+
+        // use a dummy modal component so that apps can tell that something is currently modal.
+        dummyModalComponent.enterModalState();
     }
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu);
     }
 
 private:
     MenuBarModel* oldMenu;
+    ScopedPointer<PopupMenu> oldAppleMenu;
+    Component dummyModalComponent;
 };
 
 //==============================================================================

@@ -48,7 +48,7 @@
  -  LoudnessBar.getLevelValueObject().referTo(v);
 */
 class LoudnessBar  : public Component,
-                  public Value::Listener
+                     public Value::Listener
 {
 public:
     LoudnessBar (const Value & levelValueToReferTo,

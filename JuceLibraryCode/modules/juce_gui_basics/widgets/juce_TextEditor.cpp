@@ -857,7 +857,7 @@ private:
 //==============================================================================
 class TextEditor::TextHolderComponent  : public Component,
                                          public Timer,
-                                         public ValueListener
+                                         private ValueListener
 {
 public:
     TextHolderComponent (TextEditor& owner_)
@@ -1109,11 +1109,6 @@ void TextEditor::setSelectAllWhenFocused (const bool b)
 }
 
 //==============================================================================
-const Font& TextEditor::getFont() const
-{
-    return currentFont;
-}
-
 void TextEditor::setFont (const Font& newFont)
 {
     currentFont = newFont;
@@ -1198,11 +1193,6 @@ void TextEditor::setPasswordCharacter (const juce_wchar newPasswordCharacter)
 void TextEditor::setScrollBarThickness (const int newThicknessPixels)
 {
     viewport->setScrollBarThickness (newThicknessPixels);
-}
-
-void TextEditor::setScrollBarButtonVisibility (const bool buttonsVisible)
-{
-    viewport->setScrollBarButtonVisibility (buttonsVisible);
 }
 
 //==============================================================================
@@ -1739,8 +1729,7 @@ void TextEditor::paintOverChildren (Graphics& g)
 
         if (isMultiLine())
         {
-            g.drawText (textToShowWhenEmpty,
-                        0, 0, getWidth(), getHeight(),
+            g.drawText (textToShowWhenEmpty, getLocalBounds(),
                         Justification::centred, true);
         }
         else
@@ -1755,12 +1744,51 @@ void TextEditor::paintOverChildren (Graphics& g)
 }
 
 //==============================================================================
+void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
+{
+    const bool writable = ! isReadOnly();
+
+    if (passwordCharacter == 0)
+    {
+        m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
+        m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
+        m.addItem (StandardApplicationCommandIDs::paste, TRANS("Paste"), writable);
+    }
+
+    m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addSeparator();
+
+    if (getUndoManager() != nullptr)
+    {
+        m.addItem (StandardApplicationCommandIDs::undo, TRANS("Undo"), undoManager.canUndo());
+        m.addItem (StandardApplicationCommandIDs::redo, TRANS("Redo"), undoManager.canRedo());
+    }
+}
+
+void TextEditor::performPopupMenuAction (const int menuItemID)
+{
+    switch (menuItemID)
+    {
+        case StandardApplicationCommandIDs::cut:        cutToClipboard(); break;
+        case StandardApplicationCommandIDs::copy:       copyToClipboard(); break;
+        case StandardApplicationCommandIDs::paste:      pasteFromClipboard(); break;
+        case StandardApplicationCommandIDs::del:        cut(); break;
+        case StandardApplicationCommandIDs::selectAll:  selectAll(); break;
+        case StandardApplicationCommandIDs::undo:       undo(); break;
+        case StandardApplicationCommandIDs::redo:       redo(); break;
+        default: break;
+    }
+}
+
 static void textEditorMenuCallback (int menuResult, TextEditor* editor)
 {
     if (editor != nullptr && menuResult != 0)
         editor->performPopupMenuAction (menuResult);
 }
 
+//==============================================================================
 void TextEditor::mouseDown (const MouseEvent& e)
 {
     beginDragAutoRepeat (100);
@@ -1788,12 +1816,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
 void TextEditor::mouseDrag (const MouseEvent& e)
 {
     if (wasFocused || ! selectAllTextWhenFocused)
-    {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
-        {
             moveCaretTo (getTextIndexAt (e.x, e.y), true);
-        }
-    }
 }
 
 void TextEditor::mouseUp (const MouseEvent& e)
@@ -1802,12 +1826,8 @@ void TextEditor::mouseUp (const MouseEvent& e)
     textHolder->restartTimer();
 
     if (wasFocused || ! selectAllTextWhenFocused)
-    {
         if (e.mouseWasClicked() && ! (popupMenuEnabled && e.mods.isPopupMenu()))
-        {
             moveCaret (getTextIndexAt (e.x, e.y));
-        }
-    }
 
     wasFocused = true;
 }
@@ -2092,47 +2112,6 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
 
     // (overridden to avoid forwarding key events to the parent)
     return ! ModifierKeys::getCurrentModifiers().isCommandDown();
-}
-
-//==============================================================================
-const int baseMenuItemID = 0x7fff0000;
-
-void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
-{
-    const bool writable = ! isReadOnly();
-
-    if (passwordCharacter == 0)
-    {
-        m.addItem (baseMenuItemID + 1, TRANS("cut"), writable);
-        m.addItem (baseMenuItemID + 2, TRANS("copy"), ! selection.isEmpty());
-        m.addItem (baseMenuItemID + 3, TRANS("paste"), writable);
-    }
-
-    m.addItem (baseMenuItemID + 4, TRANS("delete"), writable);
-    m.addSeparator();
-    m.addItem (baseMenuItemID + 5, TRANS("select all"));
-    m.addSeparator();
-
-    if (getUndoManager() != nullptr)
-    {
-        m.addItem (baseMenuItemID + 6, TRANS("undo"), undoManager.canUndo());
-        m.addItem (baseMenuItemID + 7, TRANS("redo"), undoManager.canRedo());
-    }
-}
-
-void TextEditor::performPopupMenuAction (const int menuItemID)
-{
-    switch (menuItemID)
-    {
-        case baseMenuItemID + 1:    cutToClipboard(); break;
-        case baseMenuItemID + 2:    copyToClipboard(); break;
-        case baseMenuItemID + 3:    pasteFromClipboard(); break;
-        case baseMenuItemID + 4:    cut(); break;
-        case baseMenuItemID + 5:    selectAll(); break;
-        case baseMenuItemID + 6:    undo(); break;
-        case baseMenuItemID + 7:    redo(); break;
-        default: break;
-    }
 }
 
 //==============================================================================
@@ -2632,32 +2611,3 @@ void TextEditor::Listener::textEditorTextChanged (TextEditor&) {}
 void TextEditor::Listener::textEditorReturnKeyPressed (TextEditor&) {}
 void TextEditor::Listener::textEditorEscapeKeyPressed (TextEditor&) {}
 void TextEditor::Listener::textEditorFocusLost (TextEditor&) {}
-
-//==============================================================================
-const Identifier TextEditor::Ids::tagType ("TEXTEDITOR");
-const Identifier TextEditor::Ids::text ("text");
-const Identifier TextEditor::Ids::font ("font");
-const Identifier TextEditor::Ids::mode ("mode");
-const Identifier TextEditor::Ids::readOnly ("readOnly");
-const Identifier TextEditor::Ids::scrollbarsShown ("scrollbarsShown");
-const Identifier TextEditor::Ids::caretVisible ("caretVisible");
-const Identifier TextEditor::Ids::popupMenuEnabled ("popupMenuEnabled");
-
-void TextEditor::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setReadOnly (state [Ids::readOnly]);
-    setScrollbarsShown (state [Ids::scrollbarsShown]);
-    setCaretVisible (state [Ids::caretVisible]);
-    setPopupMenuEnabled (state [Ids::popupMenuEnabled]);
-    const int mode = state [Ids::mode];
-    setMultiLine (mode > 1, true);
-    setReturnKeyStartsNewLine (mode != 3);
-
-    const Font font (Font::fromString (state [Ids::font]));
-    if (getFont() != font)
-        applyFontToAllText (font);
-
-    setText (state [Ids::text].toString());
-}

@@ -161,6 +161,16 @@ public:
     */
     virtual void systemRequestedQuit();
 
+    /** This method is called when the application is being put into background mode
+        by the operating system.
+    */
+    virtual void suspended();
+
+    /** This method is called when the application is being woken from background mode
+        by the operating system.
+    */
+    virtual void resumed();
+
     /** If any unhandled exceptions make it through to the message dispatch loop, this
         callback will be triggered, in case you want to log them or do some other
         type of error-handling.
@@ -204,8 +214,15 @@ public:
     */
     int getApplicationReturnValue() const noexcept                  { return appReturnValue; }
 
-    /** Returns the application's command line parameters. */
-    const String& getCommandLineParameters() const noexcept         { return commandLineParameters; }
+    /** Returns the application's command line parameters as a set of strings.
+        @see getCommandLineParameters
+    */
+    static StringArray JUCE_CALLTYPE getCommandLineParameterArray();
+
+    /** Returns the application's command line parameters as a single string.
+        @see getCommandLineParameterArray
+    */
+    static String JUCE_CALLTYPE getCommandLineParameters();
 
     /** Returns true if this executable is running as an app (as opposed to being a plugin
         or other kind of shared library. */
@@ -224,18 +241,23 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     // The following methods are internal calls - not for public use.
-    static int main (const String& commandLine);
+    static int main();
     static int main (int argc, const char* argv[]);
     static void sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
-    bool initialiseApp (const String& commandLine);
+    bool initialiseApp();
     int shutdownApp();
+
+protected:
+    bool sendCommandLineToPreexistingInstance();
    #endif
 
 private:
     //==============================================================================
-    String commandLineParameters;
-    ScopedPointer<InterProcessLock> appLock;
-    ScopedPointer<ActionListener> broadcastCallback;
+    struct MultipleInstanceHandler;
+    friend struct MultipleInstanceHandler;
+    friend class ScopedPointer<MultipleInstanceHandler>;
+    ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
+
     int appReturnValue;
     bool stillInitialising;
 

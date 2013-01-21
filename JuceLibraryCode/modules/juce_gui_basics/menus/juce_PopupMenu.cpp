@@ -287,7 +287,7 @@ public:
 
     ~Window()
     {
-        getActiveWindows().removeValue (this);
+        getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
         activeSubMenu = nullptr;
         items.clear();
@@ -394,7 +394,7 @@ public:
                 Component::SafePointer<Window> parentWindow (owner);
                 PopupMenu::ItemComponent* currentChildOfParent = parentWindow->currentChild;
 
-                hide (0, true);
+                hide (nullptr, true);
 
                 if (parentWindow != nullptr)
                     parentWindow->setCurrentlyHighlightedChild (currentChildOfParent);
@@ -520,7 +520,7 @@ public:
         }
 
         if (hideOnExit && hasBeenOver && ! isOverAny)
-            hide (0, true);
+            hide (nullptr, true);
         else
             checkButtonState (localMousePos, timeNow, wasDown, overScrollArea, isOverAny);
     }
@@ -999,7 +999,7 @@ private:
                       && (isOver || (activeSubMenu == nullptr) || ! activeSubMenu->isVisible()))
                 {
                     if (isOver && (c != nullptr) && (activeSubMenu != nullptr))
-                        activeSubMenu->hide (0, true);
+                        activeSubMenu->hide (nullptr, true);
 
                     if (! isOver)
                         itemUnderMouse = nullptr;
@@ -1244,7 +1244,7 @@ void PopupMenu::addCustomItem (const int itemResultId, CustomComponent* const cu
                          Colours::black, false, customComponent, nullptr, nullptr));
 }
 
-class NormalComponentWrapper : public PopupMenu::CustomComponent
+class PopupMenu::NormalComponentWrapper : public PopupMenu::CustomComponent
 {
 public:
     NormalComponentWrapper (Component* const comp, const int w, const int h,
@@ -1301,7 +1301,7 @@ void PopupMenu::addSeparator()
 }
 
 //==============================================================================
-class HeaderItemComponent  : public PopupMenu::CustomComponent
+class PopupMenu::HeaderItemComponent  : public PopupMenu::CustomComponent
 {
 public:
     HeaderItemComponent (const String& name)
@@ -1413,7 +1413,7 @@ public:
     PopupMenuCompletionCallback()
         : managerOfChosenCommand (nullptr),
           prevFocused (Component::getCurrentlyFocusedComponent()),
-          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : 0)
+          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : nullptr)
     {
         PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
     }

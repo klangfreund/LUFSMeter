@@ -94,6 +94,11 @@ static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelC
  #define JuceAUBaseClass AUMIDIEffectBase
 #endif
 
+// This macro can be set if you need to override this internal name for some reason..
+#ifndef JUCE_STATE_DICTIONARY_KEY
+ #define JUCE_STATE_DICTIONARY_KEY   CFSTR("jucePluginState")
+#endif
+
 //==============================================================================
 /** Somewhere in the codebase of your plugin, you need to implement this function
     and make it create an instance of the filter subclass that you're building.
@@ -119,9 +124,9 @@ public:
     {
         if (activePlugins.size() + activeUIs.size() == 0)
         {
-          #if BUILD_AU_CARBON_UI
+           #if BUILD_AU_CARBON_UI
             NSApplicationLoad();
-          #endif
+           #endif
 
             initialiseJuce_GUI();
         }
@@ -140,6 +145,18 @@ public:
         auEvent.mArgument.mParameter.mAudioUnit = GetComponentInstance();
         auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
         auEvent.mArgument.mParameter.mElement = 0;
+
+        CreateElements();
+
+        CAStreamBasicDescription streamDescription;
+        streamDescription.mSampleRate = GetSampleRate();
+        streamDescription.SetCanonical (channelConfigs[0][1], false);
+        Outputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+
+       #if ! JucePlugin_IsSynth
+        streamDescription.SetCanonical (channelConfigs[0][0], false);
+        Inputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+       #endif
     }
 
     ~JuceAU()
@@ -148,7 +165,7 @@ public:
         juceFilter = nullptr;
 
         jassert (activePlugins.contains (this));
-        activePlugins.removeValue (this);
+        activePlugins.removeFirstMatchingValue (this);
 
         if (activePlugins.size() + activeUIs.size() == 0)
             shutdownJuce_GUI();
@@ -187,7 +204,7 @@ public:
             {
               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOSXMinorVersionNumber() > 4)
+                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
               #endif
                 {
                     outDataSize = sizeof (AudioUnitCocoaViewInfo);
@@ -227,7 +244,7 @@ public:
             {
                #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOSXMinorVersionNumber() > 4)
+                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
                #endif
                 {
                     JUCE_AUTORELEASEPOOL
@@ -285,7 +302,7 @@ public:
             if (state.getSize() > 0)
             {
                 CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), state.getSize());
-                CFDictionarySetValue (dict, CFSTR("jucePluginState"), ourState);
+                CFDictionarySetValue (dict, JUCE_STATE_DICTIONARY_KEY, ourState);
                 CFRelease (ourState);
             }
         }
@@ -305,7 +322,7 @@ public:
             CFDictionaryRef dict = (CFDictionaryRef) inData;
             CFDataRef data = 0;
 
-            if (CFDictionaryGetValueIfPresent (dict, CFSTR("jucePluginState"), (const void**) &data))
+            if (CFDictionaryGetValueIfPresent (dict, JUCE_STATE_DICTIONARY_KEY, (const void**) &data))
             {
                 if (data != 0)
                 {
@@ -1049,7 +1066,7 @@ public:
             deleteEditor (self);
 
             jassert (activeUIs.contains (self));
-            activeUIs.removeValue (self);
+            activeUIs.removeFirstMatchingValue (self);
             if (activePlugins.size() + activeUIs.size() == 0)
                 shutdownJuce_GUI();
         }

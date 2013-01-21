@@ -27,21 +27,54 @@
  extern void juce_initialiseMacMainMenu();
 #endif
 
+#if ! (JUCE_IOS || JUCE_ANDROID)
+ #define JUCE_HANDLE_MULTIPLE_INSTANCES 1
+#endif
+
 //==============================================================================
-class AppBroadcastCallback  : public ActionListener
+#if JUCE_HANDLE_MULTIPLE_INSTANCES
+struct JUCEApplication::MultipleInstanceHandler  : public ActionListener
 {
 public:
-    AppBroadcastCallback()    { MessageManager::getInstance()->registerBroadcastListener (this); }
-    ~AppBroadcastCallback()   { MessageManager::getInstance()->deregisterBroadcastListener (this); }
+    MultipleInstanceHandler (const String& appName)
+        : appLock ("juceAppLock_" + appName)
+    {
+    }
+
+    bool sendCommandLineToPreexistingInstance()
+    {
+        if (appLock.enter (0))
+            return false;
+
+        JUCEApplication* const app = JUCEApplication::getInstance();
+        jassert (app != nullptr);
+
+        MessageManager::broadcastMessage (app->getApplicationName()
+                                            + "/" + app->getCommandLineParameters());
+        return true;
+    }
 
     void actionListenerCallback (const String& message)
     {
         JUCEApplication* const app = JUCEApplication::getInstance();
 
-        if (app != 0 && message.startsWith (app->getApplicationName() + "/"))
-            app->anotherInstanceStarted (message.substring (app->getApplicationName().length() + 1));
+        if (app != nullptr)
+        {
+            const String appName (app->getApplicationName());
+
+            if (message.startsWith (appName + "/"))
+                app->anotherInstanceStarted (message.substring (appName.length() + 1));
+        }
     }
+
+private:
+    InterProcessLock appLock;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultipleInstanceHandler);
 };
+#else
+struct JUCEApplication::MultipleInstanceHandler {};
+#endif
 
 //==============================================================================
 JUCEApplication::JUCEApplication()
@@ -52,22 +85,14 @@ JUCEApplication::JUCEApplication()
 
 JUCEApplication::~JUCEApplication()
 {
-    if (appLock != nullptr)
-    {
-        appLock->exit();
-        appLock = nullptr;
-    }
 }
 
 //==============================================================================
-bool JUCEApplication::moreThanOneInstanceAllowed()
-{
-    return true;
-}
+bool JUCEApplication::moreThanOneInstanceAllowed()  { return true; }
+void JUCEApplication::anotherInstanceStarted (const String&) {}
 
-void JUCEApplication::anotherInstanceStarted (const String&)
-{
-}
+void JUCEApplication::suspended() {}
+void JUCEApplication::resumed() {}
 
 void JUCEApplication::systemRequestedQuit()
 {
@@ -85,9 +110,7 @@ void JUCEApplication::setApplicationReturnValue (const int newReturnValue) noexc
 }
 
 //==============================================================================
-void JUCEApplication::unhandledException (const std::exception*,
-                                          const String&,
-                                          const int)
+void JUCEApplication::unhandledException (const std::exception*, const String&, int)
 {
     jassertfalse;
 }
@@ -135,41 +158,44 @@ bool JUCEApplication::perform (const InvocationInfo& info)
     return false;
 }
 
-//==============================================================================
-bool JUCEApplication::initialiseApp (const String& commandLine)
+#if JUCE_HANDLE_MULTIPLE_INSTANCES
+bool JUCEApplication::sendCommandLineToPreexistingInstance()
 {
-    commandLineParameters = commandLine.trim();
+    jassert (multipleInstanceHandler == nullptr); // this must only be called once!
 
-   #if ! (JUCE_IOS || JUCE_ANDROID)
-    jassert (appLock == nullptr); // initialiseApp must only be called once!
+    multipleInstanceHandler = new MultipleInstanceHandler (getApplicationName());
+    return multipleInstanceHandler->sendCommandLineToPreexistingInstance();
+}
+#endif
 
-    if (! moreThanOneInstanceAllowed())
+//==============================================================================
+bool JUCEApplication::initialiseApp()
+{
+   #if JUCE_HANDLE_MULTIPLE_INSTANCES
+    if ((! moreThanOneInstanceAllowed()) && sendCommandLineToPreexistingInstance())
     {
-        appLock = new InterProcessLock ("juceAppLock_" + getApplicationName());
-
-        if (! appLock->enter(0))
-        {
-            appLock = nullptr;
-            MessageManager::broadcastMessage (getApplicationName() + "/" + commandLineParameters);
-
-            DBG ("Another instance is running - quitting...");
-            return false;
-        }
+        DBG ("Another instance is running - quitting...");
+        return false;
     }
    #endif
 
     // let the app do its setting-up..
-    initialise (commandLineParameters);
-
-   #if JUCE_MAC
-    juce_initialiseMacMainMenu(); // needs to be called after the app object has created, to get its name
-   #endif
-
-   #if ! (JUCE_IOS || JUCE_ANDROID)
-    broadcastCallback = new AppBroadcastCallback();
-   #endif
+    initialise (getCommandLineParameters());
 
     stillInitialising = false;
+
+    if (! MessageManager::getInstance()->hasStopMessageBeenSent())
+    {
+       #if JUCE_MAC
+        juce_initialiseMacMainMenu(); // (needs to get the app's name)
+       #endif
+
+       #if JUCE_HANDLE_MULTIPLE_INSTANCES
+        if (multipleInstanceHandler != nullptr)
+            MessageManager::getInstance()->registerBroadcastListener (multipleInstanceHandler);
+       #endif
+    }
+
     return true;
 }
 
@@ -177,7 +203,10 @@ int JUCEApplication::shutdownApp()
 {
     jassert (JUCEApplicationBase::getInstance() == this);
 
-    broadcastCallback = nullptr;
+   #if JUCE_HANDLE_MULTIPLE_INSTANCES
+    if (multipleInstanceHandler != nullptr)
+        MessageManager::getInstance()->deregisterBroadcastListener (multipleInstanceHandler);
+   #endif
 
     JUCE_TRY
     {
@@ -186,77 +215,90 @@ int JUCEApplication::shutdownApp()
     }
     JUCE_CATCH_EXCEPTION
 
+    multipleInstanceHandler = nullptr;
     return getApplicationReturnValue();
 }
 
 //==============================================================================
-#if ! JUCE_ANDROID
-int JUCEApplication::main (const String& commandLine)
+#if JUCE_ANDROID
+
+StringArray JUCEApplication::getCommandLineParameterArray() { return StringArray(); }
+String JUCEApplication::getCommandLineParameters()          { return String::empty; }
+
+#else
+
+int JUCEApplication::main()
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
     jassert (createInstance != nullptr);
-    int returnCode = 0;
 
+    const ScopedPointer<JUCEApplication> app (dynamic_cast <JUCEApplication*> (createInstance()));
+    jassert (app != nullptr);
+
+    if (! app->initialiseApp())
+        return 0;
+
+    JUCE_TRY
     {
-        const ScopedPointer<JUCEApplication> app (dynamic_cast <JUCEApplication*> (createInstance()));
-
-        jassert (app != nullptr);
-
-        if (! app->initialiseApp (commandLine))
-            return 0;
-
-        JUCE_TRY
-        {
-            // loop until a quit message is received..
-            MessageManager::getInstance()->runDispatchLoop();
-        }
-        JUCE_CATCH_EXCEPTION
-
-        returnCode = app->shutdownApp();
+        // loop until a quit message is received..
+        MessageManager::getInstance()->runDispatchLoop();
     }
+    JUCE_CATCH_EXCEPTION
 
-    return returnCode;
+    return app->shutdownApp();
 }
 
+#if ! JUCE_WINDOWS
 #if JUCE_IOS
  extern int juce_iOSMain (int argc, const char* argv[]);
-#endif
-
-#if ! JUCE_WINDOWS
- extern const char* juce_Argv0;
 #endif
 
 #if JUCE_MAC
  extern void initialiseNSApplication();
 #endif
 
+extern const char** juce_argv;  // declared in juce_core
+extern int juce_argc;
+
+StringArray JUCEApplication::getCommandLineParameterArray()
+{
+    return StringArray (juce_argv + 1, juce_argc - 1);
+}
+
+String JUCEApplication::getCommandLineParameters()
+{
+    String argString;
+
+    for (int i = 1; i < juce_argc; ++i)
+    {
+        String arg (juce_argv[i]);
+
+        if (arg.containsChar (' ') && ! arg.isQuotedString())
+            arg = arg.quoted ('"');
+
+        argString << arg << ' ';
+    }
+
+    return argString.trim();
+}
+
 int JUCEApplication::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
+
+    juce_argc = argc;
+    juce_argv = argv;
 
    #if JUCE_MAC
     initialiseNSApplication();
    #endif
 
-   #if ! JUCE_WINDOWS
-    jassert (createInstance != nullptr);
-    juce_Argv0 = argv[0];
-   #endif
-
    #if JUCE_IOS
     return juce_iOSMain (argc, argv);
    #else
-    String cmd;
-    for (int i = 1; i < argc; ++i)
-    {
-        String arg (argv[i]);
-        if (arg.containsChar (' ') && ! arg.isQuotedString())
-            arg = arg.quoted ('"');
-
-        cmd << arg << ' ';
-    }
-
-    return JUCEApplication::main (cmd);
+    return JUCEApplication::main();
    #endif
 }
+#endif
+
 #endif

@@ -58,7 +58,7 @@ OutputStream::OutputStream()
 OutputStream::~OutputStream()
 {
    #if JUCE_DEBUG
-    danglingStreamChecker.activeStreams.removeValue (this);
+    danglingStreamChecker.activeStreams.removeFirstMatchingValue (this);
    #endif
 }
 
@@ -241,7 +241,7 @@ int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWri
 
     int numWritten = 0;
 
-    while (numBytesToWrite > 0 && ! source.isExhausted())
+    while (numBytesToWrite > 0)
     {
         char buffer [8192];
         const int num = source.read (buffer, (int) jmin (numBytesToWrite, (int64) sizeof (buffer)));
@@ -266,6 +266,11 @@ void OutputStream::setNewLineString (const String& newLineString_)
 
 //==============================================================================
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
+{
+    return stream << String (number);
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
 {
     return stream << String (number);
 }

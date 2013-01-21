@@ -23,13 +23,19 @@
   ==============================================================================
 */
 
-#if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) \
-                  && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 \
-                  && MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5)
+#if JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4)
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
 #if JUCE_CORETEXT_AVAILABLE
+
+#if JUCE_MAC && MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
+extern "C"
+{
+    void CTRunGetAdvances (CTRunRef, CFRange, CGSize buffer[]);
+    const CGSize* CTRunGetAdvancesPtr (CTRunRef);
+}
+#endif
 
 namespace CoreTextTypeLayout
 {
@@ -43,8 +49,38 @@ namespace CoreTextTypeLayout
         return style;
     }
 
-    static CTFontRef createCTFont (const Font& font, const float fontSize,
-                                   const bool applyScaleFactor)
+    // Workaround for Apple bug in CTFontCreateWithFontDescriptor in Garageband/Logic on 10.6
+   #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
+    static CTFontRef getFontWithTrait (CTFontRef ctFontRef, CTFontSymbolicTraits trait)
+    {
+        CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr, trait, trait);
+        if (newFont == nullptr)
+            return ctFontRef;
+
+        CFRelease (ctFontRef);
+        return newFont;
+    }
+
+    static CTFontRef useStyleFallbackIfNecessary (CTFontRef ctFontRef, CFStringRef cfFontFamily,
+                                                  const float fontSize, const Font& font)
+    {
+        CFStringRef cfActualFontFamily = (CFStringRef) CTFontCopyAttribute (ctFontRef, kCTFontFamilyNameAttribute);
+
+        if (CFStringCompare (cfFontFamily, cfActualFontFamily, 0) != kCFCompareEqualTo)
+        {
+            CFRelease (ctFontRef);
+            ctFontRef = CTFontCreateWithName (cfFontFamily, fontSize, nullptr);
+
+            if (font.isItalic())   ctFontRef = getFontWithTrait (ctFontRef, kCTFontItalicTrait);
+            if (font.isBold())     ctFontRef = getFontWithTrait (ctFontRef, kCTFontBoldTrait);
+        }
+
+        CFRelease (cfActualFontFamily);
+        return ctFontRef;
+    }
+   #endif
+
+    static CTFontRef createCTFont (const Font& font, const float fontSize, const bool applyScaleFactor)
     {
         CFStringRef cfFontFamily = FontStyleHelpers::getConcreteFamilyName (font).toCFString();
         CFStringRef cfFontStyle = findBestAvailableStyle (font.getTypefaceName(),
@@ -58,13 +94,18 @@ namespace CoreTextTypeLayout
                                                                  &kCFTypeDictionaryKeyCallBacks,
                                                                  &kCFTypeDictionaryValueCallBacks);
         CFRelease (cfFontStyle);
-        CFRelease (cfFontFamily);
 
         CTFontDescriptorRef ctFontDescRef = CTFontDescriptorCreateWithAttributes (fontDescAttributes);
         CFRelease (fontDescAttributes);
 
         CTFontRef ctFontRef = CTFontCreateWithFontDescriptor (ctFontDescRef, fontSize, nullptr);
         CFRelease (ctFontDescRef);
+
+       #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
+        ctFontRef = useStyleFallbackIfNecessary (ctFontRef, cfFontFamily, fontSize, font);
+       #endif
+
+        CFRelease (cfFontFamily);
 
         if (applyScaleFactor)
         {
@@ -1077,7 +1118,7 @@ struct DefaultFontNames
        #else
         : defaultSans  ("Lucida Grande"),
           defaultSerif ("Times New Roman"),
-          defaultFixed ("Monaco"),
+          defaultFixed ("Menlo"),
        #endif
           defaultFallback ("Arial Unicode MS")
     {

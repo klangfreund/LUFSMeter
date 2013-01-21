@@ -163,7 +163,8 @@ bool File::isHidden() const
 }
 
 //==============================================================================
-const char* juce_Argv0 = nullptr;  // referenced from juce_Application.cpp
+const char* const* juce_argv = nullptr;
+int juce_argc = 0;
 
 File File::getSpecialLocation (const SpecialLocationType type)
 {
@@ -204,8 +205,8 @@ File File::getSpecialLocation (const SpecialLocationType type)
         case globalApplicationsDirectory:       resultPath = "/Applications"; break;
 
         case invokedExecutableFile:
-            if (juce_Argv0 != 0)
-                return File (CharPointer_UTF8 (juce_Argv0));
+            if (juce_argv != nullptr && juce_argc > 0)
+                return File (CharPointer_UTF8 (juce_argv[0]));
             // deliberate fall-through...
 
         case currentExecutableFile:
@@ -273,7 +274,7 @@ String File::getVersion() const
 //==============================================================================
 File File::getLinkedTarget() const
 {
-  #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
+  #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
 
   #else
@@ -427,12 +428,12 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
 void File::revealToUser() const
 {
-  #if ! JUCE_IOS
+   #if ! JUCE_IOS
     if (exists())
         [[NSWorkspace sharedWorkspace] selectFile: juceStringToNS (getFullPathName()) inFileViewerRootedAtPath: nsEmptyString()];
     else if (getParentDirectory().exists())
         getParentDirectory().revealToUser();
-  #endif
+   #endif
 }
 
 //==============================================================================
@@ -440,7 +441,7 @@ OSType File::getMacOSType() const
 {
     JUCE_AUTORELEASEPOOL
 
-   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
+   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (getFullPathName()) error: nil];
    #else
     // (the cast here avoids a deprecation warning)

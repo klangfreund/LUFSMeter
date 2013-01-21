@@ -34,11 +34,6 @@ namespace AiffFileHelpers
 
    #if JUCE_MSVC
     #pragma pack (push, 1)
-    #define PACKED
-   #elif JUCE_GCC
-    #define PACKED __attribute__((packed))
-   #else
-    #define PACKED
    #endif
 
     //==============================================================================
@@ -49,7 +44,7 @@ namespace AiffFileHelpers
             uint16 type; // these are different in AIFF and WAV
             uint16 startIdentifier;
             uint16 endIdentifier;
-        } PACKED;
+        } JUCE_PACKED;
 
         int8 baseNote;
         int8 detune;
@@ -106,13 +101,11 @@ namespace AiffFileHelpers
             }
         }
 
-    } PACKED;
+    } JUCE_PACKED;
 
    #if JUCE_MSVC
     #pragma pack (pop)
    #endif
-
-    #undef PACKED
 
     //==============================================================================
     namespace MarkChunk
@@ -696,7 +689,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 {
     ScopedPointer <AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
-    if (w->sampleRate > 0)
+    if (w->sampleRate > 0 && w->numChannels > 0)
         return w.release();
 
     if (! deleteStreamIfOpeningFails)

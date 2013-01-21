@@ -72,6 +72,11 @@ public:
     */
     static bool isForegroundProcess();
 
+    /** Attempts to make the current process the active one.
+        (This is not possible on some platforms).
+    */
+    static void makeForegroundProcess();
+
     //==============================================================================
     /** Raises the current process's privilege level.
 
@@ -88,8 +93,7 @@ public:
     static void lowerPrivilege();
 
     //==============================================================================
-    /** Returns true if this process is being hosted by a debugger.
-    */
+    /** Returns true if this process is being hosted by a debugger. */
     static bool JUCE_CALLTYPE isRunningUnderDebugger();
 
 
@@ -128,11 +132,12 @@ public:
         @see getCurrentModuleInstanceHandle()
     */
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
+   #endif
 
-    /** WINDOWS ONLY - Gets the command-line params as a string.
-        This is needed to avoid unicode problems with the argc type params.
-    */
-    static String JUCE_CALLTYPE getCurrentCommandLineParams();
+   #if JUCE_MAC || DOXYGEN
+    //==============================================================================
+    /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
+    static void setDockIconVisible (bool isVisible);
    #endif
 
 private:

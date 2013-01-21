@@ -1,0 +1,111 @@
+Hi all,
+
+I'm working on a plugin to measure loudness, according to EBU R128 ([url]http://www.klangfreund.com/lufsmeter[/url]).
+I'm not an experienced programmer yet and therefore very happy about any comment.
+
+[b]The coarse mechanism[/b]
+
+1. The LUFSMeterAudioProcessor contains the ebu128LoudnessMeter object, which processes the audio blocks.
+
+2. The LUFSMeterAudioProcessorEditor is a Timer and in its timerCallback method, it polls the (so called momentary) loudness from the ebu128LoudnessMeter. This number is put into a Value object ( momentaryLoudnessValue.setValue (double (momentaryLoudness)) ).
+
+3. An instance of my GUI class LoudnessBar listens to this momentaryLoudnessValue. I.e. LoudnessBar contains a Value itself which referes to momentaryLoudnessValue and LoudnessBar is also a Value::Listener which listens to its own Value. When this Value changes, LoudnessBar::valueChanged() is called. There, if the current loudness differs from the previous loudness, repaint() is called.
+
+
+I'm using the Value object because it makes it easy to "attach" different GUI elements to the same value, e.g. a bar as well as a number box. Anyway, if you have doubts about this design please let me know, I'm curious about different design patterns.
+
+
+[b]Multi channel[/b]
+
+I tried to extend the plugin such that it determines the loudness of an arbitrary number of input channels on each channel. The LoudnessBar will plot as many bars as there are input channels.
+I think a Value containing a var(Array<var>) is the perfect match for this kind of task. But I just can't figure out how to use it.
+
+
+[i]First approach:[/i]
+
+[code]
+LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProcessor* ownerFilter)
+  : momentaryLoudnessValue (var(Array<var>())) // A copy of the argument is stored inside. I'm quite sure this is not needed at all.
+...
+
+LUFSMeterAudioProcessorEditor::timerCallback()
+{
+...
+    // source:
+    const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudness();
+    // destination:
+    Array<var>* momentaryLoudnessValuesArray = momentaryLoudnessValues.getValue().getArray();
+    
+    // A temporary hack to see if this approach might work:
+    // Ensure that the size of momentaryLoudnessValuesArray is equal to the number of input channels.
+    if (momentaryLoudnessValuesArray->size() != momentaryLoudnessFromEbu128LM.size())
+    {
+        // The number of input channels has changed -> Resize the Array of momentaryLoudnessValues
+        momentaryLoudnessValuesArray->clear();
+        momentaryLoudnessValuesArray->insertMultiple (0, var( double (-23.0)), momentaryLoudnessFromEbu128LM.size());
+    }
+    else
+    {
+        // WILL NEVER GET INTO THIS SECTION
+        for (int k = 0; k != momentaryLoudnessFromEbu128LM.size() ; ++k)
+        {
+            double momentaryLoudnessOfTheKthChannel = double (momentaryLoudnessFromEbu128LM[k]);
+            momentaryLoudnessValuesArray->set(k, var (momentaryLoudnessOfTheKthChannel));
+        }
+    }
+
+...
+}
+[/code]
+
+It looks like changes to momentaryLoudnessValues.getValue().getArray() are simply not stored.
+
+
+[i]Second approach:[/i]
+
+[code]LUFSMeterAudioProcessorEditor::timerCallback()
+{
+...
+    // source:
+    const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudness();
+    // destination:
+    Array<var> loudnessArray;
+    
+    
+    for (int k = 0; k != momentaryLoudnessFromEbu128LM.size() ; ++k)
+    {
+        double momentaryLoudnessOfTheKthChannel = double (momentaryLoudnessFromEbu128LM[k]);
+        loudnessArray.add (momentaryLoudnessOfTheKthChannel);
+    }
+    momentaryLoudnessValues.setValue (var (loudnessArray));
+        // The original array in momentaryLoudnessValues is replaced by a copy of var (loudnessArray).
+...
+}
+
+void LoudnessBar::paint (Graphics& g)
+{
+...
+    Array<var>* loudnessArray = loudnessValue.getValue().getArray();
+
+    if (loudnessArray)
+    {
+        const int numberOfChannels = loudnessArray->size();
+        ...
+        for (int k = 0; k != numberOfChannels; ++k)
+        {
+            double currentLoudnessOfChannelK = double ((*loudnessArray)[k]);
+                // -> EXC_BAD_ACCESS
+                // even thought k = 0 and loudnessArray->size() = 2
+            ...
+        }
+    }
+    ...
+}[/code]
+On the top of the stack when this EXC_BAD_ACCESS happens:
+[code]var::var (const var& valueToCopy)  : type (valueToCopy.type)
+{
+    type->createCopy (value, valueToCopy.value);
+}[/code]
+with the adress of valueToCopy = 0x7000000000000000.
+
+My system: OSX 10.7.5, XCode 4.2.1

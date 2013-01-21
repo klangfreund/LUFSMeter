@@ -346,9 +346,14 @@ public:
         */
         void setPixelColour (int x, int y, const Colour& colour) const noexcept;
 
-        uint8* data;
-        PixelFormat pixelFormat;
-        int lineStride, pixelStride, width, height;
+        /** Returns the size of the bitmap. */
+        Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }
+
+        uint8* data;             /**< The raw pixel data, packed according to the image's pixel format. */
+        PixelFormat pixelFormat; /**< The format of the data. */
+        int lineStride;          /**< The number of bytes between each line. */
+        int pixelStride;         /**< The number of bytes between each pixel. */
+        int width, height;
 
         //==============================================================================
         /** Used internally by custom image types to manage pixel data lifetime. */
@@ -379,8 +384,7 @@ public:
         @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
                                 above this level will be considered opaque
     */
-    void createSolidAreaMask (RectangleList& result,
-                              float alphaThreshold = 0.5f) const;
+    void createSolidAreaMask (RectangleList& result, float alphaThreshold) const;
 
     //==============================================================================
     /** Returns a NamedValueSet that is attached to the image and which can be used for
@@ -453,6 +457,8 @@ public:
     */
     NamedValueSet userData;
 
+    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData);
 };
@@ -471,7 +477,7 @@ public:
     virtual ~ImageType();
 
     /** Creates a new image of this type, and the specified parameters. */
-    virtual ImagePixelData* create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
+    virtual ImagePixelData::Ptr create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
 
     /** Must return a unique number to identify this type. */
     virtual int getTypeID() const = 0;
@@ -494,7 +500,7 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
     int getTypeID() const;
 };
 
@@ -510,7 +516,7 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
     int getTypeID() const;
 };
 

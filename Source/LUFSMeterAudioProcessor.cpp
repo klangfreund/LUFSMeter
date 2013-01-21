@@ -145,10 +145,17 @@ void LUFSMeterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     
     //TODO
     int expectedRequestRate = 20;
+    
     ebu128LoudnessMeter.prepareToPlay(sampleRate, 
                                       getNumInputChannels(), 
                                       samplesPerBlock, 
                                       expectedRequestRate);
+    
+//    Array<var>* theArrayInside = momentaryLoudnessValues.getValue().getArray();
+//    theArrayInside->clear();
+//    double TODO_minimalLoudness = -300;
+//    int numberOfInputChannels = getNumInputChannels();
+//    theArrayInside->insertMultiple (0, var (TODO_minimalLoudness), numberOfInputChannels);
 }
 
 void LUFSMeterAudioProcessor::releaseResources()

@@ -38,7 +38,7 @@ public:
 
     ~JuceMainMenuHandler()
     {
-        setMenu (nullptr);
+        setMenu (nullptr, nullptr);
 
         jassert (instance == this);
         instance = nullptr;
@@ -46,7 +46,7 @@ public:
         [callback release];
     }
 
-    void setMenu (MenuBarModel* const newMenuBarModel)
+    void setMenu (MenuBarModel* const newMenuBarModel, const PopupMenu* newExtraAppleMenuItems)
     {
         if (currentModel != newMenuBarModel)
         {
@@ -60,6 +60,9 @@ public:
 
             menuBarItemsChanged (nullptr);
         }
+
+        extraAppleMenuItems = newExtraAppleMenuItems != nullptr ? new PopupMenu (*newExtraAppleMenuItems)
+                                                                : nullptr;
     }
 
     void addSubMenu (NSMenu* parent, const PopupMenu& child,
@@ -81,7 +84,7 @@ public:
                         const String& name, const int menuId, const int tag)
     {
        #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        static bool is10_4 = (SystemStats::getOSXMinorVersionNumber() <= 4);
+        static bool is10_4 = (SystemStats::getOperatingSystemType() == MacOSX_10_4);
 
         if (is10_4)
         {
@@ -262,6 +265,7 @@ public:
     static JuceMainMenuHandler* instance;
 
     MenuBarModel* currentModel;
+    ScopedPointer<PopupMenu> extraAppleMenuItems;
     uint32 lastUpdateTime;
     NSObject* callback;
 
@@ -466,7 +470,22 @@ JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 //==============================================================================
 namespace MainMenuHelpers
 {
-    static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
+    static NSString* translateMenuName (const String& name)
+    {
+        return NSLocalizedString (juceStringToNS (TRANS (name)), nil);
+    }
+
+    static NSMenuItem* createMenuItem (NSMenu* menu, const String& name, SEL sel, NSString* key)
+    {
+        NSMenuItem* item = [[[NSMenuItem alloc] initWithTitle: translateMenuName (name)
+                                                       action: sel
+                                                keyEquivalent: key] autorelease];
+        [item setTarget: NSApp];
+        [menu addItem: item];
+        return item;
+    }
+
+    static void createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
     {
         if (extraItems != nullptr && JuceMainMenuHandler::instance != nullptr && extraItems->getNumItems() > 0)
         {
@@ -476,50 +495,26 @@ namespace MainMenuHelpers
             [menu addItem: [NSMenuItem separatorItem]];
         }
 
-        NSMenuItem* item;
-
         // Services...
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Services"), nil)
-                                          action: nil  keyEquivalent: nsEmptyString()];
-        [menu addItem: item];
-        [item release];
-        NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Services")];
-        [menu setSubmenu: servicesMenu forItem: item];
+        NSMenuItem* services = [[[NSMenuItem alloc] initWithTitle: translateMenuName ("Services")
+                                                           action: nil  keyEquivalent: nsEmptyString()] autorelease];
+        [menu addItem: services];
+
+        NSMenu* servicesMenu = [[[NSMenu alloc] initWithTitle: translateMenuName ("Services")] autorelease];
+        [menu setSubmenu: servicesMenu forItem: services];
         [NSApp setServicesMenu: servicesMenu];
-        [servicesMenu release];
         [menu addItem: [NSMenuItem separatorItem]];
 
-        // Hide + Show stuff...
-        item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Hide " + appName)
-                                          action: @selector (hide:)  keyEquivalent: nsStringLiteral ("h")];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        createMenuItem (menu, "Hide " + appName, @selector (hide:), nsStringLiteral ("h"));
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Hide Others"), nil)
-                                          action: @selector (hideOtherApplications:)  keyEquivalent: nsStringLiteral ("h")];
-        [item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        [createMenuItem (menu, "Hide Others", @selector (hideOtherApplications:), nsStringLiteral ("h"))
+            setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Show All"), nil)
-                                          action: @selector (unhideAllApplications:)  keyEquivalent: nsEmptyString()];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        createMenuItem (menu, "Show All", @selector (unhideAllApplications:), nsEmptyString());
 
         [menu addItem: [NSMenuItem separatorItem]];
 
-        // Quit item....
-        item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Quit " + appName)
-                                          action: @selector (terminate:)  keyEquivalent: nsStringLiteral ("q")];
-
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
-
-        return menu;
+        createMenuItem (menu, "Quit " + appName, @selector (terminate:), nsStringLiteral ("q"));
     }
 
     // Since our app has no NIB, this initialises a standard app menu...
@@ -569,7 +564,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
             if (JuceMainMenuHandler::instance == nullptr)
                 JuceMainMenuHandler::instance = new JuceMainMenuHandler();
 
-            JuceMainMenuHandler::instance->setMenu (newMenuBarModel);
+            JuceMainMenuHandler::instance->setMenu (newMenuBarModel, extraAppleMenuItems);
         }
     }
 
@@ -585,8 +580,24 @@ MenuBarModel* MenuBarModel::getMacMainMenu()
              ? JuceMainMenuHandler::instance->currentModel : nullptr;
 }
 
+const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
+{
+    return JuceMainMenuHandler::instance != nullptr
+             ? JuceMainMenuHandler::instance->extraAppleMenuItems.get() : nullptr;
+}
+
+typedef void (*MenuTrackingBeganCallback)();
+extern MenuTrackingBeganCallback menuTrackingBeganCallback;
+
+static void mainMenuTrackingBegan()
+{
+    PopupMenu::dismissAllActiveMenus();
+}
+
 void juce_initialiseMacMainMenu()
 {
+    menuTrackingBeganCallback = mainMenuTrackingBegan;
+
     if (JuceMainMenuHandler::instance == nullptr)
         MainMenuHelpers::rebuildMainMenu (nullptr);
 }

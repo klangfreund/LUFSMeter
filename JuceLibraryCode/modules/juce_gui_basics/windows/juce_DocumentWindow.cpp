@@ -26,10 +26,7 @@
 class DocumentWindow::ButtonListenerProxy  : public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
-    ButtonListenerProxy (DocumentWindow& owner_)
-        : owner (owner_)
-    {
-    }
+    ButtonListenerProxy (DocumentWindow& owner_) : owner (owner_) {}
 
     void buttonClicked (Button* button)
     {
@@ -53,11 +50,11 @@ DocumentWindow::DocumentWindow (const String& title,
       titleBarHeight (26),
       menuBarHeight (24),
       requiredButtons (requiredButtons_),
-    #if JUCE_MAC
+     #if JUCE_MAC
       positionTitleBarButtonsOnLeft (true),
-    #else
+     #else
       positionTitleBarButtonsOnLeft (false),
-    #endif
+     #endif
       drawTitleTextCentred (true),
       menuBarModel (nullptr)
 {
@@ -282,11 +279,10 @@ Rectangle<int> DocumentWindow::getTitleBarArea()
     const BorderSize<int> border (getBorderThickness());
 
     return Rectangle<int> (border.getLeft(), border.getTop(),
-                           getWidth() - border.getLeftAndRight(),
-                           getTitleBarHeight());
+                           getWidth() - border.getLeftAndRight(), getTitleBarHeight());
 }
 
-Button* DocumentWindow::getCloseButton() const noexcept     { return titleBarButtons[2]; }
+Button* DocumentWindow::getCloseButton()    const noexcept  { return titleBarButtons[2]; }
 Button* DocumentWindow::getMinimiseButton() const noexcept  { return titleBarButtons[0]; }
 Button* DocumentWindow::getMaximiseButton() const noexcept  { return titleBarButtons[1]; }
 
@@ -296,31 +292,25 @@ int DocumentWindow::getDesktopWindowStyleFlags() const
 
     if ((requiredButtons & minimiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMinimiseButton;
     if ((requiredButtons & maximiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMaximiseButton;
-    if ((requiredButtons & closeButton) != 0)     styleFlags |= ComponentPeer::windowHasCloseButton;
+    if ((requiredButtons & closeButton)    != 0)  styleFlags |= ComponentPeer::windowHasCloseButton;
 
     return styleFlags;
 }
 
 void DocumentWindow::lookAndFeelChanged()
 {
-    int i;
-    for (i = numElementsInArray (titleBarButtons); --i >= 0;)
+    for (int i = numElementsInArray (titleBarButtons); --i >= 0;)
         titleBarButtons[i] = nullptr;
 
     if (! isUsingNativeTitleBar())
     {
         LookAndFeel& lf = getLookAndFeel();
 
-        if ((requiredButtons & minimiseButton) != 0)
-            titleBarButtons[0] = lf.createDocumentWindowButton (minimiseButton);
+        if ((requiredButtons & minimiseButton) != 0)  titleBarButtons[0] = lf.createDocumentWindowButton (minimiseButton);
+        if ((requiredButtons & maximiseButton) != 0)  titleBarButtons[1] = lf.createDocumentWindowButton (maximiseButton);
+        if ((requiredButtons & closeButton)    != 0)  titleBarButtons[2] = lf.createDocumentWindowButton (closeButton);
 
-        if ((requiredButtons & maximiseButton) != 0)
-            titleBarButtons[1] = lf.createDocumentWindowButton (maximiseButton);
-
-        if ((requiredButtons & closeButton) != 0)
-            titleBarButtons[2] = lf.createDocumentWindowButton (closeButton);
-
-        for (i = 0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
             if (titleBarButtons[i] != nullptr)
             {
@@ -369,11 +359,10 @@ void DocumentWindow::activeWindowStatusChanged()
 
 void DocumentWindow::mouseDoubleClick (const MouseEvent& e)
 {
-    if (getTitleBarArea().contains (e.x, e.y)
-         && getMaximiseButton() != nullptr)
-    {
-        getMaximiseButton()->triggerClick();
-    }
+    Button* const maximise = getMaximiseButton();
+
+    if (maximise != nullptr && getTitleBarArea().contains (e.x, e.y))
+        maximise->triggerClick();
 }
 
 void DocumentWindow::userTriedToCloseWindow()

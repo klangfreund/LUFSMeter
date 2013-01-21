@@ -77,13 +77,6 @@ public:
     */
     Font (const String& typefaceName, float fontHeight, int styleFlags);
 
-    /** Creates a sans-serif font in a given style and size.
-
-        @param typefaceStyle the font style of the typeface to use
-        @param fontHeight   the height in pixels (can be fractional)
-    */
-    Font (const String& typefaceStyle, float fontHeight);
-
     /** Creates a font with a given typeface and parameters.
 
         @param typefaceName  the font family of the typeface to use
@@ -149,19 +142,20 @@ public:
     const String& getTypefaceName() const noexcept;
 
     //==============================================================================
-    /** Changes the font style of the typeface
-
-        e.g. "Regular", "Italic", etc.
-
-    */
-    void setTypefaceStyle (const String& typefaceStyle);
-
     /** Returns the font style of the typeface that this font uses.
-
-        e.g. "Regular", "Italic", etc.
-
+        @see withTypefaceStyle, getAvailableStyles()
     */
     const String& getTypefaceStyle() const noexcept;
+
+    /** Changes the font style of the typeface.
+        @see getAvailableStyles()
+    */
+    void setTypefaceStyle (const String& newStyle);
+
+    /** Returns a copy of this font with a new typeface style.
+        @see getAvailableStyles()
+    */
+    Font withTypefaceStyle (const String& newStyle) const;
 
     /** Returns a list of the styles that this font can use. */
     StringArray getAvailableStyles() const;
@@ -211,7 +205,6 @@ public:
 
     //==============================================================================
     /** Returns the total height of this font.
-
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
@@ -287,7 +280,6 @@ public:
 
     //==============================================================================
     /** Returns the font's horizontal scale.
-
         A value of 1.0 is the normal scale, less than this will be narrower, greater
         than 1.0 will be stretched out.
 
@@ -349,13 +341,11 @@ public:
 
     //==============================================================================
     /** Returns the total width of a string as it would be drawn using this font.
-
         For a more accurate floating-point result, use getStringWidthFloat().
     */
     int getStringWidth (const String& text) const;
 
     /** Returns the total width of a string as it would be drawn using this font.
-
         @see getStringWidth
     */
     float getStringWidthFloat (const String& text) const;

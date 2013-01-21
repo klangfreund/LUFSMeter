@@ -35,12 +35,13 @@
 LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProcessor* ownerFilter)
   : AudioProcessorEditor (ownerFilter),
     momentaryLoudnessValue (var(-300.0)),
+    momentaryLoudnessValues (var(Array<var>())),
     shortTermLoudnessValue (var(-300.0)),
     integratedLoudnessValue (var(-300.0)),
     distanceBetweenLevelBarAndTop (10),
     distanceBetweenLevelBarAndBottom (32),
     backgroundGridCaption (distanceBetweenLevelBarAndTop, distanceBetweenLevelBarAndBottom, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
-    momentaryLoudnessBar (momentaryLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    momentaryLoudnessBar (),
     shortTermLoudnessBar (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     integratedLoudnessBar (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     momentaryLoudnessCaption (String::empty, "M"),
@@ -53,6 +54,10 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     preferencesPaneWidth (400),
     preferencesPaneHeight(300)
 {
+    momentaryLoudnessBar.setValueObjectsToRefereTo (momentaryLoudnessValues,
+                                                    getProcessor()->loudnessBarMinValue, 
+                                                    getProcessor()->loudnessBarMaxValue);
+    
     // Add the background
     addAndMakeVisible (&backgroundGrid);
     addAndMakeVisible (&backgroundGridCaption);
@@ -318,6 +323,21 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
     float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
     jassert(momentaryLoudnessOfFirstChannel > -400)
     momentaryLoudnessValue.setValue(momentaryLoudnessOfFirstChannel);
+    
+    // momentary loudness values
+    // -------------------------
+    // source:
+    const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudness();
+    // destination:
+    Array<var> momentaryLoudness;
+    
+    
+    for (int k = 0; k != momentaryLoudnessFromEbu128LM.size() ; ++k)
+    {
+        double momentaryLoudnessOfTheKthChannel = double (momentaryLoudnessFromEbu128LM[k]);
+        momentaryLoudness.add (momentaryLoudnessOfTheKthChannel);
+    }
+    momentaryLoudnessValues.setValue (var (momentaryLoudness));
     
     float shortTermLoudness = getProcessor()->getShortTermLoudness();
     jassert(shortTermLoudness > -400)

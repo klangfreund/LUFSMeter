@@ -104,6 +104,8 @@
 		22D1EE61157E271000A5954F /* AUBaseHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22D1EE5F157E270F00A5954F /* AUBaseHelper.cpp */; };
 		22E09F5515DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */; };
 		22E09F5615DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */; };
+		22F54254165C146500CAB8BE /* MultiChannelLoudnessBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22F54252165C146500CAB8BE /* MultiChannelLoudnessBar.cpp */; };
+		22F54255165C146500CAB8BE /* MultiChannelLoudnessBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 22F54252165C146500CAB8BE /* MultiChannelLoudnessBar.cpp */; };
 		25279A4DDDFBAC89152CF05F /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 145898DC2D895308E17A83D6 /* juce_audio_processors.mm */; };
 		29E5C5B890D757BA4314F116 /* juce_AAX_Wrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B5835FB2DB0F224846378CD /* juce_AAX_Wrapper.mm */; };
 		2CB6CBFA9A4FDC2683AA26D6 /* juce_gui_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = 95981600C32D73FE9F0D8FC8 /* juce_gui_basics.mm */; };
@@ -347,8 +349,10 @@
 		22D1EE5F157E270F00A5954F /* AUBaseHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUBaseHelper.cpp; path = Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBaseHelper.cpp; sourceTree = DEVELOPER_DIR; };
 		22D1EE60157E270F00A5954F /* AUBaseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUBaseHelper.h; path = Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBaseHelper.h; sourceTree = DEVELOPER_DIR; };
 		22E09F5315DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BackgroundVerticalLinesAndCaption.cpp; sourceTree = "<group>"; };
-		22E09F5415DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.h */ = {isa = PBXFileReference; fileEncoding = 4; path = BackgroundVerticalLinesAndCaption.h; sourceTree = "<group>"; };
+		22E09F5415DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BackgroundVerticalLinesAndCaption.h; sourceTree = "<group>"; };
 		22E808B8157E41400045DB9B /* Macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Macros.h; path = ../../Source/Macros.h; sourceTree = "<group>"; };
+		22F54252165C146500CAB8BE /* MultiChannelLoudnessBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultiChannelLoudnessBar.cpp; sourceTree = "<group>"; };
+		22F54253165C146500CAB8BE /* MultiChannelLoudnessBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiChannelLoudnessBar.h; sourceTree = "<group>"; };
 		2331E4187C13891B7A8D17DC /* juce_ArrayAllocationBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ArrayAllocationBase.h; path = ../../JuceLibraryCode/modules/juce_core/containers/juce_ArrayAllocationBase.h; sourceTree = SOURCE_ROOT; };
 		238B4169F8F216775674B8BF /* juce_MemoryInputStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MemoryInputStream.cpp; path = ../../JuceLibraryCode/modules/juce_core/streams/juce_MemoryInputStream.cpp; sourceTree = SOURCE_ROOT; };
 		23E0B07812BE2D46B559821C /* juce_module_info */ = {isa = PBXFileReference; lastKnownFileType = text; name = juce_module_info; path = ../../JuceLibraryCode/modules/juce_audio_formats/juce_module_info; sourceTree = SOURCE_ROOT; };
@@ -1340,6 +1344,8 @@
 				22D1EDC9157E1D0C00A5954F /* LoudnessHistory.h */,
 				22D1EDCA157E1D0C00A5954F /* LoudnessNumeric.cpp */,
 				22D1EDCB157E1D0C00A5954F /* LoudnessNumeric.h */,
+				22F54252165C146500CAB8BE /* MultiChannelLoudnessBar.cpp */,
+				22F54253165C146500CAB8BE /* MultiChannelLoudnessBar.h */,
 				22786A1C15D3AFD000D474B1 /* PreferencesPane.cpp */,
 				22786A1D15D3AFD000D474B1 /* PreferencesPane.h */,
 			);
@@ -3224,6 +3230,7 @@
 				22786A1F15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
 				22385A0215DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */,
 				22E09F5615DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */,
+				22F54255165C146500CAB8BE /* MultiChannelLoudnessBar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3288,6 +3295,7 @@
 				22786A1E15D3AFD000D474B1 /* PreferencesPane.cpp in Sources */,
 				22385A0115DD77C100858034 /* LoudnessBarRangeSlider.cpp in Sources */,
 				22E09F5515DE99DC00CDB3EF /* BackgroundVerticalLinesAndCaption.cpp in Sources */,
+				22F54254165C146500CAB8BE /* MultiChannelLoudnessBar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
