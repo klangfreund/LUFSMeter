@@ -1,3 +1,47 @@
+.. author: Samuel Gaehwiler (klangfreund.com)
+
+This file is the issue tracker as well as the roadmap.
+
+****************
+Issues / Roadmap
+****************
+
+In order of priority.
+
+
+Multi-Channel Meter for the Momentary Loudness
+----------------------------------------------
+
+Implement Loudness Range
+------------------------
+
+Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
+------------------------------------------------------------------------------
+
+Rework the GUI
+--------------
+- Give the plugin an overall look (Skinnable via Look and feel!)
+- How to implement the history meter more efficient?
+- Settings panel as overlay? Or any other idea such that it's intuitive?
+
+Website: Implement a notification function for interested customers
+-------------------------------------------------------------------
+- Email Newsletter?
+- RSS Feed?
+- Facebook?
+
+Linux
+-----
+- Compile the LUFS Meter for Linux
+
+
+
+
+
+********************
+general improvements
+********************
+
 general
 =======
 
