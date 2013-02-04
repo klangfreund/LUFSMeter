@@ -18,6 +18,15 @@ Implement Loudness Range
 Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
 ------------------------------------------------------------------------------
 
+Numeric Gain (Weighting) for each channel user adjustable
+---------------------------------------------------------
+Part of my answer to an Email at 130204:
+To get the accurate LUFS value for 6 channels with my LUFS Meter:
+Open an instance of the LUFS-Meter with 5 or 6 input channels.
+Ensure that the two surround channels are on channel 4 and 5. Also make sure that the LFE channel is NOT connected at all (e.g. mute this channel, or use a utility plugin where you can pull the gain for this channel).
+
+It's on my todo-list to implement this internally, such that you only have to choose a preset for e.g. 6 channel surround... and off you go.
+
 Rework the GUI
 --------------
 - Give the plugin an overall look (Skinnable via Look and feel!)
