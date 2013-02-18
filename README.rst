@@ -17,3 +17,7 @@ directory.
 
 The second requirement is the Juce framework
 (http://www.rawmaterialsoftware.com/), which is already included.
+
+The main development environment of the LUFS Meter is Mac OSX.
+Additional insights are given in
+``docs/How_to_set_up_the_LUFS_Meter_or_any_new_Juce_plugin.rst``.

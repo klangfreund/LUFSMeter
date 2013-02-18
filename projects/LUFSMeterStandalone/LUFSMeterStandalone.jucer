@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="efOX8g" name="LUFSMeterStandalone" projectType="guiapp" version="0.0.3"
+              bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.0.0"
+              companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1">
+  <MAINGROUP id="AO7N4d" name="LUFSMeterStandalone">
+    <GROUP id="{54DB0834-C391-BB20-D2E8-10BA7ED68A39}" name="LUFSMeter Source">
+      <FILE id="HKkacv" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
+            file="../LUFSMeter/Source/Ebu128LoudnessMeter.cpp"/>
+      <FILE id="lzb1UK" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
+            file="../LUFSMeter/Source/Ebu128LoudnessMeter.h"/>
+      <GROUP id="{8FCA1F3C-E349-4B80-4EBB-2B2DFCE3B45A}" name="filters">
+        <FILE id="AQc8fX" name="SecondOrderIIRFilter.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/filters/SecondOrderIIRFilter.cpp"/>
+        <FILE id="se7TVS" name="SecondOrderIIRFilter.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/filters/SecondOrderIIRFilter.h"/>
+      </GROUP>
+      <GROUP id="{D91667B3-391A-4045-5C05-8A29A72F63A9}" name="gui">
+        <FILE id="PN3k52" name="BackgroundGrid.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/BackgroundGrid.cpp"/>
+        <FILE id="oPlcMx" name="BackgroundGrid.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/BackgroundGrid.h"/>
+        <FILE id="cD57xz" name="BackgroundGridCaption.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/BackgroundGridCaption.cpp"/>
+        <FILE id="CNrPnl" name="BackgroundGridCaption.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/BackgroundGridCaption.h"/>
+        <FILE id="Gn91kp" name="BackgroundVerticalLinesAndCaption.cpp" compile="1"
+              resource="0" file="../LUFSMeter/Source/gui/BackgroundVerticalLinesAndCaption.cpp"/>
+        <FILE id="dv7do5" name="BackgroundVerticalLinesAndCaption.h" compile="0"
+              resource="0" file="../LUFSMeter/Source/gui/BackgroundVerticalLinesAndCaption.h"/>
+        <FILE id="xPOzoP" name="LoudnessBar.cpp" compile="1" resource="0" file="../LUFSMeter/Source/gui/LoudnessBar.cpp"/>
+        <FILE id="YbfjQa" name="LoudnessBar.h" compile="0" resource="0" file="../LUFSMeter/Source/gui/LoudnessBar.h"/>
+        <FILE id="AXAXsi" name="LoudnessBarRangeSlider.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessBarRangeSlider.cpp"/>
+        <FILE id="Rl1u3A" name="LoudnessBarRangeSlider.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessBarRangeSlider.h"/>
+        <FILE id="Un6A78" name="LoudnessHistory.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessHistory.cpp"/>
+        <FILE id="lpwQs9" name="LoudnessHistory.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessHistory.h"/>
+        <FILE id="PqSU7z" name="LoudnessNumeric.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessNumeric.cpp"/>
+        <FILE id="iqN6cu" name="LoudnessNumeric.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessNumeric.h"/>
+        <FILE id="RDmuYP" name="MultiChannelLoudnessBar.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/MultiChannelLoudnessBar.cpp"/>
+        <FILE id="dXLlpa" name="MultiChannelLoudnessBar.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/MultiChannelLoudnessBar.h"/>
+        <FILE id="vkemay" name="PreferencesPane.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/PreferencesPane.cpp"/>
+        <FILE id="HY1OeA" name="PreferencesPane.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/PreferencesPane.h"/>
+      </GROUP>
+      <FILE id="YGRfQO" name="LUFSMeterAudioProcessor.cpp" compile="1" resource="0"
+            file="../LUFSMeter/Source/LUFSMeterAudioProcessor.cpp"/>
+      <FILE id="E4xLrl" name="LUFSMeterAudioProcessor.h" compile="0" resource="0"
+            file="../LUFSMeter/Source/LUFSMeterAudioProcessor.h"/>
+      <FILE id="ziJfvc" name="LUFSMeterAudioProcessorEditor.cpp" compile="1"
+            resource="0" file="../LUFSMeter/Source/LUFSMeterAudioProcessorEditor.cpp"/>
+      <FILE id="DmctgZ" name="LUFSMeterAudioProcessorEditor.h" compile="0"
+            resource="0" file="../LUFSMeter/Source/LUFSMeterAudioProcessorEditor.h"/>
+      <FILE id="et1yiX" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
+            file="../LUFSMeter/Source/MacrosAndJuceHeaders.h"/>
+    </GROUP>
+    <GROUP id="{75D50FC4-BF05-8BB7-DFC9-BBA484676D29}" name="Source">
+      <FILE id="v5NsX9" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_audio" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" juceFolder="../../libraries/juce/modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="1" optimisation="1" targetName="LUFSMeterStandalone"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="0" optimisation="2" targetName="LUFSMeterStandalone"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
