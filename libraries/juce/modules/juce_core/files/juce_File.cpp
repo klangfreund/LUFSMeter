@@ -654,8 +654,10 @@ bool File::startAsProcess (const String& parameters) const
 //==============================================================================
 FileInputStream* File::createInputStream() const
 {
-    if (existsAsFile())
-        return new FileInputStream (*this);
+    ScopedPointer<FileInputStream> fin (new FileInputStream (*this));
+
+    if (fin->openedOk())
+        return fin.release();
 
     return nullptr;
 }
@@ -670,9 +672,11 @@ FileOutputStream* File::createOutputStream (const int bufferSize) const
 
 //==============================================================================
 bool File::appendData (const void* const dataToAppend,
-                       const int numberOfBytes) const
+                       const size_t numberOfBytes) const
 {
-    if (numberOfBytes <= 0)
+    jassert (((ssize_t) numberOfBytes) >= 0);
+
+    if (numberOfBytes == 0)
         return true;
 
     FileOutputStream out (*this, 8192);
@@ -680,11 +684,9 @@ bool File::appendData (const void* const dataToAppend,
 }
 
 bool File::replaceWithData (const void* const dataToWrite,
-                            const int numberOfBytes) const
+                            const size_t numberOfBytes) const
 {
-    jassert (numberOfBytes >= 0); // a negative number of bytes??
-
-    if (numberOfBytes <= 0)
+    if (numberOfBytes == 0)
         return deleteFile();
 
     TemporaryFile tempFile (*this, TemporaryFile::useHiddenFile);
@@ -879,6 +881,19 @@ File File::createTempFile (const String& fileNameEnding)
         return createTempFile (fileNameEnding);
 
     return tempFile;
+}
+
+//==============================================================================
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+    : address (nullptr), range (0, file.getSize()), fileHandle (0)
+{
+    openInternal (file, mode);
+}
+
+MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRange, AccessMode mode)
+    : address (nullptr), range (fileRange.getIntersectionWith (Range<int64> (0, file.getSize()))), fileHandle (0)
+{
+    openInternal (file, mode);
 }
 
 
