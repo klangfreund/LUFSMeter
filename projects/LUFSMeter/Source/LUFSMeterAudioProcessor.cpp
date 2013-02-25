@@ -148,7 +148,7 @@ void LUFSMeterAudioProcessor::changeProgramName (int index, const String& newNam
 //==============================================================================
 void LUFSMeterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    DBGT("LUFSMeterAudioProcessor::prepareToPlay called")
+    DEB("prepareToPlay called")
     
     //TODO
     int expectedRequestRate = 20;
@@ -169,6 +169,8 @@ void LUFSMeterAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+
+    DEB("releaseResources called")
 }
 
 void LUFSMeterAudioProcessor::reset()
@@ -259,6 +261,11 @@ void LUFSMeterAudioProcessor::setStateInformation (const void* data, int sizeInB
             loudnessBarMaxValue.setValue(xmlState->getIntAttribute ("loudnessBarMaxValue"));
         }
     }
+}
+
+void LUFSMeterAudioProcessor::numChannelsChanged()
+{
+    DEB("number of input channels = " + String(getNumInputChannels()))
 }
 
 float LUFSMeterAudioProcessor::getShortTermLoudness()

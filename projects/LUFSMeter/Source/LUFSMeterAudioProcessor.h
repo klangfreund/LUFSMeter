@@ -96,6 +96,11 @@ public:
     
     // Called by the host to rename a program.
     void changeProgramName (int index, const String& newName);
+    
+    /** This method is called when the number of input or output channels is 
+        changed. 
+     */
+    virtual void numChannelsChanged();
 
     //==============================================================================
     // The host will call this method when it wants to save the filter's 

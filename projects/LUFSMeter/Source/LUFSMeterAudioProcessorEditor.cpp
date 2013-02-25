@@ -153,7 +153,7 @@ void LUFSMeterAudioProcessorEditor::paint (Graphics& g)
 
 void LUFSMeterAudioProcessorEditor::resized()
 {
-    // DBGT("Height of main component = " + String(getHeight()))
+    // DEB("Height of main component = " + String(getHeight()))
 
     const int levelBarWidth = jmax( getProcessor()->loudnessBarWidth, 5);
     const int spaceBetweenBars = jmin(levelBarWidth/5, 10); // This distance is 

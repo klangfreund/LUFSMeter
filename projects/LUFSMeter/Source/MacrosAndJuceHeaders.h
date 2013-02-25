@@ -40,17 +40,19 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #endif
 
+#include <string.h> // Contains strrchr, which is used in DEB.
+
 // Sams debug macro which also has a time stamp.
 #if JUCE_DEBUG || DOXYGEN
 /** Writes a string to the standard error stream, together with the time
- of occurence.
- This is only compiled in a debug build.
- @see Logger::outputDebugString
+    of occurence.
+    This is only compiled in a debug build.
+    @see Logger::outputDebugString
  */
-    #define DBGT(dbgtext)  { Time currentTime = Time::getCurrentTime(); bool includeDate = true; bool includeTime = true; bool includeSeconds = true; bool use24HourClock = true; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ": " + dbgtext) }
+    #define DEB(dbgtext)  { Time currentTime = Time::getCurrentTime(); const bool includeDate = false; const bool includeTime = true; const bool includeSeconds = true; const bool use24HourClock = true; String filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ", " + filename + "::" + __func__ + ":" + String(__LINE__) + ": " + dbgtext) }
 
 #else
-    #define DBGT(dbgtext)
+    #define DEB(dbgtext)
 
 #endif
 

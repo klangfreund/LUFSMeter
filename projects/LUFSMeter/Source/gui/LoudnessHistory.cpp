@@ -51,8 +51,8 @@ LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
     maxLoudness.referTo (maxLoudnessToReferTo);
     maxLoudness.addListener(this);
 
-    DBGT("minLoudness = " + minLoudness.getValue().toString())
-    DBGT("maxLoudness = " + maxLoudness.getValue().toString())
+    DEB("minLoudness = " + minLoudness.getValue().toString())
+    DEB("maxLoudness = " + maxLoudness.getValue().toString())
     
     determineStretchAndOffset();
     

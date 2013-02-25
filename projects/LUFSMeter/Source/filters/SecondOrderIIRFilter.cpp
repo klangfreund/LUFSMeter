@@ -67,7 +67,7 @@ SecondOrderIIRFilter::~SecondOrderIIRFilter()
 void SecondOrderIIRFilter::prepareToPlay (double sampleRate, 
                                           int numberOfChannels)
 {
-    // DBGT("SecondOrderIIRFilter::prepareToPlay called.")
+    // DEB("prepareToPlay called.")
     
     // Initialize the two Arrays z1 and z2.
     // I.e. fill as many values into it as there are audio channels.
