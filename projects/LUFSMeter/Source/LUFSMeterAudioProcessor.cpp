@@ -122,6 +122,11 @@ bool LUFSMeterAudioProcessor::silenceInProducesSilenceOut() const
     return false;
 }
 
+double LUFSMeterAudioProcessor::getTailLengthSeconds() const
+{
+    return 0.0;
+}
+
 int LUFSMeterAudioProcessor::getNumPrograms()
 {
     return 0;

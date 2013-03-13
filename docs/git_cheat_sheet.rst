@@ -41,4 +41,4 @@ How to update to the latest JUCE version
 
 ::
 
-    git subtree pull --prefix=libraries/juce --squash juce/master    
+    git subtree pull --prefix=libraries/juce --squash juce master    

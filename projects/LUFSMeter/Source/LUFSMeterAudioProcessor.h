@@ -75,11 +75,10 @@ public:
     const String getOutputChannelName (int channelIndex) const;
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
-
+    bool silenceInProducesSilenceOut() const;
+    double getTailLengthSeconds() const;
     bool acceptsMidi() const;
     bool producesMidi() const;
-    
-    bool silenceInProducesSilenceOut() const;
 
     //==============================================================================
     // Returns the number of preset programs the filter supports.
