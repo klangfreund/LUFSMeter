@@ -39,6 +39,15 @@ The JUCE repository inside the LUFS Meter repository
 How to update to the latest JUCE version
 ----------------------------------------
 
+Source:
+http://stackoverflow.com/questions/3739393/git-subtree-merge-strategy-possible-without-merging-history
+
 ::
 
     git subtree pull --prefix=libraries/juce --squash juce master    
+
+.. Maybe of interest in the future, if I intend to make my own changes to JUCE:
+.. http://www.rawmaterialsoftware.com/viewtopic.php?f=2&t=9730&hilit=subtree#p55782
+
+If there are build errors after the upgrade to the latest JUCE revision, it might
+be solved by recreating the XCode project file with the Introjucer.
