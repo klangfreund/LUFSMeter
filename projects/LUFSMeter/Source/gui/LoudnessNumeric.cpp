@@ -41,7 +41,7 @@ LoudnessNumeric::~LoudnessNumeric ()
     levelValue.removeListener(this);
 }
 
-Value & LoudnessNumeric::getLevelValueObject ()
+Value & LoudnessNumeric::getLoudnessValueObject ()
 {
     return levelValue;
 }

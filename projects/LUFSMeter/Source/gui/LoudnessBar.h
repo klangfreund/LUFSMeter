@@ -50,14 +50,15 @@ class LoudnessBar  : public Component,
                      public Value::Listener
 {
 public:
-    LoudnessBar (const Value & levelValueToReferTo,
+    LoudnessBar (const Value & loudnessValueToReferTo,
                  const Value & minValueToReferTo,
                  const Value & maxValueToReferTo);
     
     ~LoudnessBar ();
     
-    Value & getLevelValueObject ();
+    Value & getLoudnessValueObject ();
     
+    /** The value listener method. */
     void valueChanged (Value & value);
 
     void paint (Graphics& g);
@@ -77,7 +78,7 @@ private:
     float stretch;
     float offset;
     
-    Value levelValue;
+    Value loudnessValue;
     Value minLoudness;
     Value maxLoudness;
     

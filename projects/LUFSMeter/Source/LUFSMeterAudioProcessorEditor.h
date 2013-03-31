@@ -48,13 +48,13 @@
 class LUFSMeterAudioProcessorEditor   : public AudioProcessorEditor,
                                         public Timer,
                                         public ButtonListener,
-                                        public SliderListener
+                                        public Value::Listener
 {
 public:
     LUFSMeterAudioProcessorEditor (LUFSMeterAudioProcessor* ownerFilter);
     ~LUFSMeterAudioProcessorEditor();
 
-    //==============================================================================
+    //==========================================================================
     /** The standard Juce paint method. */
     void paint (Graphics& g);
     
@@ -65,11 +65,18 @@ public:
     /** The ButtonListener method. */
     void buttonClicked (Button* button);
     
-    /** The SliderListener method. */
-    void sliderValueChanged (Slider* slider);
+    /** The value listener method. */
+    void valueChanged (Value & value);
     
 private:
     LUFSMeterAudioProcessor* getProcessor() const;
+    
+    /**
+        Recalculates the position and size of all GUI components, based on
+        the width for the loudness bars.
+     */
+    void resizeGuiComponents();
+    
     void displayPositionInfo (const AudioPlayHead::CurrentPositionInfo& pos);
     
     AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;
@@ -81,8 +88,8 @@ private:
     Value integratedLoudnessValue;
     
     /** GUI parameters. */
-    int distanceBetweenLevelBarAndTop;
-    int distanceBetweenLevelBarAndBottom;
+    int distanceBetweenLoudnessBarAndTop;
+    int distanceBetweenLoudnessBarAndBottom;
     
     BackgroundGrid backgroundGrid;
     BackgroundGridCaption backgroundGridCaption;

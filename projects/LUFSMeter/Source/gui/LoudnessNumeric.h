@@ -45,7 +45,7 @@ public:
     
     ~LoudnessNumeric ();
     
-    Value & getLevelValueObject ();
+    Value & getLoudnessValueObject ();
     
     void valueChanged (Value & value);
 

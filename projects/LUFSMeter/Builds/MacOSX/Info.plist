@@ -27,7 +27,7 @@
     <array>
       <dict>
         <key>name</key>
-        <string>LUFSMeter</string>
+        <string>Klangfreund: LUFSMeter</string>
         <key>description</key>
         <string>LUFSMeter</string>
         <key>factoryFunction</key>

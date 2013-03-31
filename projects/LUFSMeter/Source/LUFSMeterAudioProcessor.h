@@ -129,10 +129,36 @@ public:
     int lastUIHeight;
     
     // Plugin settings
-    int loudnessBarWidth;
+    // ===============
+    /**
+        The width of a loudness bar, in pixels.
+     
+        The preferencesPane.loudnessBarSize sets this value and the
+        LUFSMeterAudioProcessorEditor listens to it.
+        LUFSMeterAudioProcessorEditor::resizeGuiComponents() is called
+        on change.
+     */
+    Value loudnessBarWidth;
+
+    /**
+     The minimal loudness a loudness bar can display.
+     
+     The preferencesPane.loudnessBarRangeSlider sets this value and the
+     individual loudness bars listen to it.
+     */
     Value loudnessBarMinValue;
+    
+    /**
+     The maximal loudness a loudness bar can display.
+     
+     The preferencesPane.loudnessBarRangeSlider sets this value and the
+     individual loudness bars listen to it.
+     */
     Value loudnessBarMaxValue;
     
+    Value numberOfInputChannels;
+    
+    // The actual loudness metering algorithm
     Ebu128LoudnessMeter ebu128LoudnessMeter;
 
 private:

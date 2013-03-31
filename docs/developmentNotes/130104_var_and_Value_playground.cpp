@@ -1,9 +1,9 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
+    author: Samuel Gaehwiler (klangfreund.com)
 
-    It contains the basic startup code for a Juce application.
+    Just playing around to get familiar with var objects.
 
   ==============================================================================
 */

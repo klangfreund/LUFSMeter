@@ -31,14 +31,14 @@
 
 
 //==============================================================================
-LoudnessBar::LoudnessBar (const Value & levelValueToReferTo,
+LoudnessBar::LoudnessBar (const Value & loudnessValueToReferTo,
                           const Value & minValueToReferTo,
                           const Value & maxValueToReferTo)
   : currentLevel (minValueToReferTo.getValue()),
     previousLevel (minValueToReferTo.getValue())
 {
-    levelValue.referTo(levelValueToReferTo);
-    levelValue.addListener(this);
+    loudnessValue.referTo(loudnessValueToReferTo);
+    loudnessValue.addListener(this);
     
     minLoudness.referTo(minValueToReferTo);
     minLoudness.addListener(this);
@@ -50,17 +50,17 @@ LoudnessBar::LoudnessBar (const Value & levelValueToReferTo,
 
 LoudnessBar::~LoudnessBar ()
 {
-    levelValue.removeListener(this);
+    loudnessValue.removeListener(this);
 }
 
-Value & LoudnessBar::getLevelValueObject ()
+Value & LoudnessBar::getLoudnessValueObject ()
 {
-    return levelValue;
+    return loudnessValue;
 }
 
 void LoudnessBar::valueChanged (Value & value)
 {
-    if (value == levelValue)
+    if (value == loudnessValue)
     {
         
         currentLevel = value.getValue();

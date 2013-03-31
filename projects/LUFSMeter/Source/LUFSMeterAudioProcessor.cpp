@@ -39,9 +39,10 @@ LUFSMeterAudioProcessor::LUFSMeterAudioProcessor()
     // Set up some default values..
     lastUIWidth (600),
     lastUIHeight (300),
-    loudnessBarWidth (50),
+    loudnessBarWidth (var(50)),
     loudnessBarMinValue (var(-41)),
-    loudnessBarMaxValue (var(-14))
+    loudnessBarMaxValue (var(-14)),
+    numberOfInputChannels (var(2))
 {
 }
 
@@ -237,9 +238,9 @@ void LUFSMeterAudioProcessor::getStateInformation (MemoryBlock& destData)
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
-    xml.setAttribute("loudnessBarWidth", loudnessBarWidth);
-    xml.setAttribute("loudnessBarMinValue", int(loudnessBarMinValue.getValue()));
-    xml.setAttribute("loudnessBarMaxValue", int(loudnessBarMaxValue.getValue()));
+    xml.setAttribute ("loudnessBarWidth", int(loudnessBarWidth.getValue()));
+    xml.setAttribute ("loudnessBarMinValue", int(loudnessBarMinValue.getValue()));
+    xml.setAttribute ("loudnessBarMaxValue", int(loudnessBarMaxValue.getValue()));
     
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -261,16 +262,17 @@ void LUFSMeterAudioProcessor::setStateInformation (const void* data, int sizeInB
             // ok, now pull out our parameters..
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
-            loudnessBarWidth = xmlState->getIntAttribute ("loudnessBarWidth", loudnessBarWidth);
-            loudnessBarMinValue.setValue (xmlState->getIntAttribute ("loudnessBarMinValue"));
-            loudnessBarMaxValue.setValue(xmlState->getIntAttribute ("loudnessBarMaxValue"));
+            loudnessBarWidth.setValue (var(xmlState->getIntAttribute("loudnessBarWidth")));
+            loudnessBarMinValue.setValue (var(xmlState->getIntAttribute("loudnessBarMinValue")));
+            loudnessBarMaxValue.setValue (var(xmlState->getIntAttribute("loudnessBarMaxValue")));
         }
     }
 }
 
 void LUFSMeterAudioProcessor::numChannelsChanged()
 {
-    DEB("number of input channels = " + String(getNumInputChannels()))
+    numberOfInputChannels = getNumInputChannels();
+    DEB("number of input channels = " + String( int(numberOfInputChannels.getValue()) ))
 }
 
 float LUFSMeterAudioProcessor::getShortTermLoudness()
