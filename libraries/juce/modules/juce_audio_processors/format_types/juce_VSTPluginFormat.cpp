@@ -85,64 +85,64 @@ const int fxbVersionNum = 1;
 
 struct fxProgram
 {
-    long chunkMagic;        // 'CcnK'
-    long byteSize;          // of this chunk, excl. magic + byteSize
-    long fxMagic;           // 'FxCk'
-    long version;
-    long fxID;              // fx unique id
-    long fxVersion;
-    long numParams;
+    VstInt32 chunkMagic;    // 'CcnK'
+    VstInt32 byteSize;      // of this chunk, excl. magic + byteSize
+    VstInt32 fxMagic;       // 'FxCk'
+    VstInt32 version;
+    VstInt32 fxID;          // fx unique id
+    VstInt32 fxVersion;
+    VstInt32 numParams;
     char prgName[28];
     float params[1];        // variable no. of parameters
 };
 
 struct fxSet
 {
-    long chunkMagic;        // 'CcnK'
-    long byteSize;          // of this chunk, excl. magic + byteSize
-    long fxMagic;           // 'FxBk'
-    long version;
-    long fxID;              // fx unique id
-    long fxVersion;
-    long numPrograms;
+    VstInt32 chunkMagic;    // 'CcnK'
+    VstInt32 byteSize;      // of this chunk, excl. magic + byteSize
+    VstInt32 fxMagic;       // 'FxBk'
+    VstInt32 version;
+    VstInt32 fxID;          // fx unique id
+    VstInt32 fxVersion;
+    VstInt32 numPrograms;
     char future[128];
     fxProgram programs[1];  // variable no. of programs
 };
 
 struct fxChunkSet
 {
-    long chunkMagic;        // 'CcnK'
-    long byteSize;          // of this chunk, excl. magic + byteSize
-    long fxMagic;           // 'FxCh', 'FPCh', or 'FBCh'
-    long version;
-    long fxID;              // fx unique id
-    long fxVersion;
-    long numPrograms;
+    VstInt32 chunkMagic;    // 'CcnK'
+    VstInt32 byteSize;      // of this chunk, excl. magic + byteSize
+    VstInt32 fxMagic;       // 'FxCh', 'FPCh', or 'FBCh'
+    VstInt32 version;
+    VstInt32 fxID;          // fx unique id
+    VstInt32 fxVersion;
+    VstInt32 numPrograms;
     char future[128];
-    long chunkSize;
+    VstInt32 chunkSize;
     char chunk[8];          // variable
 };
 
 struct fxProgramSet
 {
-    long chunkMagic;        // 'CcnK'
-    long byteSize;          // of this chunk, excl. magic + byteSize
-    long fxMagic;           // 'FxCh', 'FPCh', or 'FBCh'
-    long version;
-    long fxID;              // fx unique id
-    long fxVersion;
-    long numPrograms;
+    VstInt32 chunkMagic;    // 'CcnK'
+    VstInt32 byteSize;      // of this chunk, excl. magic + byteSize
+    VstInt32 fxMagic;       // 'FxCh', 'FPCh', or 'FBCh'
+    VstInt32 version;
+    VstInt32 fxID;          // fx unique id
+    VstInt32 fxVersion;
+    VstInt32 numPrograms;
     char name[28];
-    long chunkSize;
+    VstInt32 chunkSize;
     char chunk[8];          // variable
 };
 
 namespace
 {
-    long vst_swap (const long x) noexcept
+    VstInt32 vst_swap (const VstInt32 x) noexcept
     {
        #ifdef JUCE_LITTLE_ENDIAN
-        return (long) ByteOrder::swap ((uint32) x);
+        return (VstInt32) ByteOrder::swap ((uint32) x);
        #else
         return x;
        #endif
@@ -1573,7 +1573,7 @@ public:
                 set->fxID = vst_swap (getUID());
                 set->fxVersion = vst_swap (getVersionNumber());
                 set->numPrograms = vst_swap (numPrograms);
-                set->chunkSize = vst_swap ((long) chunk.getSize());
+                set->chunkSize = vst_swap ((VstInt32) chunk.getSize());
 
                 chunk.copyTo (set->chunk, 0, chunk.getSize());
             }
@@ -1590,7 +1590,7 @@ public:
                 set->fxID = vst_swap (getUID());
                 set->fxVersion = vst_swap (getVersionNumber());
                 set->numPrograms = vst_swap (numPrograms);
-                set->chunkSize = vst_swap ((long) chunk.getSize());
+                set->chunkSize = vst_swap ((VstInt32) chunk.getSize());
 
                 getCurrentProgramName().copyToUTF8 (set->name, sizeof (set->name) - 1);
                 chunk.copyTo (set->chunk, 0, chunk.getSize());
@@ -2665,18 +2665,11 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
 // entry point for all callbacks from the plugin
 static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
-    try
-    {
-        if (effect != nullptr)
-            if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->resvd2))
-                return instance->handleCallback (opcode, index, value, ptr, opt);
+    if (effect != nullptr)
+        if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->resvd2))
+            return instance->handleCallback (opcode, index, value, ptr, opt);
 
-        return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
-    }
-    catch (...)
-    {
-        return 0;
-    }
+    return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
 }
 
 //==============================================================================
@@ -2698,60 +2691,40 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     if (instance == nullptr)
         return;
 
-    try
+   #if JUCE_MAC
+    if (instance->module->resFileId != 0)
+        UseResFile (instance->module->resFileId);
+   #endif
+
+    instance->fillInPluginDescription (desc);
+
+    VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
+
+    if (category != kPlugCategShell)
     {
-       #if JUCE_MAC
-        if (instance->module->resFileId != 0)
-            UseResFile (instance->module->resFileId);
-       #endif
+        // Normal plugin...
+        results.add (new PluginDescription (desc));
 
-        instance->fillInPluginDescription (desc);
-
-        VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
-
-        if (category != kPlugCategShell)
-        {
-            // Normal plugin...
-            results.add (new PluginDescription (desc));
-
-            instance->dispatch (effOpen, 0, 0, 0, 0);
-        }
-        else
-        {
-            // It's a shell plugin, so iterate all the subtypes...
-            for (;;)
-            {
-                char shellEffectName [64] = { 0 };
-                const int uid = (int) instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
-
-                if (uid == 0)
-                    break;
-
-                desc.uid = uid;
-                desc.name = shellEffectName;
-                desc.descriptiveName = shellEffectName;
-
-                bool alreadyThere = false;
-
-                for (int i = results.size(); --i >= 0;)
-                {
-                    PluginDescription* const d = results.getUnchecked(i);
-
-                    if (d->isDuplicateOf (desc))
-                    {
-                        alreadyThere = true;
-                        break;
-                    }
-                }
-
-                if (! alreadyThere)
-                    results.add (new PluginDescription (desc));
-            }
-        }
+        instance->dispatch (effOpen, 0, 0, 0, 0);
     }
-    catch (...)
+    else
     {
-        // crashed while loading...
+        // It's a shell plugin, so iterate all the subtypes...
+        for (;;)
+        {
+            char shellEffectName [256] = { 0 };
+            const int uid = (int) instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
+
+            if (uid == 0)
+                break;
+
+            desc.uid = uid;
+            desc.name = shellEffectName;
+            desc.descriptiveName = shellEffectName;
+
+            if (! arrayContainsPlugin (results, desc))
+                results.add (new PluginDescription (desc));
+        }
     }
 }
 
@@ -2871,7 +2844,9 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
    #elif JUCE_LINUX
-    return FileSearchPath ("/usr/lib/vst");
+    return FileSearchPath (SystemStats::getEnvironmentVariable ("VST_PATH",
+                                                                "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
+                             .replace (":", ";"));
    #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
