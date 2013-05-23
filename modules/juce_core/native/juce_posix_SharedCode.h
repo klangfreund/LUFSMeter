@@ -543,7 +543,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
 MemoryMappedFile::~MemoryMappedFile()
 {
     if (address != nullptr)
-        munmap (address, range.getLength());
+        munmap (address, (size_t) range.getLength());
 
     if (fileHandle != 0)
         close (fileHandle);
@@ -880,7 +880,7 @@ void Thread::setCurrentThreadName (const String& name)
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
    #elif JUCE_LINUX
-    prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);
+    pthread_setname_np (pthread_self(), name.toRawUTF8());
    #endif
 }
 

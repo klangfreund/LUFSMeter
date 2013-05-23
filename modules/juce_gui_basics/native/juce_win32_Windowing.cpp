@@ -77,8 +77,9 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
  #define TOUCHEVENTF_DOWN   0x0002
  #define TOUCHEVENTF_UP     0x0004
  DECLARE_HANDLE (HTOUCHINPUT);
+ DECLARE_HANDLE (HGESTUREINFO);
 
- typedef struct tagTOUCHINPUT
+ struct TOUCHINPUT
  {
     LONG x;
     LONG y;
@@ -90,16 +91,34 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     ULONG_PTR dwExtraInfo;
     DWORD cxContact;
     DWORD cyContact;
- } TOUCHINPUT, *PTOUCHINPUT;
+ };
+
+ struct GESTUREINFO
+ {
+    UINT cbSize;
+    DWORD dwFlags;
+    DWORD dwID;
+    HWND hwndTarget;
+    POINTS ptsLocation;
+    DWORD dwInstanceID;
+    DWORD dwSequenceID;
+    ULONGLONG ullArguments;
+    UINT cbExtraArgs;
+ };
+
 #endif
 
 typedef BOOL (WINAPI* RegisterTouchWindowFunc) (HWND, ULONG);
-typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, PTOUCHINPUT, int);
+typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, TOUCHINPUT*, int);
 typedef BOOL (WINAPI* CloseTouchInputHandleFunc) (HTOUCHINPUT);
+typedef BOOL (WINAPI* GetGestureInfoFunc) (HGESTUREINFO, GESTUREINFO*);
+typedef BOOL (WINAPI* SetProcessDPIAwareFunc)();
 
 static RegisterTouchWindowFunc   registerTouchWindow = nullptr;
 static GetTouchInputInfoFunc     getTouchInputInfo = nullptr;
 static CloseTouchInputHandleFunc closeTouchInputHandle = nullptr;
+static GetGestureInfoFunc        getGestureInfo = nullptr;
+static SetProcessDPIAwareFunc    setProcessDPIAware = nullptr;
 
 static bool hasCheckedForMultiTouch = false;
 
@@ -112,6 +131,7 @@ static bool canUseMultiTouch()
         registerTouchWindow   = (RegisterTouchWindowFunc)   getUser32Function ("RegisterTouchWindow");
         getTouchInputInfo     = (GetTouchInputInfoFunc)     getUser32Function ("GetTouchInputInfo");
         closeTouchInputHandle = (CloseTouchInputHandleFunc) getUser32Function ("CloseTouchInputHandle");
+        getGestureInfo        = (GetGestureInfoFunc)        getUser32Function ("GetGestureInfo");
     }
 
     return registerTouchWindow != nullptr;
@@ -120,6 +140,27 @@ static bool canUseMultiTouch()
 static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
 {
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
+}
+
+static void setDPIAwareness()
+{
+    if (JUCEApplication::isStandaloneApp())
+    {
+        if (setProcessDPIAware == nullptr)
+            setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
+
+        if (setProcessDPIAware != nullptr)
+            setProcessDPIAware();
+    }
+}
+
+inline float getDisplayScale()
+{
+    HDC dc = GetDC (0);
+    const float scale = (GetDeviceCaps (dc, LOGPIXELSX)
+                         + GetDeviceCaps (dc, LOGPIXELSY)) / (2.0f * 96.0f);
+    ReleaseDC (0, dc);
+    return scale;
 }
 
 //==============================================================================
@@ -473,6 +514,7 @@ public:
           parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine),
           lastPaintTime (0),
+          lastMagnifySize (0),
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
@@ -542,16 +584,6 @@ public:
         SetWindowText (hwnd, title.toWideCharPointer());
     }
 
-    void setPosition (int x, int y)
-    {
-        offsetWithinParent (x, y);
-        SetWindowPos (hwnd, 0,
-                      x - windowBorder.getLeft(),
-                      y - windowBorder.getTop(),
-                      0, 0,
-                      SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-    }
-
     void repaintNowIfTransparent()
     {
         if (isUsingUpdateLayeredWindow() && lastPaintTime > 0 && Time::getMillisecondCounter() > lastPaintTime + 30)
@@ -577,33 +609,37 @@ public:
        #endif
     }
 
-    void setSize (int w, int h)
-    {
-        SetWindowPos (hwnd, 0, 0, 0,
-                      w + windowBorder.getLeftAndRight(),
-                      h + windowBorder.getTopAndBottom(),
-                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-
-        if (isValidPeer (this))
-        {
-            updateBorderSize();
-            repaintNowIfTransparent();
-        }
-    }
-
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
-        offsetWithinParent (x, y);
+
+        Rectangle<int> newBounds (windowBorder.addedTo (bounds));
+
+        if (isUsingUpdateLayeredWindow())
+        {
+            if (HWND parentHwnd = GetParent (hwnd))
+            {
+                RECT parentRect;
+                GetWindowRect (parentHwnd, &parentRect);
+                newBounds.translate (parentRect.left, parentRect.top);
+            }
+        }
+
+        const Rectangle<int> oldBounds (getBounds());
+        const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
+        const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
+                                  || oldBounds.getHeight() != bounds.getHeight());
+
+        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER;
+        if (! hasMoved)    flags |= SWP_NOMOVE;
+        if (! hasResized)  flags |= SWP_NOSIZE;
 
         SetWindowPos (hwnd, 0,
-                      x - windowBorder.getLeft(),
-                      y - windowBorder.getTop(),
-                      w + windowBorder.getLeftAndRight(),
-                      h + windowBorder.getTopAndBottom(),
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+                      newBounds.getX(), newBounds.getY(),
+                      newBounds.getWidth(), newBounds.getHeight(),
+                      flags);
 
-        if (isValidPeer (this))
+        if (hasResized && isValidPeer (this))
         {
             updateBorderSize();
             repaintNowIfTransparent();
@@ -616,8 +652,7 @@ public:
         GetWindowRect (hwnd, &r);
         Rectangle<int> bounds (rectangleFromRECT (r));
 
-        HWND parentH = GetParent (hwnd);
-        if (parentH != 0)
+        if (HWND parentH = GetParent (hwnd))
         {
             GetWindowRect (parentH, &r);
             bounds.translate (-r.left, -r.top);
@@ -700,13 +735,7 @@ public:
                     ShowWindow (hwnd, SW_SHOWNORMAL);
 
                 if (! boundsCopy.isEmpty())
-                {
-                    setBounds (boundsCopy.getX(),
-                               boundsCopy.getY(),
-                               boundsCopy.getWidth(),
-                               boundsCopy.getHeight(),
-                               false);
-                }
+                    setBounds (boundsCopy, false);
             }
             else
             {
@@ -1070,6 +1099,7 @@ private:
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
    #endif
     uint32 lastPaintTime;
+    ULONGLONG lastMagnifySize;
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon;
@@ -1303,6 +1333,7 @@ private:
             if (canUseMultiTouch())
                 registerTouchWindow (hwnd, 0);
 
+            setDPIAwareness();
             updateBorderSize();
 
             // Calling this function here is (for some reason) necessary to make Windows
@@ -1347,20 +1378,6 @@ private:
     static void* getFocusCallback (void*)
     {
         return GetFocus();
-    }
-
-    void offsetWithinParent (int& x, int& y) const
-    {
-        if (isUsingUpdateLayeredWindow())
-        {
-            if (HWND parentHwnd = GetParent (hwnd))
-            {
-                RECT parentRect;
-                GetWindowRect (parentHwnd, &parentRect);
-                x += parentRect.left;
-                y += parentRect.top;
-            }
-        }
     }
 
     bool isUsingUpdateLayeredWindow() const
@@ -1690,10 +1707,9 @@ private:
         doMouseEvent (getCurrentMousePos());
     }
 
-    void doMouseWheel (const Point<int>& globalPos, const WPARAM wParam, const bool isVertical)
+    ComponentPeer* findPeerUnderMouse (Point<int>& localPos)
     {
-        updateKeyModifiers();
-        const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
+        const Point<int> globalPos (getCurrentMousePosGlobal());
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
@@ -1703,17 +1719,69 @@ private:
         if (peer == nullptr)
             peer = this;
 
+        localPos = peer->globalToLocal (globalPos);
+        return peer;
+    }
+
+    void doMouseWheel (const WPARAM wParam, const bool isVertical)
+    {
+        updateKeyModifiers();
+        const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
+
         MouseWheelDetails wheel;
         wheel.deltaX = isVertical ? 0.0f : amount / -256.0f;
         wheel.deltaY = isVertical ? amount / 256.0f : 0.0f;
         wheel.isReversed = false;
         wheel.isSmooth = false;
 
-        peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(), wheel);
+        Point<int> localPos;
+        if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
+            peer->handleMouseWheel (0, localPos, getMouseEventTime(), wheel);
     }
 
-    void doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
+    bool doGestureEvent (LPARAM lParam)
     {
+        GESTUREINFO gi;
+        zerostruct (gi);
+        gi.cbSize = sizeof (gi);
+
+        if (getGestureInfo != nullptr && getGestureInfo ((HGESTUREINFO) lParam, &gi))
+        {
+            updateKeyModifiers();
+            Point<int> localPos;
+
+            if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
+            {
+                switch (gi.dwID)
+                {
+                    case 3: /*GID_ZOOM*/
+                        if (gi.dwFlags != 1 /*GF_BEGIN*/ && lastMagnifySize > 0)
+                            peer->handleMagnifyGesture (0, localPos, getMouseEventTime(),
+                                                        (float) (gi.ullArguments / (double) lastMagnifySize));
+
+                        lastMagnifySize = gi.ullArguments;
+                        return true;
+
+                    case 4: /*GID_PAN*/
+                    case 5: /*GID_ROTATE*/
+                    case 6: /*GID_TWOFINGERTAP*/
+                    case 7: /*GID_PRESSANDTAP*/
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    LRESULT doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
+    {
+        if ((styleFlags & windowIgnoresMouseClicks) != 0)
+            if (HWNDComponentPeer* const parent = getOwnerOfWindow (GetParent (hwnd)))
+                if (parent != this)
+                    return parent->doTouchEvent (numInputs, eventHandle);
+
         HeapBlock<TOUCHINPUT> inputInfo (numInputs);
 
         if (getTouchInputInfo (eventHandle, numInputs, inputInfo, sizeof (TOUCHINPUT)))
@@ -1726,12 +1794,13 @@ private:
                 {
                     if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
                                                           (flags & TOUCHEVENTF_UP) != 0))
-                        return;  // abandon method if this window was deleted by the callback
+                        return 0;  // abandon method if this window was deleted by the callback
                 }
             }
         }
 
         closeTouchInputHandle (eventHandle);
+        return 0;
     }
 
     bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
@@ -2178,7 +2247,8 @@ private:
             case WM_NCHITTEST:
                 if ((styleFlags & windowIgnoresMouseClicks) != 0)
                     return HTTRANSPARENT;
-                else if (! hasTitleBar())
+
+                if (! hasTitleBar())
                     return HTCLIENT;
 
                 break;
@@ -2226,15 +2296,20 @@ private:
 
             case 0x020A: /* WM_MOUSEWHEEL */
             case 0x020E: /* WM_MOUSEHWHEEL */
-                doMouseWheel (getCurrentMousePosGlobal(), wParam, message == 0x020A);
+                doMouseWheel (wParam, message == 0x020A);
                 return 0;
 
             case WM_TOUCH:
-                if (getTouchInputInfo == nullptr)
-                    break;
+                if (getTouchInputInfo != nullptr)
+                    return doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
 
-                doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
-                return 0;
+                break;
+
+            case 0x119: /* WM_GESTURE */
+                if (doGestureEvent (lParam))
+                    return 0;
+
+                break;
 
             //==============================================================================
             case WM_SIZING:                return handleSizeConstraining (*(RECT*) lParam, wParam);
@@ -3087,6 +3162,8 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 
 void Desktop::Displays::findDisplays()
 {
+    setDPIAwareness();
+
     Array <Rectangle<int> > monitors;
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitors);
 

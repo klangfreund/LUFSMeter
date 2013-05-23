@@ -180,7 +180,7 @@ namespace CodeHelpers
     String addEscapeChars (const String& s)
     {
         MemoryOutputStream out;
-        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true, true);
+        writeEscapeChars (out, s.toRawUTF8(), -1, -1, false, true, true);
         return out.toUTF8();
     }
 
@@ -267,9 +267,9 @@ namespace CodeHelpers
         return result + currentLine.trimEnd() + ")";
     }
 
-    String floatLiteral (float value, int numDecPlaces)
+    String floatLiteral (double value, int numDecPlaces)
     {
-        String s ((double) value, numDecPlaces);
+        String s (value, numDecPlaces);
 
         if (s.containsChar ('.'))
             s << 'f';

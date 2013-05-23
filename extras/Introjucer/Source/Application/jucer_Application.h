@@ -32,6 +32,9 @@
 #include "jucer_CommandLine.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
+void createGUIEditorMenu (PopupMenu&);
+void handleGUIEditorMenuCommand (int);
+void registerGUIEditorCommands();
 
 //==============================================================================
 class IntrojucerApp   : public JUCEApplication
@@ -39,7 +42,6 @@ class IntrojucerApp   : public JUCEApplication
 public:
     //==============================================================================
     IntrojucerApp() :  isRunningCommandLine (false) {}
-    ~IntrojucerApp() {}
 
     //==============================================================================
     void initialise (const String& commandLine)
@@ -71,14 +73,7 @@ public:
 
         icons = new Icons();
 
-        commandManager = new ApplicationCommandManager();
-        commandManager->registerAllCommandsForTarget (this);
-
-        {
-            CodeDocument doc;
-            CppCodeEditorComponent ed (File::nonexistent, doc);
-            commandManager->registerAllCommandsForTarget (&ed);
-        }
+        initCommandManager();
 
         menuModel = new MainMenuModel();
 
@@ -93,13 +88,24 @@ public:
         else
             mainWindowList.reopenLastProjects();
 
-        makeSureUserHasSelectedModuleFolder();
-
         mainWindowList.createWindowIfNoneAreOpen();
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
+
+        struct ModuleFolderChecker  : public CallbackMessage
+        {
+            ModuleFolderChecker() {}
+
+            void messageCallback()
+            {
+                if (IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance()))
+                    app->makeSureUserHasSelectedModuleFolder();
+            }
+        };
+
+        (new ModuleFolderChecker())->post();
     }
 
     void shutdown()
@@ -145,15 +151,8 @@ public:
     }
 
     //==============================================================================
-    const String getApplicationName()
-    {
-        return "Introjucer";
-    }
-
-    const String getApplicationVersion()
-    {
-        return ProjectInfo::versionString;
-    }
+    const String getApplicationName()       { return "Introjucer"; }
+    const String getApplicationVersion()    { return ProjectInfo::versionString; }
 
     bool moreThanOneInstanceAllowed()
     {
@@ -195,22 +194,7 @@ public:
 
         void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         {
-            if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
-            {
-                // open a file from the "recent files" menu
-                getApp().openFile (getAppSettings().recentFiles.getFile (menuItemID - recentProjectsBaseID));
-            }
-            else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
-            {
-                OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID);
-                jassert (doc != nullptr);
-
-                getApp().mainWindowList.openDocument (doc, true);
-            }
-            else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
-            {
-                getAppSettings().appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
-            }
+            getApp().handleMainMenuCommand (menuItemID);
         }
     };
 
@@ -223,18 +207,19 @@ public:
 
     virtual StringArray getMenuNames()
     {
-        const char* const names[] = { "File", "Edit", "View", "Window", "Tools", nullptr };
+        const char* const names[] = { "File", "Edit", "View", "Window", "GUI Editor", "Tools", nullptr };
         return StringArray (names);
     }
 
     virtual void createMenu (PopupMenu& menu, const String& menuName)
     {
-        if (menuName == "File")         createFileMenu   (menu);
-        else if (menuName == "Edit")    createEditMenu   (menu);
-        else if (menuName == "View")    createViewMenu   (menu);
-        else if (menuName == "Window")  createWindowMenu (menu);
-        else if (menuName == "Tools")   createToolsMenu  (menu);
-        else                            jassertfalse; // names have changed?
+        if (menuName == "File")             createFileMenu   (menu);
+        else if (menuName == "Edit")        createEditMenu   (menu);
+        else if (menuName == "View")        createViewMenu   (menu);
+        else if (menuName == "Window")      createWindowMenu (menu);
+        else if (menuName == "Tools")       createToolsMenu  (menu);
+        else if (menuName == "GUI Editor")  createGUIEditorMenu (menu);
+        else                                jassertfalse; // names have changed?
     }
 
     virtual void createFileMenu (PopupMenu& menu)
@@ -244,7 +229,7 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::open);
 
         PopupMenu recentFiles;
-        getAppSettings().recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
+        settings->recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
         menu.addSubMenu ("Open Recent", recentFiles);
 
         menu.addSeparator();
@@ -317,11 +302,11 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::goToCounterpart);
         menu.addSeparator();
 
-        const int numDocs = jmin (50, getApp().openDocumentManager.getNumOpenDocuments());
+        const int numDocs = jmin (50, openDocumentManager.getNumOpenDocuments());
 
         for (int i = 0; i < numDocs; ++i)
         {
-            OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument(i);
+            OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument(i);
             menu.addItem (activeDocumentsBaseID + i, doc->getName());
         }
 
@@ -333,6 +318,31 @@ public:
     {
         menu.addCommandItem (commandManager, CommandIDs::updateModules);
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
+        menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
+    }
+
+    virtual void handleMainMenuCommand (int menuItemID)
+    {
+        if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
+        {
+            // open a file from the "recent files" menu
+            openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID));
+        }
+        else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
+        {
+            if (OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
+                mainWindowList.openDocument (doc, true);
+            else
+                jassertfalse;
+        }
+        else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
+        {
+            settings->appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+        }
+        else
+        {
+            handleGUIEditorMenuCommand (menuItemID);
+        }
     }
 
     //==============================================================================
@@ -527,7 +537,27 @@ public:
 
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
+
+   #if JUCE_LINUX
+    virtual String getLogFolderName() const    { return "~/.config/Introjucer/Logs"; }
+   #else
     virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
+   #endif
+
+    virtual PropertiesFile::Options getPropertyFileOptionsFor (const String& filename)
+    {
+        PropertiesFile::Options options;
+        options.applicationName     = filename;
+        options.filenameSuffix      = "settings";
+        options.osxLibrarySubFolder = "Application Support";
+       #if JUCE_LINUX
+        options.folderName          = "~/.config/Introjucer";
+       #else
+        options.folderName          = "Introjucer";
+       #endif
+
+        return options;
+    }
 
     virtual Component* createProjectContentComponent() const
     {
@@ -563,11 +593,25 @@ private:
             delete this;
 
             if (JUCEApplication::getInstance() != nullptr)
-                IntrojucerApp::getApp().closeModalCompsAndQuit();
+                getApp().closeModalCompsAndQuit();
         }
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)
     };
+
+    void initCommandManager()
+    {
+        commandManager = new ApplicationCommandManager();
+        commandManager->registerAllCommandsForTarget (this);
+
+        {
+            CodeDocument doc;
+            CppCodeEditorComponent ed (File::nonexistent, doc);
+            commandManager->registerAllCommandsForTarget (&ed);
+        }
+
+        registerGUIEditorCommands();
+    }
 };
 
 

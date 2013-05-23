@@ -222,21 +222,12 @@ public:
                                                                 : String::empty)];
     }
 
-    void setPosition (int x, int y)
-    {
-        setBounds (x, y, component.getWidth(), component.getHeight(), false);
-    }
-
-    void setSize (int w, int h)
-    {
-        setBounds (component.getX(), component.getY(), w, h, false);
-    }
-
-    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
 
-        NSRect r = NSMakeRect ((CGFloat) x, (CGFloat) y, (CGFloat) jmax (0, w), (CGFloat) jmax (0, h));
+        NSRect r = NSMakeRect ((CGFloat) newBounds.getX(), (CGFloat) newBounds.getY(),
+                               (CGFloat) jmax (0, newBounds.getWidth()), (CGFloat) jmax (0, newBounds.getHeight()));
 
         if (isSharedWindow)
         {
@@ -289,19 +280,14 @@ public:
         return getBounds (! isSharedWindow);
     }
 
-    Point<int> getScreenPosition() const
-    {
-        return getBounds (true).getPosition();
-    }
-
     Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        return relativePosition + getScreenPosition();
+        return relativePosition + getBounds (true).getPosition();
     }
 
     Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        return screenPosition - getScreenPosition();
+        return screenPosition - getBounds (true).getPosition();
     }
 
     void setAlpha (float newAlpha)
@@ -368,7 +354,7 @@ public:
 
                     // (can't call the component's setBounds method because that'll reset our fullscreen flag)
                     if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                        setBounds (r, shouldBeFullScreen);
                 }
             }
         }
@@ -626,6 +612,17 @@ public:
         handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), wheel);
     }
 
+    void redirectMagnify (NSEvent* ev)
+    {
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+        const float invScale = 1.0f - [ev magnification];
+
+        if (invScale != 0.0f)
+            handleMagnifyGesture (0, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
+       #endif
+        (void) ev;
+    }
+
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
@@ -806,7 +803,7 @@ public:
                 }
 
                 CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-                CGImageRef image = juce_createCoreGraphicsImage (temp, false, colourSpace, false);
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
                 CGColorSpaceRelease (colourSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);
@@ -1150,8 +1147,8 @@ public:
             class AsyncRepaintMessage  : public CallbackMessage
             {
             public:
-                AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
-                    : peer (peer_), rect (rect_)
+                AsyncRepaintMessage (NSViewComponentPeer* const p, const Rectangle<int>& r)
+                    : peer (p), rect (r)
                 {}
 
                 void messageCallback()
@@ -1347,6 +1344,7 @@ struct JuceNSViewClass   : public ObjCClass <NSView>
         addMethod (@selector (otherMouseDragged:),            mouseDragged,               "v@:@");
         addMethod (@selector (otherMouseUp:),                 mouseUp,                    "v@:@");
         addMethod (@selector (scrollWheel:),                  scrollWheel,                "v@:@");
+        addMethod (@selector (magnifyWithEvent:),             magnify,                    "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "v@:@");
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
@@ -1425,6 +1423,7 @@ private:
     static void mouseEntered   (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseEnter (ev); }
     static void mouseExited    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseExit  (ev); }
     static void scrollWheel    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseWheel (ev); }
+    static void magnify        (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMagnify    (ev); }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
 

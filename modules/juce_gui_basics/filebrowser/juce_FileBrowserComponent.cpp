@@ -102,7 +102,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
     goUpButton->addListener (this);
-    goUpButton->setTooltip (TRANS ("go up to parent directory"));
+    goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 
     if (previewComp != nullptr)
         addAndMakeVisible (previewComp);
@@ -310,7 +310,7 @@ String FileBrowserComponent::getActionVerb() const
 
 void FileBrowserComponent::setFilenameBoxLabel (const String& name)
 {
-    fileLabel.setText (name, false);
+    fileLabel.setText (name, dontSendNotification);
 }
 
 FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept
@@ -523,7 +523,7 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
         }
         else if (drive.isOnCDRomDrive())
         {
-            name << TRANS(" [CD/DVD drive]");
+            name << " [" << TRANS("CD/DVD drive") << ']';
         }
 
         rootNames.add (name);

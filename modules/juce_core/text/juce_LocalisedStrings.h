@@ -81,14 +81,16 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents);
+    LocalisedStrings (const String& fileContents,
+                      bool ignoreCaseOfKeys);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad);
+    LocalisedStrings (const File& fileToLoad,
+                      bool ignoreCaseOfKeys);
 
     /** Destructor. */
     ~LocalisedStrings();
@@ -109,7 +111,7 @@ public:
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
-        be 0 if none has been created.
+        be nullptr if none has been created.
     */
     static LocalisedStrings* getCurrentMappings();
 
@@ -167,19 +169,13 @@ public:
     const StringArray& getCountryCodes() const            { return countryCodes; }
 
 
-    //==============================================================================
-    /** Indicates whether to use a case-insensitive search when looking up a string.
-        This defaults to true.
-    */
-    void setIgnoresCase (bool shouldIgnoreCase);
-
 private:
     //==============================================================================
     String languageName;
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents);
+    void loadFromText (const String&, bool ignoreCase);
 
     JUCE_LEAK_DETECTOR (LocalisedStrings)
 };
@@ -194,6 +190,15 @@ private:
  */
  #define TRANS(stringLiteral) juce::translate (stringLiteral)
 #endif
+
+/** A dummy version of the TRANS macro, used to indicate a string literal that should be
+    added to the translation file by source-code scanner tools.
+
+    Wrapping a string literal in this macro has no effect, but by using it around strings
+    that your app needs to translate at a later stage, it lets automatic code-scanning tools
+    find this string and add it to the list of strings that need translation.
+*/
+#define NEEDS_TRANS(stringLiteral) (stringLiteral)
 
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings

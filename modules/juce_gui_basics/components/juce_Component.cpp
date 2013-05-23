@@ -584,7 +584,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             Desktop::getInstance().addDesktopComponent (this);
 
             bounds.setPosition (topLeft);
-            peer->setBounds (topLeft.x, topLeft.y, getWidth(), getHeight(), false);
+            peer->setBounds (bounds, false);
 
             if (oldRenderingEngine >= 0)
                 peer->setCurrentRenderingEngine (oldRenderingEngine);
@@ -644,7 +644,8 @@ ComponentPeer* Component::getPeer() const
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);
-    else if (parentComponent == nullptr)
+
+    if (parentComponent == nullptr)
         return nullptr;
 
     return parentComponent->getPeer();
@@ -1048,17 +1049,8 @@ void Component::setBounds (const int x, const int y, int w, int h)
         }
 
         if (flags.hasHeavyweightPeerFlag)
-        {
             if (ComponentPeer* const peer = getPeer())
-            {
-                if (wasMoved && wasResized)
-                    peer->setBounds (getX(), getY(), getWidth(), getHeight(), false);
-                else if (wasMoved)
-                    peer->setPosition (getX(), getY());
-                else if (wasResized)
-                    peer->setSize (getWidth(), getHeight());
-            }
-        }
+                peer->setBounds (getBounds(), false);
 
         sendMovedResizedMessages (wasMoved, wasResized);
     }
@@ -2151,6 +2143,12 @@ void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wh
         parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
 }
 
+void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
+{
+    // the base class just passes this event up to its parent..
+    if (parentComponent != nullptr)
+        parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
+}
 
 //==============================================================================
 void Component::resized()                       {}
@@ -2474,6 +2472,18 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
 
         if (! checker.shouldBailOut())
             MouseListenerList::sendWheelEvent (*this, checker, me, wheel);
+    }
+}
+
+void Component::internalMagnifyGesture (MouseInputSource& source, const Point<int>& relativePos,
+                                        const Time& time, float amount)
+{
+    if (! isCurrentlyBlockedByAnotherModalComponent())
+    {
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, this, time, relativePos, time, 0, false);
+
+        mouseMagnify (me, amount);
     }
 }
 

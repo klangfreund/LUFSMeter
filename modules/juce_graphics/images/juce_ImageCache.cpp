@@ -27,8 +27,7 @@ class ImageCache::Pimpl     : private Timer,
                               private DeletedAtShutdown
 {
 public:
-    Pimpl()
-        : cacheTimeout (5000)
+    Pimpl()  : cacheTimeout (5000)
     {
     }
 
@@ -43,7 +42,7 @@ public:
 
         for (int i = images.size(); --i >= 0;)
         {
-            Item* const item = images.getUnchecked(i);
+            const Item* const item = images.getUnchecked(i);
 
             if (item->hashCode == hashCode)
                 return item->image;
@@ -92,6 +91,15 @@ public:
 
         if (images.size() == 0)
             stopTimer();
+    }
+
+    void releaseUnusedImages()
+    {
+        const ScopedLock sl (lock);
+
+        for (int i = images.size(); --i >= 0;)
+            if (images.getUnchecked(i)->image.getReferenceCount() <= 1)
+                images.remove (i);
     }
 
     struct Item
@@ -161,4 +169,9 @@ void ImageCache::setCacheTimeout (const int millisecs)
 {
     jassert (millisecs >= 0);
     Pimpl::getInstance()->cacheTimeout = (unsigned int) millisecs;
+}
+
+void ImageCache::releaseUnusedImages()
+{
+    Pimpl::getInstance()->releaseUnusedImages();
 }

@@ -315,27 +315,39 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
 
 
 //==============================================================================
-namespace MACAddressHelpers
+struct GetAdaptersInfoHelper
 {
-    void getViaGetAdaptersInfo (Array<MACAddress>& result)
+    bool callGetAdaptersInfo()
     {
         DynamicLibrary dll ("iphlpapi.dll");
         JUCE_LOAD_WINAPI_FUNCTION (dll, GetAdaptersInfo, getAdaptersInfo, DWORD, (PIP_ADAPTER_INFO, PULONG))
 
-        if (getAdaptersInfo != nullptr)
+        if (getAdaptersInfo == nullptr)
+            return false;
+
+        adapterInfo.malloc (1);
+        ULONG len = sizeof (IP_ADAPTER_INFO);
+
+        if (getAdaptersInfo (adapterInfo, &len) == ERROR_BUFFER_OVERFLOW)
+            adapterInfo.malloc (len, 1);
+
+        return getAdaptersInfo (adapterInfo, &len) == NO_ERROR;
+    }
+
+    HeapBlock<IP_ADAPTER_INFO> adapterInfo;
+};
+
+namespace MACAddressHelpers
+{
+    void getViaGetAdaptersInfo (Array<MACAddress>& result)
+    {
+        GetAdaptersInfoHelper gah;
+
+        if (gah.callGetAdaptersInfo())
         {
-            ULONG len = sizeof (IP_ADAPTER_INFO);
-            HeapBlock<IP_ADAPTER_INFO> adapterInfo (1);
-
-            if (getAdaptersInfo (adapterInfo, &len) == ERROR_BUFFER_OVERFLOW)
-                adapterInfo.malloc (len, 1);
-
-            if (getAdaptersInfo (adapterInfo, &len) == NO_ERROR)
-            {
-                for (PIP_ADAPTER_INFO adapter = adapterInfo; adapter != nullptr; adapter = adapter->Next)
-                    if (adapter->AddressLength >= 6)
-                        result.addIfNotAlreadyThere (MACAddress (adapter->Address));
-            }
+            for (PIP_ADAPTER_INFO adapter = gah.adapterInfo; adapter != nullptr; adapter = adapter->Next)
+                if (adapter->AddressLength >= 6)
+                    result.addIfNotAlreadyThere (MACAddress (adapter->Address));
         }
     }
 
@@ -394,6 +406,24 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
     MACAddressHelpers::getViaNetBios (result);
 }
 
+void IPAddress::findAllAddresses (Array<IPAddress>& result)
+{
+    result.addIfNotAlreadyThere (IPAddress::local());
+
+    GetAdaptersInfoHelper gah;
+
+    if (gah.callGetAdaptersInfo())
+    {
+        for (PIP_ADAPTER_INFO adapter = gah.adapterInfo; adapter != nullptr; adapter = adapter->Next)
+        {
+            IPAddress ip (adapter->IpAddressList.IpAddress.String);
+
+            if (ip != IPAddress::any())
+                result.addIfNotAlreadyThere (ip);
+        }
+    }
+}
+
 //==============================================================================
 bool Process::openEmailWithAttachments (const String& targetEmailAddress,
                                         const String& emailSubject,
@@ -408,15 +438,15 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
         return false;
 
     MapiMessage message = { 0 };
-    message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
-    message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
+    message.lpszSubject = (LPSTR) emailSubject.toRawUTF8();
+    message.lpszNoteText = (LPSTR) bodyText.toRawUTF8();
 
     MapiRecipDesc recip = { 0 };
     recip.ulRecipClass = MAPI_TO;
     String targetEmailAddress_ (targetEmailAddress);
     if (targetEmailAddress_.isEmpty())
         targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
-    recip.lpszName = (LPSTR) targetEmailAddress_.toUTF8().getAddress();
+    recip.lpszName = (LPSTR) targetEmailAddress_.toRawUTF8();
     message.nRecipCount = 1;
     message.lpRecips = &recip;
 
@@ -429,7 +459,7 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
     for (int i = 0; i < filesToAttach.size(); ++i)
     {
         files[i].nPosition = (ULONG) -1;
-        files[i].lpszPathName = (LPSTR) filesToAttach[i].toUTF8().getAddress();
+        files[i].lpszPathName = (LPSTR) filesToAttach[i].toRawUTF8();
     }
 
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;

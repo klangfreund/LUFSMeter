@@ -120,15 +120,14 @@ namespace AudioUnitFormatHelpers
             DBG ("AU name: " + name);
         }
 
-        if (name.isNotEmpty())
+        if (name.containsChar (':'))
         {
             manufacturer = name.upToFirstOccurrenceOf (":", false, false).trim();
             name         = name.fromFirstOccurrenceOf (":", false, false).trim();
         }
-        else
-        {
+
+        if (name.isEmpty())
             name = "<Unknown>";
-        }
     }
 
     bool getComponentDescFromIdentifier (const String& fileOrIdentifier, AudioComponentDescription& desc,
@@ -153,6 +152,22 @@ namespace AudioUnitFormatHelpers
                 if (AudioComponent comp = AudioComponentFindNext (0, &desc))
                 {
                     getNameAndManufacturer (comp, name, manufacturer);
+
+                    if (manufacturer.isEmpty())
+                        manufacturer = tokens[2];
+
+                    if (version.isEmpty())
+                    {
+                        UInt32 versionNum;
+
+                        if (AudioComponentGetVersion (comp, &versionNum) == noErr)
+                        {
+                            version << (int) (versionNum >> 16) << "."
+                                    << (int) ((versionNum >> 8) & 0xff) << "."
+                                    << (int) (versionNum & 0xff);
+                        }
+                    }
+
                     return true;
                 }
             }
@@ -217,6 +232,10 @@ namespace AudioUnitFormatHelpers
                             desc.componentType = types[0];
                             desc.componentSubType = types[1];
                             desc.componentManufacturer = types[2];
+
+                            if (AudioComponent comp = AudioComponentFindNext (0, &desc))
+                                getNameAndManufacturer (comp, name, manufacturer);
+
                             break;
                         }
 
@@ -274,30 +293,23 @@ public:
     {
         using namespace AudioUnitFormatHelpers;
 
-        try
+        ++insideCallback;
+
+        JUCE_AU_LOG ("Opening AU: " + fileOrIdentifier);
+
+        if (getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer)
+             || getComponentDescFromFile (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
         {
-            ++insideCallback;
-
-            JUCE_AU_LOG ("Opening AU: " + fileOrIdentifier);
-
-            if (getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer)
-                 || getComponentDescFromFile (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
+            if (AudioComponent comp = AudioComponentFindNext (0, &componentDesc))
             {
-                if (AudioComponent comp = AudioComponentFindNext (0, &componentDesc))
-                {
-                    AudioComponentInstanceNew (comp, &audioUnit);
+                AudioComponentInstanceNew (comp, &audioUnit);
 
-                    wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
-                                     || componentDesc.componentType == kAudioUnitType_MusicEffect;
-                }
+                wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
+                                 || componentDesc.componentType == kAudioUnitType_MusicEffect;
             }
+        }
 
-            --insideCallback;
-        }
-        catch (...)
-        {
-            --insideCallback;
-        }
+        --insideCallback;
     }
 
     ~AudioUnitPluginInstance()

@@ -41,6 +41,13 @@
  #undef STRICT
  #define STRICT 1
  #include <windows.h>
+
+ #ifdef __MINGW32__
+  struct MOUSEHOOKSTRUCTEX  : public MOUSEHOOKSTRUCT
+  {
+     DWORD mouseData;
+  };
+ #endif
 #elif defined (LINUX)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
@@ -196,6 +203,52 @@ namespace
         {
             UnhookWindowsHookEx (mouseWheelHook);
             mouseWheelHook = 0;
+        }
+    }
+
+    //==============================================================================
+    static HHOOK keyboardHook = 0;
+    static int keyboardHookUsers = 0;
+
+    LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
+    {
+        if (nCode == 0)
+        {
+            const MSG& msg = *(const MSG*) lParam;
+
+            if (msg.message == WM_CHAR)
+            {
+                Desktop& desktop = Desktop::getInstance();
+                HWND focused = GetFocus();
+
+                for (int i = desktop.getNumComponents(); --i >= 0;)
+                {
+                    if ((HWND) desktop.getComponent (i)->getWindowHandle() == focused)
+                    {
+                        SendMessage (focused, msg.message, msg.wParam, msg.lParam);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
+    }
+
+    void registerKeyboardHook()
+    {
+        if (keyboardHookUsers++ == 0)
+            keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
+                                             (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
+                                             GetCurrentThreadId());
+    }
+
+    void unregisterKeyboardHook()
+    {
+        if (--keyboardHookUsers == 0 && keyboardHook != 0)
+        {
+            UnhookWindowsHookEx (keyboardHook);
+            keyboardHook = 0;
         }
     }
 
@@ -1284,6 +1337,9 @@ public:
                 addMouseListener (this, true);
 
             registerMouseWheelHook();
+
+            if (PluginHostType().isAbletonLive())
+                registerKeyboardHook();
            #endif
         }
 
@@ -1291,6 +1347,7 @@ public:
         {
            #if JUCE_WINDOWS
             unregisterMouseWheelHook();
+            unregisterKeyboardHook();
            #endif
 
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
@@ -1419,10 +1476,12 @@ private:
 
     //==============================================================================
    #if JUCE_WINDOWS
-    // Workarounds for Wavelab's happy-go-lucky use of threads.
+    // Workarounds for hosts which attempt to open editor windows on a non-GUI thread.. (Grrrr...)
     static void checkWhetherMessageThreadIsCorrect()
     {
-        if (getHostType().isWavelab() || getHostType().isCubaseBridged())
+        const PluginHostType host (getHostType());
+
+        if (host.isWavelab() || host.isCubaseBridged() || host.isPremiere())
         {
             if (! messageThreadIsDefinitelyCorrect)
             {

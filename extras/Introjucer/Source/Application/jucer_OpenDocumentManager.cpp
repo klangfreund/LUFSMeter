@@ -70,7 +70,7 @@ public:
         if (file.getFileExtension().isNotEmpty())
             return file.getFileExtension() + " file";
 
-        jassertfalse
+        jassertfalse;
         return "Unknown";
     }
 
@@ -84,10 +84,13 @@ private:
 
 
 //==============================================================================
+OpenDocumentManager::DocumentType* createGUIDocumentType();
+
 OpenDocumentManager::OpenDocumentManager()
 {
     registerType (new UnknownDocument::Type());
     registerType (new SourceCodeDocument::Type());
+    registerType (createGUIDocumentType());
 }
 
 OpenDocumentManager::~OpenDocumentManager()
@@ -170,21 +173,16 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
                                                    TRANS("Closing document..."),
                                                    TRANS("Do you want to save the changes to \"")
                                                        + doc->getName() + "\"?",
-                                                   TRANS("save"),
-                                                   TRANS("discard changes"),
-                                                   TRANS("cancel"));
+                                                   TRANS("Save"),
+                                                   TRANS("Discard changes"),
+                                                   TRANS("Cancel"));
 
-    if (r == 1)
-    {
-        // save changes
+    if (r == 1)  // save changes
         return doc->save() ? FileBasedDocument::savedOk
                            : FileBasedDocument::failedToWriteToFile;
-    }
-    else if (r == 2)
-    {
-        // discard changes
+
+    if (r == 2)  // discard changes
         return FileBasedDocument::savedOk;
-    }
 
     return FileBasedDocument::userCancelledSave;
 }
@@ -195,10 +193,8 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
     if (Document* doc = documents [index])
     {
         if (saveIfNeeded)
-        {
             if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
                 return false;
-        }
 
         for (int i = listeners.size(); --i >= 0;)
             listeners.getUnchecked(i)->documentAboutToClose (doc);

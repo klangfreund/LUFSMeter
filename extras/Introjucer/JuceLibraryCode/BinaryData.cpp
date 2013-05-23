@@ -31,6 +31,14 @@ static const unsigned char temp_43731c40[] =
 "  cp -r \"$original\" \"$AU\"\r\n"
 "  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
 "  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
+"\r\n"
+"  # Fix info.plist for AUs built with Xcode 3\r\n"
+"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
+"    echo\r\n"
+"  else\r\n"
+"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
+"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
+"  fi\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyVST -gt 0 ]; then\r\n"
@@ -492,6 +500,151 @@ static const unsigned char temp_62b91564[] =
 
 const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_62b91564;
 
+//================== jucer_ComponentTemplate.cpp ==================
+static const unsigned char temp_8626361b[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"  This is an automatically generated GUI class created by the Introjucer!\r\n"
+"\r\n"
+"  Be careful when adding custom code to these files, as only the code within\r\n"
+"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
+"  and re-saved.\r\n"
+"\r\n"
+"  Created with Introjucer version: %%version%%\r\n"
+"\r\n"
+"  ------------------------------------------------------------------------------\r\n"
+"\r\n"
+"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
+"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"//[Headers] You can add your own extra header files here...\r\n"
+"//[/Headers]\r\n"
+"\r\n"
+"%%includeFilesCPP%%\r\n"
+"\r\n"
+"//[MiscUserDefs] You can add your own user definitions and misc code here...\r\n"
+"//[/MiscUserDefs]\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%className%%::%%className%% (%%constructorParams%%)\r\n"
+"%%initialisers%%{\r\n"
+"    %%constructor%%\r\n"
+"\r\n"
+"    //[Constructor] You can add your own custom stuff here..\r\n"
+"    //[/Constructor]\r\n"
+"}\r\n"
+"\r\n"
+"%%className%%::~%%className%%()\r\n"
+"{\r\n"
+"    //[Destructor_pre]. You can add your own custom destruction code here..\r\n"
+"    //[/Destructor_pre]\r\n"
+"\r\n"
+"    %%destructor%%\r\n"
+"\r\n"
+"    //[Destructor]. You can add your own custom destruction code here..\r\n"
+"    //[/Destructor]\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%methodDefinitions%%\r\n"
+"\r\n"
+"//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...\r\n"
+"//[/MiscUserCode]\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"#if 0\r\n"
+"/*  -- Introjucer information section --\r\n"
+"\r\n"
+"    This is where the Introjucer stores the metadata that describe this GUI layout, so \r\n"
+"    make changes in here at your peril!\r\n"
+"\r\n"
+"BEGIN_JUCER_METADATA\r\n"
+"\r\n"
+"%%metadata%%\r\n"
+"END_JUCER_METADATA\r\n"
+"*/\r\n"
+"#endif\r\n"
+"\r\n"
+"%%staticMemberDefinitions%%\r\n"
+"//[EndFile] You can add extra defines here...\r\n"
+"//[/EndFile]";
+
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_8626361b;
+
+//================== jucer_ComponentTemplate.h ==================
+static const unsigned char temp_363772e0[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"  This is an automatically generated GUI class created by the Introjucer!\r\n"
+"\r\n"
+"  Be careful when adding custom code to these files, as only the code within\r\n"
+"  the \"//[xyz]\" and \"//[/xyz]\" sections will be retained when the file is loaded\r\n"
+"  and re-saved.\r\n"
+"\r\n"
+"  Created with Introjucer version: %%version%%\r\n"
+"\r\n"
+"  ------------------------------------------------------------------------------\r\n"
+"\r\n"
+"  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
+"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef %%headerGuard%%\r\n"
+"#define %%headerGuard%%\r\n"
+"\r\n"
+"//[Headers]     -- You can add your own extra header files here --\r\n"
+"#include \"JuceHeader.h\"\r\n"
+"//[/Headers]\r\n"
+"\r\n"
+"%%includeFilesH%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"                                                                    //[Comments]\r\n"
+"    An auto-generated component, created by the Introjucer.\r\n"
+"\r\n"
+"    Describe your class and how it works here!\r\n"
+"                                                                    //[/Comments]\r\n"
+"*/\r\n"
+"%%classDeclaration%%\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%className%% (%%constructorParams%%);\r\n"
+"    ~%%className%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    //[UserMethods]     -- You can add your own custom methods in this section.\r\n"
+"    //[/UserMethods]\r\n"
+"\r\n"
+"    %%publicMemberDeclarations%%\r\n"
+"\r\n"
+"private:\r\n"
+"    //[UserVariables]   -- You can add your own custom variables in this section.\r\n"
+"    //[/UserVariables]\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    %%privateMemberDeclarations%%\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%)\r\n"
+"};\r\n"
+"\r\n"
+"//[EndFile] You can add extra defines here...\r\n"
+"//[/EndFile]\r\n"
+"\r\n"
+"#endif   // %%headerGuard%%";
+
+const char* jucer_ComponentTemplate_h = (const char*) temp_363772e0;
+
 //================== jucer_ContentCompTemplate.cpp ==================
 static const unsigned char temp_7e4c4c06[] =
 "/*\r\n"
@@ -573,6 +726,51 @@ static const unsigned char temp_4a30078b[] =
 "#endif  // HEADERGUARD\r\n";
 
 const char* jucer_ContentCompTemplate_h = (const char*) temp_4a30078b;
+
+//================== jucer_InlineComponentTemplate.h ==================
+static const unsigned char temp_cd7c7047[] =
+"//==============================================================================\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS()\r\n"
+"    {\r\n"
+"        // In your constructor, you should add any child components, and\r\n"
+"        // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~COMPONENTCLASS()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        // You should replace everything in this method with your own drawing code..\r\n"
+"\r\n"
+"        g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"        g.setColour (Colours::grey);\r\n"
+"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"        g.setColour (Colours::lightblue);\r\n"
+"        g.setFont (14.0f);\r\n"
+"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This method is where you should set the bounds of any child\r\n"
+"        // components that your component contains..\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"};\r\n";
+
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_cd7c7047;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
 static const unsigned char temp_794304c3[] =
@@ -1017,7 +1215,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:  numBytes = 2101; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2464; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
@@ -1025,8 +1223,11 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
+        case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
+        case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1947; return jucer_MainTemplate_NoWindow_cpp;
         case 0x400bc026:  numBytes = 3613; return jucer_MainTemplate_Window_cpp;

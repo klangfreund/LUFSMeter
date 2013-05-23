@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:10:20pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
@@ -248,11 +246,7 @@ public:
 
 //==============================================================================
 AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
-    : deviceManager (deviceManager_),
-      keyboardComponent (0),
-      sineButton (0),
-      sampledButton (0),
-      liveAudioDisplayComp (0)
+    : deviceManager (deviceManager_)
 {
     addAndMakeVisible (keyboardComponent = new MidiKeyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard));
 
@@ -296,10 +290,10 @@ AudioDemoSynthPage::~AudioDemoSynthPage()
     deviceManager.removeAudioCallback (liveAudioDisplayComp);
     //[/Destructor_pre]
 
-    deleteAndZero (keyboardComponent);
-    deleteAndZero (sineButton);
-    deleteAndZero (sampledButton);
-    deleteAndZero (liveAudioDisplayComp);
+    keyboardComponent = nullptr;
+    sineButton = nullptr;
+    sampledButton = nullptr;
+    liveAudioDisplayComp = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -358,9 +352,10 @@ void AudioDemoSynthPage::buttonClicked (Button* buttonThatWasClicked)
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Introjucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
@@ -387,3 +382,7 @@ BEGIN_JUCER_METADATA
 END_JUCER_METADATA
 */
 #endif
+
+
+//[EndFile] You can add extra defines here...
+//[/EndFile]
