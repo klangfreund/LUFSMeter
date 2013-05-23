@@ -117,7 +117,7 @@ A default Introjucer GUI application
 
 4.1 Create a new GUI Application with a basic window using the
     Introjucer. As before, follow 1.3 and 1.4.
-    (All modules execp juce_audio_plugin_client, juce_audio_utils
+    (All modules except juce_audio_plugin_client, juce_audio_utils
     and juce_browser_plugin_client are selected.).
 4.3 Give it a try, it should compile.
 

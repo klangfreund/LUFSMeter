@@ -3,7 +3,8 @@
 
     author: Samuel Gaehwiler (klangfreund.com)
 
-    Just playing around to get familiar with var objects.
+    Just playing around to get familiar with storing arrays in var and Value
+    objects.
 
   ==============================================================================
 */
