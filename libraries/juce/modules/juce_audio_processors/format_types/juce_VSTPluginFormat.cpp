@@ -33,7 +33,7 @@
 #if JUCE_MAC
  static bool makeFSRefFromPath (FSRef* destFSRef, const String& path)
  {
-     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
+     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toRawUTF8()), destFSRef, 0) == noErr;
  }
 #endif
 
@@ -65,6 +65,10 @@
 #include "juce_VSTMidiEventList.h"
 
 #if JUCE_MINGW
+ #ifndef WM_APPCOMMAND
+  #define WM_APPCOMMAND 0x0319
+ #endif
+
  extern "C" void _fpreset();
  extern "C" void _clearfp();
 #elif ! JUCE_WINDOWS
@@ -493,7 +497,7 @@ public:
 
         if (file.hasFileExtension (".vst"))
         {
-            const char* const utf8 = file.getFullPathName().toUTF8().getAddress();
+            const char* const utf8 = file.getFullPathName().toRawUTF8();
 
             if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
                                                                         strlen (utf8), file.isDirectory()))
@@ -556,7 +560,7 @@ public:
         {
             FSRef fn;
 
-            if (FSPathMakeRef ((UInt8*) file.getFullPathName().toUTF8().getAddress(), &fn, 0) == noErr)
+            if (FSPathMakeRef ((UInt8*) file.getFullPathName().toRawUTF8(), &fn, 0) == noErr)
             {
                 resFileId = FSOpenResFile (&fn, fsRdPerm);
 
@@ -578,7 +582,7 @@ public:
                             DetachResource (resHandle);
                             HLock (resHandle);
 
-                            Ptr ptr;
+                            ::Ptr ptr;
                             Str255 errorText;
 
                             OSErr err = GetMemFragment (*resHandle, GetHandleSize (resHandle),
@@ -776,22 +780,17 @@ public:
 
         if (effect != nullptr && effect->magic == kEffectMagic)
         {
-            try
-            {
-               #if JUCE_MAC
-                if (module->resFileId != 0)
-                    UseResFile (module->resFileId);
-               #endif
+           #if JUCE_MAC
+            if (module->resFileId != 0)
+                UseResFile (module->resFileId);
+           #endif
 
-                // Must delete any editors before deleting the plugin instance!
-                jassert (getActiveEditor() == 0);
+            // Must delete any editors before deleting the plugin instance!
+            jassert (getActiveEditor() == 0);
 
-                _fpreset(); // some dodgy plugs fuck around with this
+            _fpreset(); // some dodgy plugs fuck around with this
 
-                module->closeEffect (effect);
-            }
-            catch (...)
-            {}
+            module->closeEffect (effect);
         }
 
         module = nullptr;
@@ -1048,36 +1047,21 @@ public:
                                                jlimit (0, numSamples - 1, samplePosition));
                 }
 
-                try
-                {
-                    effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend.events, 0);
-                }
-                catch (...)
-                {}
+                effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend.events, 0);
             }
 
             _clearfp();
 
             if ((effect->flags & effFlagsCanReplacing) != 0)
             {
-                try
-                {
-                    effect->processReplacing (effect, buffer.getArrayOfChannels(), buffer.getArrayOfChannels(), numSamples);
-                }
-                catch (...)
-                {}
+                effect->processReplacing (effect, buffer.getArrayOfChannels(), buffer.getArrayOfChannels(), numSamples);
             }
             else
             {
                 tempBuffer.setSize (effect->numOutputs, numSamples);
                 tempBuffer.clear();
 
-                try
-                {
-                    effect->process (effect, buffer.getArrayOfChannels(), tempBuffer.getArrayOfChannels(), numSamples);
-                }
-                catch (...)
-                {}
+                effect->process (effect, buffer.getArrayOfChannels(), tempBuffer.getArrayOfChannels(), numSamples);
 
                 for (int i = effect->numOutputs; --i >= 0;)
                     buffer.copyFrom (i, 0, tempBuffer.getSampleData (i), numSamples);
@@ -1165,14 +1149,8 @@ public:
     {
         if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
         {
-            try
-            {
-                const ScopedLock sl (lock);
-                return effect->getParameter (effect, index);
-            }
-            catch (...)
-            {
-            }
+            const ScopedLock sl (lock);
+            return effect->getParameter (effect, index);
         }
 
         return 0.0f;
@@ -1182,16 +1160,10 @@ public:
     {
         if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
         {
-            try
-            {
-                const ScopedLock sl (lock);
+            const ScopedLock sl (lock);
 
-                if (effect->getParameter (effect, index) != newValue)
-                    effect->setParameter (effect, index, newValue);
-            }
-            catch (...)
-            {
-            }
+            if (effect->getParameter (effect, index) != newValue)
+                effect->setParameter (effect, index, newValue);
         }
     }
 
@@ -1245,7 +1217,7 @@ public:
         if (index == getCurrentProgram())
         {
             if (getNumPrograms() > 0 && newName != getCurrentProgramName())
-                dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toUTF8().getAddress(), 0.0f);
+                dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toRawUTF8(), 0.0f);
         }
         else
         {
@@ -1834,7 +1806,7 @@ private:
        #if JUCE_MAC
         return (VstIntPtr) (void*) &module->parentDirFSSpec;
        #else
-        return (VstIntPtr) (pointer_sized_uint) module->fullParentDirectoryPathName.toUTF8().getAddress();
+        return (VstIntPtr) (pointer_sized_uint) module->fullParentDirectoryPathName.toRawUTF8();
        #endif
     }
 
@@ -1918,12 +1890,12 @@ class VSTPluginWindow   : public AudioProcessorEditor,
 {
 public:
     //==============================================================================
-    VSTPluginWindow (VSTPluginInstance& plugin_)
-        : AudioProcessorEditor (&plugin_),
+    VSTPluginWindow (VSTPluginInstance& plug)
+        : AudioProcessorEditor (&plug),
          #if ! JUCE_MAC
           ComponentMovementWatcher (this),
          #endif
-          plugin (plugin_),
+          plugin (plug),
           isOpen (false),
           recursiveResize (false),
           pluginWantsKeys (false),
@@ -1999,7 +1971,7 @@ public:
     {
         if (isShowing())
             openPluginWindow();
-        else
+        else if (! shouldAvoidDeletingWindow())
             closePluginWindow();
 
         componentMovedOrResized (true, true);
@@ -2046,7 +2018,7 @@ public:
         {
             if (ComponentPeer* const peer = getPeer())
             {
-                peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
+                peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
 
                #if JUCE_LINUX
                 if (pluginWindow != 0)
@@ -2077,17 +2049,16 @@ public:
     //==============================================================================
     void timerCallback()
     {
-       #if JUCE_WINDOWS
-        if (--sizeCheckCount <= 0)
+        if (isShowing())
         {
-            sizeCheckCount = 10;
+           #if JUCE_WINDOWS
+            if (--sizeCheckCount <= 0)
+            {
+                sizeCheckCount = 10;
+                checkPluginWindowSize();
+            }
+           #endif
 
-            checkPluginWindowSize();
-        }
-       #endif
-
-        try
-        {
             static bool reentrant = false;
 
             if (! reentrant)
@@ -2097,13 +2068,13 @@ public:
                 reentrant = false;
             }
         }
-        catch (...)
-        {}
     }
 
     //==============================================================================
     void mouseDown (const MouseEvent& e)
     {
+        (void) e;
+
        #if JUCE_LINUX
         if (pluginWindow == 0)
             return;
@@ -2126,8 +2097,6 @@ public:
         sendEventToChild (&ev);
 
        #elif JUCE_WINDOWS
-        (void) e;
-
         toFront (true);
        #endif
     }
@@ -2156,6 +2125,16 @@ private:
     Window pluginWindow;
     EventProcPtr pluginProc;
    #endif
+
+    // This is a workaround for old Mackie plugins that crash if their
+    // window is deleted more than once.
+    bool shouldAvoidDeletingWindow() const
+    {
+        PluginDescription desc;
+        plugin.fillInPluginDescription (desc);
+
+        return desc.manufacturerName.containsIgnoreCase ("Loud Technologies");
+    }
 
     //==============================================================================
 #if JUCE_MAC
@@ -2394,11 +2373,9 @@ private:
                                  message, wParam, lParam);
                 }
 
-                return CallWindowProc ((WNDPROC) (w->originalWndProc),
+                return CallWindowProc ((WNDPROC) w->originalWndProc,
                                        (HWND) w->pluginHWND,
-                                       message,
-                                       wParam,
-                                       lParam);
+                                       message, wParam, lParam);
             }
         }
 
@@ -2565,9 +2542,10 @@ private:
     class InnerWrapperComponent   : public CarbonViewWrapperComponent
     {
     public:
-        InnerWrapperComponent (VSTPluginWindow& owner_)
-            : owner (owner_), alreadyInside (false)
+        InnerWrapperComponent (VSTPluginWindow& w)
+            : owner (w), alreadyInside (false)
         {
+            keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
         }
 
         ~InnerWrapperComponent()
@@ -2619,7 +2597,7 @@ private:
         {
             if (ComponentPeer* const peer = getPeer())
             {
-                const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
+                const Point<int> pos (peer->globalToLocal (getScreenPosition()));
                 ERect r;
                 r.left   = (VstInt16) pos.getX();
                 r.top    = (VstInt16) pos.getY();

@@ -132,6 +132,10 @@
   extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
+#if ! (JUCE_DEBUG || defined (JUCE_RTAS_PLUGINGESTALT_IS_CACHEABLE))
+ #define JUCE_RTAS_PLUGINGESTALT_IS_CACHEABLE 1
+#endif
+
 const int midiBufferSize = 1024;
 const OSType juceChunkType = 'juce';
 static const int bypassControlIndex = 1;
@@ -483,7 +487,7 @@ protected:
                                                                    nodeName,
                                                                    midiBuffer);
 
-                midiBufferNode->Initialize (1, true);
+                midiBufferNode->Initialize (0xffff, true);
             }
            #endif
         }
@@ -895,7 +899,7 @@ public:
         DefineManufacturerNamesAndID (JucePlugin_Manufacturer, JucePlugin_RTASManufacturerCode);
         DefinePlugInNamesAndVersion (createRTASName().toUTF8(), JucePlugin_VersionCode);
 
-       #ifndef JUCE_DEBUG
+       #if JUCE_RTAS_PLUGINGESTALT_IS_CACHEABLE
         AddGestalt (pluginGestalt_IsCacheable);
        #endif
     }
@@ -922,7 +926,7 @@ public:
                                        JucePlugin_RTASProductId,
                                        JucePlugin_RTASCategory);
 
-            type->DefineTypeNames (createRTASName().toUTF8().getAddress());
+            type->DefineTypeNames (createRTASName().toRawUTF8());
             type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
             type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),

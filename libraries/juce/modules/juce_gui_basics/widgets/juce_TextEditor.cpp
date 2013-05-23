@@ -1113,6 +1113,7 @@ void TextEditor::lookAndFeelChanged()
     {
         setCaretVisible (false);
         setCaretVisible (true);
+        updateCaretPosition();
     }
 }
 
@@ -2093,7 +2094,7 @@ void TextEditor::focusGained (FocusChangeType)
 
     if (ComponentPeer* const peer = getPeer())
         if (! isReadOnly())
-            peer->textInputRequired (getScreenPosition() - peer->getScreenPosition());
+            peer->textInputRequired (peer->globalToLocal (getScreenPosition()));
 }
 
 void TextEditor::focusLost (FocusChangeType)

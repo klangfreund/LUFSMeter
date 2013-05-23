@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  21 Sep 2012 12:10:00pm
+  This is an automatically generated GUI class created by the Introjucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Introjucer version: 3.1.0
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
+  Copyright 2004-13 by Raw Material Software Ltd.
 
   ==============================================================================
 */
@@ -175,29 +173,23 @@ private:
 AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_)
     : deviceManager (deviceManager_),
       thread ("audio file preview"),
-      directoryList (0, thread),
-      zoomLabel (0),
-      explanation (0),
-      zoomSlider (0),
-      thumbnail (0),
-      startStopButton (0),
-      fileTreeComp (0)
+      directoryList (nullptr, thread)
 {
     addAndMakeVisible (zoomLabel = new Label (String::empty,
                                               "zoom:"));
-    zoomLabel->setFont (Font (15.0000f, Font::plain));
+    zoomLabel->setFont (Font (15.00f, Font::plain));
     zoomLabel->setJustificationType (Justification::centredRight);
     zoomLabel->setEditable (false, false, false);
     zoomLabel->setColour (TextEditor::textColourId, Colours::black);
-    zoomLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    zoomLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (explanation = new Label (String::empty,
                                                 "Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."));
-    explanation->setFont (Font (14.0000f, Font::plain));
+    explanation->setFont (Font (14.00f, Font::plain));
     explanation->setJustificationType (Justification::bottomRight);
     explanation->setEditable (false, false, false);
     explanation->setColour (TextEditor::textColourId, Colours::black);
-    explanation->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    explanation->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
     addAndMakeVisible (zoomSlider = new Slider (String::empty));
     zoomSlider->setRange (0, 1, 0);
@@ -246,12 +238,12 @@ AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
     fileTreeComp->removeListener (this);
     //[/Destructor_pre]
 
-    deleteAndZero (zoomLabel);
-    deleteAndZero (explanation);
-    deleteAndZero (zoomSlider);
-    deleteAndZero (thumbnail);
-    deleteAndZero (startStopButton);
-    deleteAndZero (fileTreeComp);
+    zoomLabel = nullptr;
+    explanation = nullptr;
+    zoomSlider = nullptr;
+    thumbnail = nullptr;
+    startStopButton = nullptr;
+    fileTreeComp = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -372,15 +364,16 @@ void AudioDemoPlaybackPage::fileDoubleClicked (const File&)
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Introjucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="AudioDemoPlaybackPage" componentName=""
                  parentClasses="public Component, public FileBrowserListener"
-                 constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (0, thread)"
+                 constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (nullptr, thread)"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>
@@ -412,3 +405,7 @@ BEGIN_JUCER_METADATA
 END_JUCER_METADATA
 */
 #endif
+
+
+//[EndFile] You can add extra defines here...
+//[/EndFile]

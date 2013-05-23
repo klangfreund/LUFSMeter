@@ -23,6 +23,18 @@
   ==============================================================================
 */
 
+//==============================================================================
+namespace PopupMenuSettings
+{
+    const int scrollZone = 24;
+    const int borderSize = 2;
+    const int timerInterval = 50;
+    const int dismissCommandId = 0x6287345f;
+    const int sectionHeaderID  = 0x4734a34f;
+
+    static bool menuWasHiddenBecauseOfAppChange = false;
+}
+
 class PopupMenu::Item
 {
 public:
@@ -87,7 +99,7 @@ public:
           commandManager (other.commandManager)
     {}
 
-    bool canBeTriggered() const noexcept    { return isActive && itemID != 0; }
+    bool canBeTriggered() const noexcept    { return isActive && itemID != 0 && itemID != PopupMenuSettings::sectionHeaderID; }
     bool hasActiveSubMenu() const noexcept  { return isActive && subMenu != nullptr && subMenu->items.size() > 0; }
 
     //==============================================================================
@@ -198,17 +210,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent)
 };
 
-
-//==============================================================================
-namespace PopupMenuSettings
-{
-    const int scrollZone = 24;
-    const int borderSize = 2;
-    const int timerInterval = 50;
-    const int dismissCommandId = 0x6287345f;
-
-    static bool menuWasHiddenBecauseOfAppChange = false;
-}
 
 //==============================================================================
 class PopupMenu::Window  : public Component,
@@ -738,12 +739,12 @@ private:
 
         for (int col = 0; col < numColumns; ++col)
         {
-            int i, colW = options.standardHeight, colH = 0;
+            int colW = options.standardHeight, colH = 0;
 
             const int numChildren = jmin (items.size() - childNum,
                                           (items.size() + numColumns - 1) / numColumns);
 
-            for (i = numChildren; --i >= 0;)
+            for (int i = numChildren; --i >= 0;)
             {
                 colW = jmax (colW, items.getUnchecked (childNum + i)->getWidth());
                 colH += items.getUnchecked (childNum + i)->getHeight();
@@ -1330,7 +1331,7 @@ private:
 
 void PopupMenu::addSectionHeader (const String& title)
 {
-    addCustomItem (0X4734a34f, new HeaderItemComponent (title));
+    addCustomItem (PopupMenuSettings::sectionHeaderID, new HeaderItemComponent (title));
 }
 
 //==============================================================================

@@ -41,6 +41,7 @@ class CarbonViewWrapperComponent  : public Component,
 public:
     CarbonViewWrapperComponent()
         : ComponentMovementWatcher (this),
+          keepPluginWindowWhenHidden (false),
           wrapperWindow (0),
           carbonWindow (0),
           embeddedView (0),
@@ -48,7 +49,7 @@ public:
     {
     }
 
-    virtual ~CarbonViewWrapperComponent()
+    ~CarbonViewWrapperComponent()
     {
         jassert (embeddedView == 0); // must call deleteWindow() in the subclass's destructor!
     }
@@ -98,9 +99,7 @@ public:
 
             // Check for the plugin creating its own floating window, and if there is one,
             // we need to reparent it to make it visible..
-            NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0];
-
-            if (floatingChildWindow != nil)
+            if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
                 [getOwnerWindow() addChildWindow: floatingChildWindow
                                          ordered: NSWindowAbove];
 
@@ -112,7 +111,7 @@ public:
                 { kEventClassMouse,  kEventMouseDown },
                 { kEventClassMouse,  kEventMouseMoved },
                 { kEventClassMouse,  kEventMouseDragged },
-                { kEventClassMouse,  kEventMouseUp},
+                { kEventClassMouse,  kEventMouseUp },
                 { kEventClassWindow, kEventWindowDrawContent },
                 { kEventClassWindow, kEventWindowShown },
                 { kEventClassWindow, kEventWindowHidden }
@@ -201,6 +200,18 @@ public:
                 wr.bottom = (short) (wr.top + getHeight());
 
                 SetWindowBounds (wrapperWindow, kWindowContentRgn, &wr);
+
+                // This group stuff is mainly a workaround for Mackie plugins like FinalMix..
+                WindowGroupRef group = GetWindowGroup (wrapperWindow);
+                WindowRef attachedWindow;
+
+                if (GetIndexedWindow (group, 2, kWindowGroupContentsReturnWindows, &attachedWindow) == noErr)
+                {
+                    SelectWindow (attachedWindow);
+                    ActivateWindow (attachedWindow, TRUE);
+                    HideWindow (wrapperWindow);
+                }
+
                 ShowWindow (wrapperWindow);
             }
 
@@ -223,7 +234,7 @@ public:
     {
         if (isShowing())
             createWindow();
-        else
+        else if (! keepPluginWindowWhenHidden)
             deleteWindow();
 
         setEmbeddedWindowToOurSize();
@@ -243,12 +254,15 @@ public:
 
     void timerCallback()
     {
-        setOurSizeToEmbeddedViewSize();
+        if (isShowing())
+        {
+            setOurSizeToEmbeddedViewSize();
 
-        // To avoid strange overpainting problems when the UI is first opened, we'll
-        // repaint it a few times during the first second that it's on-screen..
-        if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
-            recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
+            // To avoid strange overpainting problems when the UI is first opened, we'll
+            // repaint it a few times during the first second that it's on-screen..
+            if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+                recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
+        }
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
@@ -269,7 +283,9 @@ public:
                 SetEventParameter (event, kEventParamClickActivation, typeClickActivationResult,
                                    sizeof (ClickActivationResult), &howToHandleClick);
 
-                HIViewSetNeedsDisplay (embeddedView, true);
+                if (embeddedView != 0)
+                    HIViewSetNeedsDisplay (embeddedView, true);
+
                 return noErr;
             }
         }
@@ -281,6 +297,8 @@ public:
     {
         return ((CarbonViewWrapperComponent*) userData)->carbonEventHandler (nextHandlerRef, event);
     }
+
+    bool keepPluginWindowWhenHidden;
 
 protected:
     WindowRef wrapperWindow;

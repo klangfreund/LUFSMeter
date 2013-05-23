@@ -61,6 +61,7 @@
 #include "AAX_ITransport.h"
 #include "AAX_IMIDINode.h"
 #include "AAX_UtilsNative.h"
+#include "AAX_Enums.h"
 
 #ifdef __clang__
  #pragma clang diagnostic pop
@@ -495,7 +496,15 @@ struct AAXClasses
             info.timeSigDenominator = (int) den;
 
             info.timeInSamples = 0;
-            check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+
+            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
+                info.isPlaying = false;
+
+            if (! info.isPlaying)
+                check (transport.GetTimelineSelectionStartPosition (&info.timeInSamples));
+            else
+                check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
+
             info.timeInSeconds = info.timeInSamples / getSampleRate();
 
             int64_t ticks = 0;
@@ -508,12 +517,35 @@ struct AAXClasses
             info.ppqLoopStart = loopStartTick / 960000.0;
             info.ppqLoopEnd   = loopEndTick   / 960000.0;
 
-            // No way to get these: (?)
-            info.isPlaying = false;
-            info.isRecording = false;
-            info.ppqPositionOfLastBarStart = 0;
             info.editOriginTime = 0;
             info.frameRate = AudioPlayHead::fpsUnknown;
+
+            AAX_EFrameRate frameRate;
+            int32_t offset;
+
+            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            {
+                double framesPerSec = 24.0;
+
+                switch (frameRate)
+                {
+                    case AAX_eFrameRate_Undeclared:    break;
+                    case AAX_eFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
+                    case AAX_eFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
+                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+                    default:                           break;
+                }
+
+                info.editOriginTime = offset / framesPerSec;
+            }
+
+            // No way to get these: (?)
+            info.isRecording = false;
+            info.ppqPositionOfLastBarStart = 0;
 
             return true;
         }
@@ -536,6 +568,14 @@ struct AAXClasses
         void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex)
         {
             ReleaseParameter (IndexAsParamID (parameterIndex));
+        }
+
+        AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size)
+        {
+            if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
+            if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
+
+            return AAX_CEffectParameters::NotificationReceived (type, data, size);
         }
 
         void process (const float* const* inputs, float* const* outputs, const int bufferSize,
@@ -686,7 +726,7 @@ struct AAXClasses
                 {
                     AAX_IParameter* parameter
                         = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
-                                                     audioProcessor.getParameterName (parameterIndex).toUTF8().getAddress(),
+                                                     audioProcessor.getParameterName (parameterIndex).toRawUTF8(),
                                                      audioProcessor.getParameter (parameterIndex),
                                                      AAX_CLinearTaperDelegate<float, 0>(),
                                                      AAX_CNumberDisplayDelegate<float, 3>(),

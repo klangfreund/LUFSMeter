@@ -303,10 +303,6 @@ public:
 
         initialiseOnThread();
 
-       #if JUCE_USE_OPENGL_SHADERS && ! JUCE_OPENGL_ES
-        shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
-       #endif
-
         hasInitialised = true;
 
         while (! threadShouldExit())
@@ -330,6 +326,10 @@ public:
 
         context.extensions.initialise();
         nativeContext->setSwapInterval (1);
+
+       #if JUCE_USE_OPENGL_SHADERS && ! JUCE_OPENGL_ES
+        shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
+       #endif
 
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
@@ -471,7 +471,18 @@ private:
 
     static bool canBeAttached (const Component& comp) noexcept
     {
-        return comp.getWidth() > 0 && comp.getHeight() > 0 && comp.isShowing();
+        return comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimised (comp);
+    }
+
+    static bool isShowingOrMinimised (const Component& c)
+    {
+        if (! c.isVisible())
+            return false;
+
+        if (Component* p = c.getParentComponent())
+            return isShowingOrMinimised (*p);
+
+        return c.getPeer() != nullptr;
     }
 
     static bool isAttached (const Component& comp) noexcept

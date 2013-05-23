@@ -28,7 +28,7 @@
 //==============================================================================
 namespace MouseCursorHelpers
 {
-    static NSImage* createNSImage (const Image& image)
+    NSImage* createNSImage (const Image& image)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -37,7 +37,7 @@ namespace MouseCursorHelpers
             [im lockFocus];
 
             CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-            CGImageRef imageRef = juce_createCoreGraphicsImage (image, false, colourSpace, false);
+            CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, false);
             CGColorSpaceRelease (colourSpace);
 
             CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];

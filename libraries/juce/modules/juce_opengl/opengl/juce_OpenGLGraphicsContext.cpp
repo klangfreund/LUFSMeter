@@ -72,8 +72,8 @@ struct Target
 class PositionedTexture
 {
 public:
-    PositionedTexture (OpenGLTexture& texture, const EdgeTable& et, const Rectangle<int>& clip_)
-        : clip (clip_.getIntersection (et.getMaximumBounds()))
+    PositionedTexture (OpenGLTexture& texture, const EdgeTable& et, const Rectangle<int>& clipRegion)
+        : clip (clipRegion.getIntersection (et.getMaximumBounds()))
     {
         if (clip.contains (et.getMaximumBounds()))
         {
@@ -87,8 +87,8 @@ public:
         }
     }
 
-    PositionedTexture (GLuint textureID_, const Rectangle<int> area_, const Rectangle<int> clip_) noexcept
-        : textureID (textureID_), area (area_), clip (clip_)
+    PositionedTexture (GLuint texture, const Rectangle<int> r, const Rectangle<int> clipRegion) noexcept
+        : textureID (texture), area (r), clip (clipRegion)
     {}
 
     GLuint textureID;
@@ -922,6 +922,8 @@ struct StateHelpers
         ~ShaderQuadQueue() noexcept
         {
             static_jassert (sizeof (VertexInfo) == 8);
+            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
             context.extensions.glDeleteBuffers (2, buffers);
         }
 
@@ -937,9 +939,10 @@ struct StateHelpers
             }
 
             context.extensions.glGenBuffers (2, buffers);
-            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, buffers[0]);
-            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
             context.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof (indexData), indexData, GL_STATIC_DRAW);
+            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, buffers[1]);
+            context.extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertexData), vertexData, GL_STREAM_DRAW);
             JUCE_CHECK_OPENGL_ERROR
         }
 
@@ -1012,10 +1015,10 @@ struct StateHelpers
             GLuint colour;
         };
 
-       #if ! (JUCE_MAC || JUCE_ANDROID || JUCE_IOS)
-        enum { numQuads = 64 }; // (had problems with my drivers segfaulting when these buffers are any larger)
+       #if JUCE_MAC || JUCE_ANDROID || JUCE_IOS
+        enum { numQuads = 256 };
        #else
-        enum { numQuads = 8192 };
+        enum { numQuads = 64 }; // (had problems with my drivers segfaulting when these buffers are any larger)
        #endif
 
         GLuint buffers[2];
@@ -1026,7 +1029,9 @@ struct StateHelpers
 
         void draw() noexcept
         {
-            context.extensions.glBufferData (GL_ARRAY_BUFFER, numVertices * sizeof (VertexInfo), vertexData, GL_DYNAMIC_DRAW);
+            context.extensions.glBufferSubData (GL_ARRAY_BUFFER, 0, numVertices * sizeof (VertexInfo), vertexData);
+            // NB: If you get a random crash in here and are running in a Parallels VM, it seems to be a bug in
+            // their driver.. Can't find a workaround unfortunately.
             glDrawElements (GL_TRIANGLES, (numVertices * 3) / 2, GL_UNSIGNED_SHORT, 0);
             JUCE_CHECK_OPENGL_ERROR
             numVertices = 0;
@@ -1039,8 +1044,7 @@ struct StateHelpers
     struct CurrentShader
     {
         CurrentShader (OpenGLContext& c) noexcept
-            : context (c),
-              activeShader (nullptr)
+            : context (c), activeShader (nullptr)
         {
             const char programValueID[] = "GraphicsContextPrograms";
             programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID));
@@ -1104,11 +1108,11 @@ struct StateHelpers
 class GLState
 {
 public:
-    GLState (const Target& target_) noexcept
-        : target (target_),
-          activeTextures (target_.context),
-          currentShader (target_.context),
-          shaderQuadQueue (target_.context),
+    GLState (const Target& t) noexcept
+        : target (t),
+          activeTextures (t.context),
+          currentShader (t.context),
+          shaderQuadQueue (t.context),
           previousFrameBufferTarget (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
     {
         // This object can only be created and used when the current thread has an active OpenGL context.
@@ -1127,8 +1131,6 @@ public:
     {
         flush();
         target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
-        target.context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
-        target.context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     void flush()
@@ -1262,13 +1264,13 @@ public:
             {
                 setShader (programs->imageMasked);
                 imageParams = &programs->imageMasked.imageParams;
-                maskParams = &programs->imageMasked.maskParams;
+                maskParams  = &programs->imageMasked.maskParams;
             }
             else
             {
                 setShader (programs->tiledImageMasked);
                 imageParams = &programs->tiledImageMasked.imageParams;
-                maskParams = &programs->tiledImageMasked.maskParams;
+                maskParams  = &programs->tiledImageMasked.maskParams;
             }
         }
         else

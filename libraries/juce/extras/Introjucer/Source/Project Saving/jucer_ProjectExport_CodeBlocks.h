@@ -134,6 +134,10 @@ private:
         flags.add ("-O" + config.getGCCOptimisationFlag());
         flags.add ("-std=gnu++0x");
         flags.add ("-march=pentium4");
+        flags.add ("-mstackrealign");
+
+        if (config.isDebug())
+            flags.add ("-g");
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim(),
                          " \n", "\"'");
@@ -185,6 +189,7 @@ private:
         if (type.isCommandLineApp()) return 1;
         if (type.isStaticLibrary())  return 2;
         if (type.isDynamicLibrary()) return 3;
+        if (type.isAudioPlugin())    return 3;
         return 0;
     }
 
@@ -265,6 +270,8 @@ private:
     {
         XmlElement* const compiler = xml.createNewChildElement ("Compiler");
         setAddOption (*compiler, "option", "-Wall");
+        setAddOption (*compiler, "option", "-Wno-strict-aliasing");
+        setAddOption (*compiler, "option", "-Wno-strict-overflow");
     }
 
     void addProjectLinkerOptions (XmlElement& xml) const
