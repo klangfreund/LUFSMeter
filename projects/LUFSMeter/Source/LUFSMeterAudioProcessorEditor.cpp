@@ -425,5 +425,5 @@ void LUFSMeterAudioProcessorEditor::displayPositionInfo (const AudioPlayHead::Cu
     else if (pos.isPlaying)
         displayText << "  (playing)";
     
-    infoLabel.setText (displayText, false);
+    //infoLabel.setText (displayText, false);
 }

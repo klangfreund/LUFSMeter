@@ -298,9 +298,9 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new LUFSMeterAudioProcessor();
 }
 
-#ifdef LUFSMETER_STANDALONE
-AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType)
-{
-    return new LUFSMeterAudioProcessor();
-}
-#endif
+//#ifdef LUFSMETER_STANDALONE
+//AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType)
+//{
+//    return new LUFSMeterAudioProcessor();
+//}
+//#endif

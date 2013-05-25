@@ -10,7 +10,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 // #include "MainComponent.h"
-#include "../../../libraries/juce/modules/juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
+//#include "../../../libraries/juce/modules/juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
+#include "juce_StandaloneFilterWindow.h"
 
 
 //==============================================================================

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="efOX8g" name="LUFSMeterStandalone" projectType="guiapp" version="0.0.3"
-              bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.0.0"
+              bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.1.0"
               companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1">
   <MAINGROUP id="AO7N4d" name="LUFSMeterStandalone">
-    <GROUP id="{54DB0834-C391-BB20-D2E8-10BA7ED68A39}" name="LUFSMeter Source">
+    <GROUP id="{54DB0834-C391-BB20-D2E8-10BA7ED68A39}" name="Source LUFSMeter Plugin">
       <FILE id="HKkacv" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
             file="../LUFSMeter/Source/Ebu128LoudnessMeter.cpp"/>
       <FILE id="lzb1UK" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
@@ -62,7 +62,9 @@
       <FILE id="et1yiX" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
             file="../LUFSMeter/Source/MacrosAndJuceHeaders.h"/>
     </GROUP>
-    <GROUP id="{75D50FC4-BF05-8BB7-DFC9-BBA484676D29}" name="Source">
+    <GROUP id="{75D50FC4-BF05-8BB7-DFC9-BBA484676D29}" name="Source LUFSMeter Standalone">
+      <FILE id="JJrPHd" name="juce_StandaloneFilterWindow.h" compile="0"
+            resource="0" file="Source/juce_StandaloneFilterWindow.h"/>
       <FILE id="v5NsX9" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
