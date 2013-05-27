@@ -30,14 +30,18 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter ();
 
 //==============================================================================
 /**
-    A class that can be used to run a simple standalone application containing your filter.
+    A class that can be used to run a simple standalone application containing 
+    your filter.
 
-    Just create one of these objects in your JUCEApplication::initialise() method, and
-    let it do its work. It will create your filter object using the same createFilter() function
-    that the other plugin wrappers use.
+    Just create one of these objects in your JUCEApplication::initialise()
+    method, and let it do its work. It will create your filter object using the
+    same createFilter() function that the other plugin wrappers use.
 */
 class StandaloneFilterWindow    : public DocumentWindow,
-                                  public ButtonListener   // (can't use Button::Listener due to idiotic VC2005 bug)
+                                  public ApplicationCommandTarget,
+                                    // This will be registered at the
+                                    // globalCommandManager.
+                                  public MenuBarModel
 {
 public:
     //==============================================================================
@@ -50,15 +54,30 @@ public:
                             const Colour& backgroundColour,
                             PropertySet* settingsToUse)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-          settings (settingsToUse),
-          optionsButton ("options")
+          settings (settingsToUse)
     {
-        //setUsingNativeTitleBar (true);
-        setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
+        // Register the StandaloneFilterWindow as ApplicationCommandTarget.
+        globalCommandManager.registerAllCommandsForTarget (this);
+        globalCommandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
+        
+        // This lets the command manager use keypresses that arrive in our
+        // window to send out commands.
+        addKeyListener (globalCommandManager.getKeyMappings());
 
-        Component::addAndMakeVisible (&optionsButton);
-        optionsButton.addListener (this);
-        optionsButton.setTriggeredOnMouseDown (true);
+#if JUCE_MAC
+        setMenuBar (nullptr); // Disable the main menu below the window title bar.
+        MenuBarModel::setMacMainMenu (this); // Enable
+#else
+        setMenuBar (this);
+#endif
+        
+        // Tells our menu bar model that it should watch the
+        // globalCommandManager for changes, and send change messages
+        // accordingly.
+        setApplicationCommandManagerToWatch (&globalCommandManager);
+        
+        setUsingNativeTitleBar (true);
+        //setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
         createFilter();
 
@@ -144,11 +163,150 @@ public:
         }
 
         deleteFilter();
+        
+        // because we've set the StandaloneFilterWindow to be used as our menu
+        // bar model, we have to switch this off before deleting the
+        // StandaloneFilterWindow.
+        setMenuBar (nullptr);
+        
+#if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
+        MenuBarModel::setMacMainMenu (nullptr);
+#endif
     }
 
-    //==============================================================================
+    //==========================================================================
     AudioProcessor* getAudioProcessor() const noexcept      { return filter; }
     AudioDeviceManager* getDeviceManager() const noexcept   { return deviceManager; }
+    
+    //==========================================================================
+    // ApplicationCommandTarget methods:
+    ApplicationCommandTarget* getNextCommandTarget()
+    {
+        // Source: Juce Demo.
+        // This will return the next parent component that is an ApplicationCommandTarget (in this
+        // case, there probably isn't one, but it's best to use this method in your own apps).
+        return findFirstTargetParentComponent();
+    }
+    
+    void getAllCommands (Array <CommandID>& commands)
+    {
+        // this returns the set of all commands that this target can perform..
+        const CommandID ids[] = {   showAudioSettings,
+                                    saveCurrentState,
+                                    loadASavedState,
+                                    resetToDefaultState
+                                };
+        
+        commands.addArray (ids, numElementsInArray (ids));
+    }
+    
+    // This method is used when something needs to find out the details about one of the commands
+    // that this object can perform..
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
+    {
+        const String optionsCategory ("Options");
+        
+        switch (commandID)
+        {
+            case showAudioSettings:
+                result.setInfo ("Audio Settings...",
+                                "Shows the audio settings dialog",
+                                optionsCategory,
+                                0);
+                result.addDefaultKeypress (',', ModifierKeys::commandModifier);
+                break;
+                
+            case saveCurrentState:
+                result.setInfo ("Save current state...",
+                                "Saves the current state",
+                                optionsCategory,
+                                0);
+                result.addDefaultKeypress ('s', ModifierKeys::commandModifier);
+                break;
+                
+            case loadASavedState:
+                result.setInfo ("Load a saved state...",
+                                "Loads a saved state",
+                                optionsCategory,
+                                0);
+                result.addDefaultKeypress ('o', ModifierKeys::commandModifier);
+                break;
+                
+            case resetToDefaultState:
+                result.setInfo ("Reset to the default state",
+                                "Reset to the default state",
+                                optionsCategory,
+                                0);
+                result.addDefaultKeypress ('r', ModifierKeys::commandModifier);
+                break;
+                
+            default:
+                break;
+        };
+    }
+    
+    // This is the ApplicationCommandTarget method that is used to actually
+    // perform one of our commands..
+    bool perform (const InvocationInfo& info)
+    {
+        switch (info.commandID)
+        {
+            case showAudioSettings:
+                showAudioSettingsDialog();
+                break;
+            
+            case saveCurrentState:
+                saveState();
+                break;
+                
+            case loadASavedState:
+                loadState();
+                break;
+                
+            case resetToDefaultState:
+                resetFilter();
+                break;
+                
+            default:
+                return false;
+        };
+        
+        return true;
+    }
+    
+    
+    //==========================================================================
+    // MenuBarModel methods
+    
+    StringArray getMenuBarNames()
+    {
+        const char* const names[] = { "Options", nullptr };
+        
+        return StringArray (names);
+    }
+
+    PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/)
+    {
+        PopupMenu menu;
+
+        if (menuIndex == 0)
+        {
+            menu.addCommandItem (&globalCommandManager, showAudioSettings);
+            menu.addCommandItem (&globalCommandManager, saveCurrentState);
+            menu.addCommandItem (&globalCommandManager, loadASavedState);
+            menu.addCommandItem (&globalCommandManager, resetToDefaultState);
+        }
+        return menu;
+    }
+    
+    void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
+    {
+        // most of our menu items are invoked automatically as commands, but we
+        // could handle the other special cases here..
+    }
+    
+    //==========================================================================
+    
 
     void createFilter()
     {
@@ -249,34 +407,9 @@ public:
     }
 
     /** @internal */
-    void buttonClicked (Button*)
-    {
-        if (filter != nullptr)
-        {
-            PopupMenu m;
-            m.addItem (1, TRANS("Audio Settings..."));
-            m.addSeparator();
-            m.addItem (2, TRANS("Save current state..."));
-            m.addItem (3, TRANS("Load a saved state..."));
-            m.addSeparator();
-            m.addItem (4, TRANS("Reset to default state"));
-
-            switch (m.showAt (&optionsButton))
-            {
-                case 1:  showAudioSettingsDialog(); break;
-                case 2:  saveState(); break;
-                case 3:  loadState(); break;
-                case 4:  resetFilter(); break;
-                default: break;
-            }
-        }
-    }
-
-    /** @internal */
     void resized()
     {
         DocumentWindow::resized();
-        optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
     }
 
 private:
@@ -285,7 +418,9 @@ private:
     ScopedPointer<AudioProcessor> filter;
     ScopedPointer<AudioDeviceManager> deviceManager;
     AudioProcessorPlayer player;
-    TextButton optionsButton;
+    
+    // The global command manager object used to dispatch command events
+    ApplicationCommandManager globalCommandManager;
 
     void deleteFilter()
     {
@@ -299,6 +434,14 @@ private:
 
         filter = nullptr;
     }
+    
+    enum CommandIDs
+    {
+        showAudioSettings           = 0x2000,
+        saveCurrentState            = 0x2001,
+        loadASavedState             = 0x2002,
+        resetToDefaultState         = 0x2003
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
