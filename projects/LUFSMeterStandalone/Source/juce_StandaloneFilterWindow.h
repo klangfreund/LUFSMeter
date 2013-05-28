@@ -58,7 +58,7 @@ public:
     {
         // Register the StandaloneFilterWindow as ApplicationCommandTarget.
         globalCommandManager.registerAllCommandsForTarget (this);
-        globalCommandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
+        //globalCommandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
         
         // This lets the command manager use keypresses that arrive in our
         // window to send out commands.
@@ -74,6 +74,9 @@ public:
         // Tells our menu bar model that it should watch the
         // globalCommandManager for changes, and send change messages
         // accordingly.
+        // Without this, the entries in the menu bar are greyed out.
+        // (For example, they are greyed out as soon as the Audio Settings
+        // Dialog is open an has the focus.)
         setApplicationCommandManagerToWatch (&globalCommandManager);
         
         setUsingNativeTitleBar (true);
