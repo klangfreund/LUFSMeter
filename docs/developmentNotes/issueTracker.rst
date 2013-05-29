@@ -20,6 +20,7 @@ Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
 
 Numeric Gain (Weighting) for each channel user adjustable
 ---------------------------------------------------------
+
 Part of my answer to an Email at 130204:
 To get the accurate LUFS value for 6 channels with my LUFS Meter:
 Open an instance of the LUFS-Meter with 5 or 6 input channels.
@@ -29,18 +30,24 @@ It's on my todo-list to implement this internally, such that you only have to ch
 
 Rework the GUI
 --------------
+
 - Give the plugin an overall look (Skinnable via Look and feel!)
 - How to implement the history meter more efficient?
 - Settings panel as overlay? Or any other idea such that it's intuitive?
 
+Website: Improve usability, add a klangfreund.com index page and add a getting started tutorial
+-----------------------------------------------------------------------------------------------
+
 Website: Implement a notification function for interested customers
 -------------------------------------------------------------------
+
 - Email Newsletter?
 - RSS Feed?
-- Facebook?
+- Twitter or Facebook?
 
 Linux
 -----
+
 - Compile the LUFS Meter for Linux
 
 
