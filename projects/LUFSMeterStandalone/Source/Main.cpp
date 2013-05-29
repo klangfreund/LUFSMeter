@@ -31,6 +31,7 @@ public:
         // This method is where you should put your application's initialisation code..
         
         standaloneFilterWindow = new StandaloneFilterWindow(JUCEApplication::getInstance()->getApplicationName(), Colours::lightgrey, nullptr);
+        standaloneFilterWindow = new StandaloneFilterWindow("LUFSMeter", Colours::lightgrey, nullptr);
         // ApplicationProperties::getInstance()->setStorageParameters (T("DemoAudioPluginStandalone"), String::empty, T("DemoAudioPluginStandalone"), 400, PropertiesFile::storeAsXML);
         //filterWindow = new StandaloneFilterWindow (T("DemoAudioPluginStandalone"), Colours::black);
         standaloneFilterWindow->setTitleBarButtonsRequired (DocumentWindow::allButtons, false);
