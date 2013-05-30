@@ -180,7 +180,11 @@ private:
      block loudnesses.
      */
     vector<int> histogramOfBlockLoudness;
-       
+    
+    /** The main loudness value of interest.
+     
+     It is the return value of getIntegratedLoudness().
+     */
     float integratedLoudness;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);

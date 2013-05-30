@@ -37,16 +37,17 @@ MultiChannelLoudnessBar::MultiChannelLoudnessBar ()
 
 MultiChannelLoudnessBar::~MultiChannelLoudnessBar ()
 {
-    loudnessValue.removeListener(this);
+    minLoudness.removeListener(this);
+    maxLoudness.removeListener(this);
 }
 
-void MultiChannelLoudnessBar::setValueObjectsToRefereTo (const Value & loudnessValueToReferTo,
-                                                         const Value & minLoudnessValueToReferTo,
+void MultiChannelLoudnessBar::setLoudness (const Array<float>& multiChannelLoudness)
+{
+}
+
+void MultiChannelLoudnessBar::setValueObjectsToRefereTo (const Value & minLoudnessValueToReferTo,
                                                          const Value & maxLoudnessValueToReferTo)
 {
-    loudnessValue.referTo(loudnessValueToReferTo);
-    loudnessValue.addListener(this);
-    
     minLoudness.referTo(minLoudnessValueToReferTo);
     minLoudness.addListener(this);
     maxLoudness.referTo(maxLoudnessValueToReferTo);
@@ -57,11 +58,12 @@ void MultiChannelLoudnessBar::setValueObjectsToRefereTo (const Value & loudnessV
 
 void MultiChannelLoudnessBar::valueChanged (Value & value)
 {
-    if (value == loudnessValue)
-    {
-        repaint();
-    }
-    else if (value == minLoudness || value == maxLoudness)
+//    if (value == loudnessValue)
+//    {
+//        repaint();
+//    }
+//    else
+    if (value == minLoudness || value == maxLoudness)
     {
         determineStretchAndOffset();
         repaint();
@@ -71,6 +73,7 @@ void MultiChannelLoudnessBar::valueChanged (Value & value)
 //==============================================================================
 void MultiChannelLoudnessBar::paint (Graphics& g)
 {
+/*
     const float width = float (getWidth());
     const float height = float (getHeight());
     
@@ -116,7 +119,7 @@ void MultiChannelLoudnessBar::paint (Graphics& g)
                        bottomY-topLeftY);
         }
     }
-
+*/
 }
 
 void MultiChannelLoudnessBar::determineStretchAndOffset()

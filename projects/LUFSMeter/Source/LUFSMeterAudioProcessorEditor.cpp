@@ -61,8 +61,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     preferencesPaneWidth (400),
     preferencesPaneHeight(300)
 {
-    momentaryLoudnessBar.setValueObjectsToRefereTo (momentaryLoudnessValues,
-                                                    getProcessor()->loudnessBarMinValue, 
+    momentaryLoudnessBar.setValueObjectsToRefereTo (getProcessor()->loudnessBarMinValue, 
                                                     getProcessor()->loudnessBarMaxValue);
     
     // Add the background
@@ -189,15 +188,18 @@ void LUFSMeterAudioProcessorEditor::resized()
 // This timer periodically updates the labels.
 void LUFSMeterAudioProcessorEditor::timerCallback()
 {
-    AudioPlayHead::CurrentPositionInfo newPos (getProcessor()->lastPosInfo);
-    
-    if (lastDisplayedPosition != newPos)
-        displayPositionInfo (newPos);
+//    AudioPlayHead::CurrentPositionInfo newPos (getProcessor()->lastPosInfo);
+//    
+//    if (lastDisplayedPosition != newPos)
+//        displayPositionInfo (newPos);
     
     float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
     jassert(momentaryLoudnessOfFirstChannel > -400)
     momentaryLoudnessValue.setValue(momentaryLoudnessOfFirstChannel);
+
+    //momentaryLoudnessBar.setLoudness(getProcessor()->getMomentaryLoudness());
     
+    /*
     // momentary loudness values
     // -------------------------
     // source:
@@ -212,6 +214,7 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
         momentaryLoudness.add (momentaryLoudnessOfTheKthChannel);
     }
     //momentaryLoudnessValues.setValue (var (momentaryLoudness));
+    */
     
     float shortTermLoudness = getProcessor()->getShortTermLoudness();
     jassert(shortTermLoudness > -400)

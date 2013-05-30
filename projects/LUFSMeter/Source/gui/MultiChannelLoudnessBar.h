@@ -54,8 +54,9 @@ public:
     
     ~MultiChannelLoudnessBar ();
     
-    void setValueObjectsToRefereTo (const Value & loudnessValueToReferTo,
-                                    const Value & minLoudnessValueToReferTo,
+    void setLoudness (const Array<float>& multiChannelLoudness);
+    
+    void setValueObjectsToRefereTo (const Value & minLoudnessValueToReferTo,
                                     const Value & maxLoudnessValueToReferTo);
     
     void valueChanged (Value & value);
@@ -77,7 +78,8 @@ private:
     float stretch;
     float offset;
     
-    Value loudnessValue;
+    Array<float> oldMultiChannelLoudness;
+//    Value loudnessValue;
     Value minLoudness;
     Value maxLoudness;
 };
