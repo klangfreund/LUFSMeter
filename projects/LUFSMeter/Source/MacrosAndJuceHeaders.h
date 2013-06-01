@@ -30,7 +30,6 @@
 #ifndef __LUFSMETER_MACROS__
 #define __LUFSMETER_MACROS__
 
-
 #ifdef LUFSMETER_STANDALONE // This preprocessor definition is set as a
 // compiler argument (Open the LUFSMeterStandalone.jucer in the Introjucer
 // and go to the Config -> LUFSMeterStandalone) when this file is compiled for

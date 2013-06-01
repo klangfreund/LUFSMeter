@@ -35,7 +35,6 @@
 LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProcessor* ownerFilter)
   : AudioProcessorEditor (ownerFilter),
     momentaryLoudnessValue (var(-300.0)),
-    momentaryLoudnessValues (),
     shortTermLoudnessValue (var(-300.0)),
     integratedLoudnessValue (var(-300.0)),
     distanceBetweenLoudnessBarAndTop (10),
@@ -44,7 +43,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
                            distanceBetweenLoudnessBarAndBottom, 
                            getProcessor()->loudnessBarMinValue, 
                            getProcessor()->loudnessBarMaxValue),
-    momentaryLoudnessBar (),
+    momentaryLoudnessBar (getProcessor()->loudnessBarMinValue,
+                          getProcessor()->loudnessBarMaxValue),
     shortTermLoudnessBar (shortTermLoudnessValue, 
                           getProcessor()->loudnessBarMinValue, 
                           getProcessor()->loudnessBarMaxValue),
@@ -61,9 +61,6 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     preferencesPaneWidth (400),
     preferencesPaneHeight(300)
 {
-    momentaryLoudnessBar.setValueObjectsToRefereTo (getProcessor()->loudnessBarMinValue, 
-                                                    getProcessor()->loudnessBarMaxValue);
-    
     // Add the background
     addAndMakeVisible (&backgroundGrid);
     addAndMakeVisible (&backgroundGridCaption);
@@ -193,15 +190,15 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
 //    if (lastDisplayedPosition != newPos)
 //        displayPositionInfo (newPos);
     
-    float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
-    jassert(momentaryLoudnessOfFirstChannel > -400)
-    momentaryLoudnessValue.setValue(momentaryLoudnessOfFirstChannel);
-
-    //momentaryLoudnessBar.setLoudness(getProcessor()->getMomentaryLoudness());
-    
-    /*
     // momentary loudness values
     // -------------------------
+    float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
+    jassert(momentaryLoudnessOfFirstChannel > -400)
+    momentaryLoudnessValue.setValue (momentaryLoudnessOfFirstChannel);
+
+    momentaryLoudnessBar.setLoudness (getProcessor()->getMomentaryLoudness());
+    
+    /*
     // source:
     const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudness();
     // destination:
@@ -213,13 +210,16 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
         double momentaryLoudnessOfTheKthChannel = double (momentaryLoudnessFromEbu128LM[k]);
         momentaryLoudness.add (momentaryLoudnessOfTheKthChannel);
     }
-    //momentaryLoudnessValues.setValue (var (momentaryLoudness));
     */
-    
+
+    // short loudness values
+    // ---------------------
     float shortTermLoudness = getProcessor()->getShortTermLoudness();
     jassert(shortTermLoudness > -400)
     shortTermLoudnessValue.setValue(shortTermLoudness);
 
+    // integrated loudness values
+    // --------------------------
     float integratedLoudness = getProcessor()->getIntegratedLoudness();
     jassert(integratedLoudness > -400)
     integratedLoudnessValue.setValue(integratedLoudness);

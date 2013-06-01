@@ -83,9 +83,9 @@ private:
     Value maxLoudness;
     
     /** Defines one border of the region which needs to be repainted. */
-    float currentLevel;
+    float currentLoudness;
     /** Defines one border of the region which needs to be repainted. */
-    float previousLevel;
+    float previousLoudness;
 };
 
 

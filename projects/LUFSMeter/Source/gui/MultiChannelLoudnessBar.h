@@ -50,17 +50,16 @@ class MultiChannelLoudnessBar  : public Component,
                                  public Value::Listener
 {
 public:
-    MultiChannelLoudnessBar ();
+    MultiChannelLoudnessBar (const Value & minLoudnessValueToReferTo,
+                             const Value & maxLoudnessValueToReferTo);
     
     ~MultiChannelLoudnessBar ();
     
     void setLoudness (const Array<float>& multiChannelLoudness);
     
-    void setValueObjectsToRefereTo (const Value & minLoudnessValueToReferTo,
-                                    const Value & maxLoudnessValueToReferTo);
-    
     void valueChanged (Value & value);
 
+    void resized ();
     void paint (Graphics& g);
     
 private:
@@ -73,12 +72,13 @@ private:
         f(minimumLevel) = 0
         f(maximumLevel) = 1 .
      */
-    void determineStretchAndOffset();
+    void determineStretchOffsetAndWidthOfIndividualChannel();
     
     float stretch;
     float offset;
+    float widthOfIndividualChannel;
     
-    Array<float> oldMultiChannelLoudness;
+    Array<float> currentMultiChannelLoudness;
 //    Value loudnessValue;
     Value minLoudness;
     Value maxLoudness;

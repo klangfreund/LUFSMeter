@@ -31,8 +31,15 @@
 
 
 //==============================================================================
-MultiChannelLoudnessBar::MultiChannelLoudnessBar ()
+MultiChannelLoudnessBar::MultiChannelLoudnessBar (const Value & minLoudnessValueToReferTo,
+                                                  const Value & maxLoudnessValueToReferTo)
 {
+    minLoudness.referTo(minLoudnessValueToReferTo);
+    minLoudness.addListener(this);
+    maxLoudness.referTo(maxLoudnessValueToReferTo);
+    maxLoudness.addListener(this);
+    
+    determineStretchOffsetAndWidthOfIndividualChannel();
 }
 
 MultiChannelLoudnessBar::~MultiChannelLoudnessBar ()
@@ -43,17 +50,18 @@ MultiChannelLoudnessBar::~MultiChannelLoudnessBar ()
 
 void MultiChannelLoudnessBar::setLoudness (const Array<float>& multiChannelLoudness)
 {
-}
-
-void MultiChannelLoudnessBar::setValueObjectsToRefereTo (const Value & minLoudnessValueToReferTo,
-                                                         const Value & maxLoudnessValueToReferTo)
-{
-    minLoudness.referTo(minLoudnessValueToReferTo);
-    minLoudness.addListener(this);
-    maxLoudness.referTo(maxLoudnessValueToReferTo);
-    maxLoudness.addListener(this);
+    if (multiChannelLoudness.size() != currentMultiChannelLoudness.size())
+    {
+        // If the number of channels has changed.
+        currentMultiChannelLoudness = multiChannelLoudness;
+        determineStretchOffsetAndWidthOfIndividualChannel();
+    }
+    else
+    {
+        currentMultiChannelLoudness = multiChannelLoudness;
+    }
     
-    determineStretchAndOffset();
+    repaint();
 }
 
 void MultiChannelLoudnessBar::valueChanged (Value & value)
@@ -65,14 +73,45 @@ void MultiChannelLoudnessBar::valueChanged (Value & value)
 //    else
     if (value == minLoudness || value == maxLoudness)
     {
-        determineStretchAndOffset();
+        determineStretchOffsetAndWidthOfIndividualChannel();
         repaint();
     }
 }
 
 //==============================================================================
+void MultiChannelLoudnessBar::resized ()
+{
+    determineStretchOffsetAndWidthOfIndividualChannel();
+}
+
 void MultiChannelLoudnessBar::paint (Graphics& g)
 {
+    const float height = float (getHeight());
+    
+    g.setColour(Colours::green);
+    
+    float topLeftX = 0.0f;
+    for (int channel = 0; channel < currentMultiChannelLoudness.size(); ++channel)
+    {
+        float currentLoudness = currentMultiChannelLoudness[channel];
+        
+        // Ensure that the currentLoudness is in the interval
+        // [minimumLevel, maximumLevel].
+        currentLoudness = jmax(currentLoudness, float(minLoudness.getValue()));
+        currentLoudness = jmin(currentLoudness, float(maxLoudness.getValue()));
+        
+        float barHeightInPercent = stretch*currentLoudness + offset;
+        
+        float topLeftY = (1.0f - barHeightInPercent) * height;
+        float bottomY = height;
+        g.fillRect(topLeftX,
+                   topLeftY,
+                   widthOfIndividualChannel,
+                   bottomY-topLeftY);
+        
+        topLeftX += widthOfIndividualChannel;
+    }
+
 /*
     const float width = float (getWidth());
     const float height = float (getHeight());
@@ -122,7 +161,7 @@ void MultiChannelLoudnessBar::paint (Graphics& g)
 */
 }
 
-void MultiChannelLoudnessBar::determineStretchAndOffset()
+void MultiChannelLoudnessBar::determineStretchOffsetAndWidthOfIndividualChannel()
 {
     // These two values define a linear mapping
     //    f(x) = stretch * x + offset
@@ -131,4 +170,18 @@ void MultiChannelLoudnessBar::determineStretchAndOffset()
     //    f(maximumLevel) = 1
     stretch = 1.0f/(double(maxLoudness.getValue()) - double(minLoudness.getValue()));
     offset = -double(minLoudness.getValue()) * stretch;
+    
+    // Determine widthOfIndividualChannel.
+    if (currentMultiChannelLoudness.size() != 0)
+    {
+        widthOfIndividualChannel = getWidth()/currentMultiChannelLoudness.size();
+    }
+    else
+    {
+        widthOfIndividualChannel = getWidth();
+    }
+    widthOfIndividualChannel = jmax(widthOfIndividualChannel, 1.0f);
+        // Should not be smaller than 1 pixel, such that an individual channel
+        // is always clearly recognizable.
+        // This also avoids division by zero.
 }

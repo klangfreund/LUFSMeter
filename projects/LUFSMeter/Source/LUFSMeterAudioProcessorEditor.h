@@ -86,7 +86,6 @@ private:
     // There is no momentaryLoudnessValues here, because the Value object is
     // not suited to be updated at e.g. 20Hz since it deallocates and allocates
     // new memory every time it gets updated.
-    Value momentaryLoudnessValues;
     Value shortTermLoudnessValue;
     Value integratedLoudnessValue;
     

@@ -34,8 +34,8 @@
 LoudnessBar::LoudnessBar (const Value & loudnessValueToReferTo,
                           const Value & minValueToReferTo,
                           const Value & maxValueToReferTo)
-  : currentLevel (minValueToReferTo.getValue()),
-    previousLevel (minValueToReferTo.getValue())
+  : currentLoudness (minValueToReferTo.getValue()),
+    previousLoudness (minValueToReferTo.getValue())
 {
     loudnessValue.referTo(loudnessValueToReferTo);
     loudnessValue.addListener(this);
@@ -63,23 +63,23 @@ void LoudnessBar::valueChanged (Value & value)
     if (value == loudnessValue)
     {
         
-        currentLevel = value.getValue();
+        currentLoudness = value.getValue();
         
-        // Ensure that the currentLevel is in the interval
+        // Ensure that the currentLoudness is in the interval
         // [minimumLevel, maximumLevel].
-        currentLevel = jmax(currentLevel, float(minLoudness.getValue()));
-        currentLevel = jmin(currentLevel, float(maxLoudness.getValue()));
+        currentLoudness = jmax(currentLoudness, float(minLoudness.getValue()));
+        currentLoudness = jmin(currentLoudness, float(maxLoudness.getValue()));
         
-        if (currentLevel != previousLevel)
+        if (currentLoudness != previousLoudness)
         {
-            //        float topBorderInPercent = stretch*jmax(currentLevel,previousLevel) + offset;
-            //        float bottomBorderInPercent = stretch*jmin(currentLevel,previousLevel) + offset;
+            //        float topBorderInPercent = stretch*jmax(currentLoudness,previousLoudness) + offset;
+            //        float bottomBorderInPercent = stretch*jmin(currentLoudness,previousLoudness) + offset;
             //        
             //        const int topLeftX = 0;
             //        const int topLeftY = floor((1-topBorderInPercent) * (float) getHeight()) -3;
             //        const int heightOfSectionToDraw = ceil((topBorderInPercent-bottomBorderInPercent) * (float) getHeight()) + 3;
             //        
-            previousLevel = currentLevel;
+            previousLoudness = currentLoudness;
             //    
             //        repaint(topLeftX, topLeftY, getWidth(), heightOfSectionToDraw);
             
@@ -108,7 +108,7 @@ void LoudnessBar::paint (Graphics& g)
 //    float cornerSize = 3.0f;
 //    g.fillRoundedRectangle(x, y, width, height, cornerSize);
     
-    float barHeightInPercent = stretch*currentLevel + offset;
+    float barHeightInPercent = stretch*currentLoudness + offset;
     g.setColour(Colours::green);
     const float topLeftX = 0.0f;
     float topLeftY = (1.0f - barHeightInPercent) * height;
