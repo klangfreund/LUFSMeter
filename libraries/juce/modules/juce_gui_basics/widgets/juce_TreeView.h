@@ -1,34 +1,30 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
-#define __JUCE_TREEVIEW_JUCEHEADER__
+#ifndef JUCE_TREEVIEW_H_INCLUDED
+#define JUCE_TREEVIEW_H_INCLUDED
 
-#include "../layout/juce_Viewport.h"
-#include "../mouse/juce_FileDragAndDropTarget.h"
-#include "../mouse/juce_DragAndDropTarget.h"
 class TreeView;
 
 
@@ -151,7 +147,7 @@ public:
 
     /** Returns the rectangle that this item occupies.
 
-        If relativeToTreeViewTopLeft is true, the co-ordinates are relative to the
+        If relativeToTreeViewTopLeft is true, the coordinates are relative to the
         top-left of the TreeView comp, so this will depend on the scroll-position of
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
@@ -551,6 +547,8 @@ private:
     void restoreToDefaultOpenness();
     bool isFullyOpen() const noexcept;
     XmlElement* getOpennessState (bool canReturnNull) const;
+    bool removeSubItemFromList (int index, bool deleteItem);
+    void removeAllSubItemsFromList();
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // The parameters for these methods have changed - please update your code!
@@ -788,35 +786,35 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
+    bool isInterestedInFileDrag (const StringArray& files) override;
     /** @internal */
-    void fileDragEnter (const StringArray& files, int x, int y);
+    void fileDragEnter (const StringArray& files, int x, int y) override;
     /** @internal */
-    void fileDragMove (const StringArray& files, int x, int y);
+    void fileDragMove (const StringArray& files, int x, int y) override;
     /** @internal */
-    void fileDragExit (const StringArray& files);
+    void fileDragExit (const StringArray& files) override;
     /** @internal */
-    void filesDropped (const StringArray& files, int x, int y);
+    void filesDropped (const StringArray& files, int x, int y) override;
     /** @internal */
-    bool isInterestedInDragSource (const SourceDetails&);
+    bool isInterestedInDragSource (const SourceDetails&) override;
     /** @internal */
-    void itemDragEnter (const SourceDetails&);
+    void itemDragEnter (const SourceDetails&) override;
     /** @internal */
-    void itemDragMove (const SourceDetails&);
+    void itemDragMove (const SourceDetails&) override;
     /** @internal */
-    void itemDragExit (const SourceDetails&);
+    void itemDragExit (const SourceDetails&) override;
     /** @internal */
-    void itemDropped (const SourceDetails&);
+    void itemDropped (const SourceDetails&) override;
 
 private:
     class ContentComponent;
@@ -825,9 +823,9 @@ private:
     class TargetGroupHighlight;
     friend class TreeViewItem;
     friend class ContentComponent;
-    friend class ScopedPointer<TreeViewport>;
-    friend class ScopedPointer<InsertPointHighlight>;
-    friend class ScopedPointer<TargetGroupHighlight>;
+    friend struct ContainerDeletePolicy<TreeViewport>;
+    friend struct ContainerDeletePolicy<InsertPointHighlight>;
+    friend struct ContainerDeletePolicy<TargetGroupHighlight>;
 
     ScopedPointer<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;
@@ -835,11 +833,8 @@ private:
     ScopedPointer<InsertPointHighlight> dragInsertPointHighlight;
     ScopedPointer<TargetGroupHighlight> dragTargetGroupHighlight;
     int indentSize;
-    bool defaultOpenness : 1;
-    bool needsRecalculating : 1;
-    bool rootItemVisible : 1;
-    bool multiSelectEnabled : 1;
-    bool openCloseButtonsVisible : 1;
+    bool defaultOpenness, needsRecalculating, rootItemVisible;
+    bool multiSelectEnabled, openCloseButtonsVisible;
 
     void itemsChanged() noexcept;
     void recalculateIfNeeded();
@@ -857,4 +852,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };
 
-#endif   // __JUCE_TREEVIEW_JUCEHEADER__
+#endif   // JUCE_TREEVIEW_H_INCLUDED

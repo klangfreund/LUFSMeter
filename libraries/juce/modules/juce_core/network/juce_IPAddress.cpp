@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -98,12 +101,12 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
 {
     ifconf cfg;
     HeapBlock<char> buffer;
-    size_t bufferSize = 1024;
+    int bufferSize = 1024;
 
     do
     {
         bufferSize *= 2;
-        buffer.calloc (bufferSize);
+        buffer.calloc ((size_t) bufferSize);
 
         cfg.ifc_len = bufferSize;
         cfg.ifc_buf = buffer;
@@ -111,7 +114,7 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
         if (ioctl (sock, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
             return;
 
-    } while (bufferSize < cfg.ifc_len + 2 * (IFNAMSIZ + sizeof (struct sockaddr_in6)));
+    } while (bufferSize < cfg.ifc_len + 2 * (int) (IFNAMSIZ + sizeof (struct sockaddr_in6)));
 
    #if JUCE_MAC || JUCE_IOS
     while (cfg.ifc_len >= (int) (IFNAMSIZ + sizeof (struct sockaddr_in)))
@@ -123,7 +126,7 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
         cfg.ifc_buf += IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
     }
    #else
-    for (int i = 0; i < cfg.ifc_len / sizeof (struct ifreq); ++i)
+    for (size_t i = 0; i < cfg.ifc_len / sizeof (struct ifreq); ++i)
     {
         const ifreq& item = cfg.ifc_req[i];
 

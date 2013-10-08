@@ -1,32 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
-#define __JUCE_IDENTIFIER_JUCEHEADER__
-
-class StringPool;
+#ifndef JUCE_IDENTIFIER_H_INCLUDED
+#define JUCE_IDENTIFIER_H_INCLUDED
 
 
 //==============================================================================
@@ -37,7 +38,7 @@ class StringPool;
     from a string, so it's much faster to keep a static identifier object to refer
     to frequently-used names, rather than constructing them each time you need it.
 
-    @see NamedPropertySet, ValueTree
+    @see NamedValueSet, ValueTree
 */
 class JUCE_API  Identifier
 {
@@ -61,16 +62,16 @@ public:
     Identifier (const Identifier& other) noexcept;
 
     /** Creates a copy of another identifier. */
-    Identifier& operator= (const Identifier& other) noexcept;
+    Identifier& operator= (const Identifier other) noexcept;
 
     /** Destructor */
     ~Identifier();
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator== (const Identifier& other) const noexcept     { return name == other.name; }
+    inline bool operator== (const Identifier other) const noexcept      { return name == other.name; }
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator!= (const Identifier& other) const noexcept     { return name != other.name; }
+    inline bool operator!= (const Identifier other) const noexcept      { return name != other.name; }
 
     /** Returns this identifier as a string. */
     String toString() const                                             { return name; }
@@ -80,6 +81,9 @@ public:
 
     /** Returns this identifier's raw string pointer. */
     const String::CharPointerType getCharPointer() const noexcept       { return name; }
+
+    /** Returns this identifier as a StringRef. */
+    operator StringRef() const noexcept                                 { return name; }
 
     /** Returns true if this Identifier is not null */
     bool isValid() const noexcept                                       { return name.getAddress() != nullptr; }
@@ -105,4 +109,4 @@ private:
 };
 
 
-#endif   // __JUCE_IDENTIFIER_JUCEHEADER__
+#endif   // JUCE_IDENTIFIER_H_INCLUDED

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -33,27 +32,31 @@ class SystemTrayIconComponent::Pimpl
 public:
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
         : owner (iconComp), statusItem (nil),
-          statusIcon (MouseCursorHelpers::createNSImage (im))
+          statusIcon (MouseCursorHelpers::createNSImage (im)),
+          isHighlighted (false)
     {
-        static SystemTrayCallbackClass cls;
-        callback = [cls.createInstance() init];
-        SystemTrayCallbackClass::setOwner (callback, this);
-
-        statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
-
-        [statusItem setHighlightMode: YES];
+        static SystemTrayViewClass cls;
+        view = [cls.createInstance() init];
+        SystemTrayViewClass::setOwner (view, this);
+        SystemTrayViewClass::setImage (view, statusIcon);
 
         setIconSize();
-        [statusItem setImage: statusIcon];
-        [statusItem setTarget: callback];
-        [statusItem setAction: @selector (statusItemAction:)];
+
+        statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
+        [statusItem setView: view];
+
+        [[NSNotificationCenter defaultCenter]  addObserver: view
+                                                  selector: @selector (frameChanged:)
+                                                      name: NSWindowDidMoveNotification
+                                                    object: nil];
     }
 
     ~Pimpl()
     {
+        [[NSStatusBar systemStatusBar] removeStatusItem: statusItem];
         [statusItem release];
+        [view release];
         [statusIcon release];
-        [callback release];
     }
 
     void updateIcon (const Image& newImage)
@@ -61,6 +64,13 @@ public:
         [statusIcon release];
         statusIcon = MouseCursorHelpers::createNSImage (newImage);
         setIconSize();
+        SystemTrayViewClass::setImage (view, statusIcon);
+    }
+
+    void setHighlighted (bool shouldHighlight)
+    {
+        isHighlighted = shouldHighlight;
+        [view setNeedsDisplay: true];
     }
 
     void handleStatusItemAction (NSEvent* e)
@@ -83,67 +93,104 @@ public:
             if (([e modifierFlags] & NSCommandKeyMask) != 0)
                 eventMods = eventMods.withFlags (ModifierKeys::commandModifier);
 
-            NSRect r = [[e window] frame];
-            r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
-            owner.setBounds (convertToRectInt (r));
-
             const Time now (Time::getCurrentTime());
+
+            MouseInputSource mouseSource = Desktop::getInstance().getMainMouseSource();
 
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
-                owner.mouseDown (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                             Point<int>(),
+                owner.mouseDown (MouseEvent (mouseSource, Point<int>(),
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
                                              &owner, &owner, now,
                                              Point<int>(), now, 1, false));
 
-                owner.mouseUp (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                           Point<int>(), eventMods.withoutMouseButtons(),
+                owner.mouseUp (MouseEvent (mouseSource, Point<int>(), eventMods.withoutMouseButtons(),
                                            &owner, &owner, now,
                                            Point<int>(), now, 1, false));
             }
             else if (type == NSMouseMoved)
             {
-                owner.mouseMove (MouseEvent (Desktop::getInstance().getMainMouseSource(),
-                                             Point<int>(), eventMods,
+                owner.mouseMove (MouseEvent (mouseSource, Point<int>(), eventMods,
                                              &owner, &owner, now,
                                              Point<int>(), now, 1, false));
             }
         }
     }
 
-private:
     SystemTrayIconComponent& owner;
     NSStatusItem* statusItem;
+
+private:
     NSImage* statusIcon;
-    NSObject* callback;
+    NSControl* view;
+    bool isHighlighted;
 
     void setIconSize()
     {
         [statusIcon setSize: NSMakeSize (20.0f, 20.0f)];
     }
 
-    struct SystemTrayCallbackClass   : public ObjCClass <NSObject>
+    struct SystemTrayViewClass : public ObjCClass <NSControl>
     {
-        SystemTrayCallbackClass()  : ObjCClass <NSObject> ("JUCESystemTray_")
+        SystemTrayViewClass()  : ObjCClass <NSControl> ("JUCESystemTrayView_")
         {
-            addIvar<SystemTrayIconComponent::Pimpl*> ("owner");
-            addMethod (@selector (statusItemAction:), statusItemAction, "v@:@");
+            addIvar<Pimpl*> ("owner");
+            addIvar<NSImage*> ("image");
+
+            addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
+            addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
+            addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+            addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
 
             registerClass();
         }
 
-        static void setOwner (id self, SystemTrayIconComponent::Pimpl* owner)
-        {
-            object_setInstanceVariable (self, "owner", owner);
-        }
+        static Pimpl* getOwner (id self)                { return getIvar<Pimpl*> (self, "owner"); }
+        static NSImage* getImage (id self)              { return getIvar<NSImage*> (self, "image"); }
+        static void setOwner (id self, Pimpl* owner)    { object_setInstanceVariable (self, "owner", owner); }
+        static void setImage (id self, NSImage* image)  { object_setInstanceVariable (self, "image", image); }
 
     private:
-        static void statusItemAction (id self, SEL, id /*sender*/)
+        static void handleEventDown (id self, SEL, NSEvent* e)
         {
-            if (SystemTrayIconComponent::Pimpl* const owner = getIvar<SystemTrayIconComponent::Pimpl*> (self, "owner"))
-                owner->handleStatusItemAction ([NSApp currentEvent]);
+            if (Pimpl* const owner = getOwner (self))
+            {
+                owner->setHighlighted (! owner->isHighlighted);
+                owner->handleStatusItemAction (e);
+            }
+        }
+
+        static void drawRect (id self, SEL, NSRect)
+        {
+            NSRect bounds = [self bounds];
+
+            if (Pimpl* const owner = getOwner (self))
+                [owner->statusItem drawStatusBarBackgroundInRect: bounds
+                                                   withHighlight: owner->isHighlighted];
+
+            if (NSImage* const im = getImage (self))
+            {
+                NSSize imageSize = [im size];
+
+                [im drawInRect: NSMakeRect (bounds.origin.x + ((bounds.size.width  - imageSize.width)  / 2.0f),
+                                            bounds.origin.y + ((bounds.size.height - imageSize.height) / 2.0f),
+                                            imageSize.width, imageSize.height)
+                      fromRect: NSZeroRect
+                     operation: NSCompositeSourceOver
+                      fraction: 1.0f];
+            }
+        }
+
+        static void frameChanged (id self, SEL, NSNotification*)
+        {
+            if (Pimpl* const owner = getOwner (self))
+            {
+                NSRect r = [[[owner->statusItem view] window] frame];
+                NSRect sr = [[[NSScreen screens] objectAtIndex: 0] frame];
+                r.origin.y = sr.size.height - r.origin.y - r.size.height;
+                owner->owner.setBounds (convertToRectInt (r));
+            }
         }
     };
 
@@ -167,7 +214,28 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     }
 }
 
-void SystemTrayIconComponent::setIconTooltip (const String& /* tooltip */)
+void SystemTrayIconComponent::setIconTooltip (const String&)
 {
     // xxx not yet implemented!
+}
+
+void SystemTrayIconComponent::setHighlighted (bool highlight)
+{
+    if (pimpl != nullptr)
+        pimpl->setHighlighted (highlight);
+}
+
+void SystemTrayIconComponent::showInfoBubble (const String& /*title*/, const String& /*content*/)
+{
+    // xxx Not implemented!
+}
+
+void SystemTrayIconComponent::hideInfoBubble()
+{
+    // xxx Not implemented!
+}
+
+void* SystemTrayIconComponent::getNativeHandle() const
+{
+    return pimpl != nullptr ? pimpl->statusItem : nullptr;
 }

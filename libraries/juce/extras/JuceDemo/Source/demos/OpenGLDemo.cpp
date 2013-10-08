@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -61,6 +60,7 @@ public:
 
         openGLContext.setRenderer (this);
         openGLContext.setComponentPaintingEnabled (true);
+        openGLContext.setContinuousRepainting (true);
         openGLContext.attachTo (*this);
 
         startTimer (1000 / 30);
@@ -110,7 +110,9 @@ public:
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
 
         updateTextureImage();  // this will update our dynamically-changing texture image.
-        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
+
+        const float scale = (float) openGLContext.getRenderingScale();
+        drawBackground2DStuff (scale); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..
@@ -121,8 +123,9 @@ public:
         glEnable (GL_TEXTURE_2D);
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
-        OpenGLHelpers::prepareFor2D (getContextWidth(), getContextHeight());
-        OpenGLHelpers::setPerspective (45.0, getContextWidth() / (double) getContextHeight(), 0.1, 100.0);
+        OpenGLHelpers::prepareFor2D (roundToInt (scale * getWidth()),
+                                     roundToInt (scale * getHeight()));
+        OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
         glTranslatef (0.0f, 0.0f, -5.0f);
         draggableOrientation.applyToOpenGLMatrix();
@@ -164,23 +167,23 @@ public:
         }
     }
 
-    void drawBackground2DStuff()
+    void drawBackground2DStuff (float scale)
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
         ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
-                                                                                        getContextWidth(),
-                                                                                        getContextHeight()));
+                                                                                        roundToInt (scale * getWidth()),
+                                                                                        roundToInt (scale * getHeight())));
 
         if (glRenderer != nullptr)
         {
-            Graphics g (glRenderer);
-            g.addTransform (AffineTransform::scale ((float) getScale()));
+            Graphics g (*glRenderer);
+            g.addTransform (AffineTransform::scale (scale));
 
             // This stuff just creates a spinning star shape and fills it..
             Path p;
-            const float scale = getHeight() * 0.4f;
             p.addStar (Point<float> (getWidth() * 0.7f, getHeight() * 0.4f), 7,
-                       scale * (float) sizeSlider.getValue(), scale,
+                       getHeight() * 0.4f * (float) sizeSlider.getValue(),
+                       getHeight() * 0.4f,
                        rotation / 50.0f);
 
             g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (fabsf (::sinf (rotation / 300.0f))),
@@ -191,15 +194,10 @@ public:
         }
     }
 
-    double getScale() const         { return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).scale; }
-    int getContextWidth() const     { return roundToInt (getScale() * getWidth()); }
-    int getContextHeight() const    { return roundToInt (getScale() * getHeight()); }
-
     void timerCallback()
     {
         rotation += (float) speedSlider.getValue();
         textScrollPos += 1.4f;
-        openGLContext.triggerRepaint();
     }
 
 private:

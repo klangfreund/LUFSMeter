@@ -1,32 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_COLOUR_JUCEHEADER__
-#define __JUCE_COLOUR_JUCEHEADER__
-
-#include "../colour/juce_PixelFormats.h"
+#ifndef JUCE_COLOUR_H_INCLUDED
+#define JUCE_COLOUR_H_INCLUDED
 
 
 //==============================================================================
@@ -142,37 +139,31 @@ public:
 
     //==============================================================================
     /** Returns the red component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getRed() const noexcept                       { return argb.getRed(); }
 
     /** Returns the green component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getGreen() const noexcept                     { return argb.getGreen(); }
 
     /** Returns the blue component of this colour.
-
         @returns a value between 0x00 and 0xff.
     */
     uint8 getBlue() const noexcept                      { return argb.getBlue(); }
 
     /** Returns the red component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatRed() const noexcept;
 
     /** Returns the green component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatGreen() const noexcept;
 
     /** Returns the blue component of this colour as a floating point value.
-
         @returns a value between 0.0 and 1.0
     */
     float getFloatBlue() const noexcept;
@@ -220,25 +211,21 @@ public:
     Colour withAlpha (float newAlpha) const noexcept;
 
     /** Returns a colour that's the same colour as this one, but with a modified alpha value.
-
         The new colour's alpha will be this object's alpha multiplied by the value passed-in.
     */
     Colour withMultipliedAlpha (float alphaMultiplier) const noexcept;
 
     //==============================================================================
     /** Returns a colour that is the result of alpha-compositing a new colour over this one.
-
-        If the foreground colour is semi-transparent, it is blended onto this colour
-        accordingly.
+        If the foreground colour is semi-transparent, it is blended onto this colour accordingly.
     */
-    Colour overlaidWith (const Colour& foregroundColour) const noexcept;
+    Colour overlaidWith (Colour foregroundColour) const noexcept;
 
     /** Returns a colour that lies somewhere between this one and another.
-
         If amountOfOther is zero, the result is 100% this colour, if amountOfOther
         is 1.0, the result is 100% of the other colour.
     */
-    Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
+    Colour interpolatedWith (Colour other, float proportionOfOther) const noexcept;
 
     //==============================================================================
     /** Returns the colour's hue component.
@@ -331,32 +318,29 @@ public:
         nudged up or down so that it differs from the luminosity of this colour
         by at least the amount specified by minLuminosityDiff.
     */
-    Colour contrasting (const Colour& targetColour, float minLuminosityDiff) const noexcept;
+    Colour contrasting (Colour targetColour, float minLuminosityDiff) const noexcept;
 
     /** Returns a colour that contrasts against two colours.
         Looks for a colour that contrasts with both of the colours passed-in.
         Handy for things like choosing a highlight colour in text editors, etc.
     */
-    static Colour contrasting (const Colour& colour1,
-                               const Colour& colour2) noexcept;
+    static Colour contrasting (Colour colour1,
+                               Colour colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.
-
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
     static Colour greyLevel (float brightness) noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this colour.
-
         The string can be turned back into a colour using the fromString() method.
     */
     String toString() const;
 
-    /** Reads the colour from a string that was created with toString().
-    */
-    static Colour fromString (const String& encodedColourString);
+    /** Reads the colour from a string that was created with toString(). */
+    static Colour fromString (StringRef encodedColourString);
 
     /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
     String toDisplayString (bool includeAlphaValue) const;
@@ -367,4 +351,4 @@ private:
 };
 
 
-#endif   // __JUCE_COLOUR_JUCEHEADER__
+#endif   // JUCE_COLOUR_H_INCLUDED

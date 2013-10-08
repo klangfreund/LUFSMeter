@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -40,29 +39,32 @@
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
+    (void) application;
     initialiseJuce_GUI();
 
-    JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
+    JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
+
     if (! app->initialiseApp())
         exit (0);
 }
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
+    (void) application;
     JUCEApplicationBase::appWillTerminateByForce();
 }
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    (void) application;
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application
 {
-    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
-    if (app != nullptr)
+    (void) application;
+    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -71,6 +73,7 @@
 namespace juce
 {
 
+int juce_iOSMain (int argc, const char* argv[]);
 int juce_iOSMain (int argc, const char* argv[])
 {
     return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
@@ -156,7 +159,7 @@ private:
     int result;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
     const bool isYesNo, isAsync;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
@@ -178,9 +181,10 @@ namespace juce
 {
 
 //==============================================================================
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+#if JUCE_MODAL_LOOPS_PERMITTED
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType /*iconType*/,
                                                      const String& title, const String& message,
-                                                     Component* associatedComponent)
+                                                     Component* /*associatedComponent*/)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -188,18 +192,19 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
         (void) mb.getResult();
     }
 }
+#endif
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent,
+                                                          Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
     new iOSMessageBox (title, message, @"OK", nil, nil, callback, true);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                       const String& title, const String& message,
-                                                      Component* associatedComponent,
+                                                      Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
@@ -212,9 +217,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     return false;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                         const String& title, const String& message,
-                                                        Component* associatedComponent,
+                                                        Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
@@ -227,13 +232,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
@@ -257,7 +262,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File&)
 {
     return Image::null;
 }
@@ -278,9 +283,9 @@ String SystemClipboard::getTextFromClipboard()
 }
 
 //==============================================================================
-bool Desktop::addMouseInputSource()
+bool MouseInputSource::SourceList::addSource()
 {
-    mouseSources.add (new MouseInputSource (mouseSources.size(), false));
+    addSource (sources.size(), false);
     return true;
 }
 
@@ -289,13 +294,18 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
     return juce_lastMousePos;
 }
 
-void Desktop::setMousePosition (const Point<int>&)
+void MouseInputSource::setRawMousePosition (Point<int>)
 {
+}
+
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
 }
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
@@ -303,21 +313,22 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {
         UIScreen* s = [UIScreen mainScreen];
 
         Display d;
-        d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame]));
-        d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds]));
+        d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame])) / masterScale;
+        d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
         d.isMain = true;
+        d.scale = masterScale;
 
         if ([s respondsToSelector: @selector (scale)])
-            d.scale = s.scale;
-        else
-            d.scale = 1.0;
+            d.scale *= s.scale;
+
+        d.dpi = 160 * d.scale;
 
         displays.add (d);
     }

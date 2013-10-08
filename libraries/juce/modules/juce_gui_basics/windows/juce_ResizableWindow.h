@@ -1,35 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__
-#define __JUCE_RESIZABLEWINDOW_JUCEHEADER__
-
-#include "juce_TopLevelWindow.h"
-#include "../mouse/juce_ComponentDragger.h"
-#include "../layout/juce_ResizableBorderComponent.h"
-#include "../layout/juce_ResizableCornerComponent.h"
+#ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
+#define JUCE_RESIZABLEWINDOW_H_INCLUDED
 
 
 //==============================================================================
@@ -76,7 +70,7 @@ public:
                                     desktop; if false, you can use it as a child component
     */
     ResizableWindow (const String& name,
-                     const Colour& backgroundColour,
+                     Colour backgroundColour,
                      bool addToDesktop);
 
     /** Destructor.
@@ -111,7 +105,7 @@ public:
 
         @see getBackgroundColour
     */
-    void setBackgroundColour (const Colour& newColour);
+    void setBackgroundColour (Colour newColour);
 
     //==============================================================================
     /** Make the window resizable or fixed.
@@ -125,8 +119,7 @@ public:
     void setResizable (bool shouldBeResizable,
                        bool useBottomRightCornerResizer);
 
-    /** True if resizing is enabled.
-
+    /** Returns true if resizing is enabled.
         @see setResizable
     */
     bool isResizable() const noexcept;
@@ -147,7 +140,6 @@ public:
                           int newMaximumHeight) noexcept;
 
     /** Returns the bounds constrainer object that this window is using.
-
         You can access this to change its properties.
     */
     ComponentBoundsConstrainer* getConstrainer() noexcept           { return constrainer; }
@@ -157,13 +149,12 @@ public:
         A pointer to the object you pass in will be kept, but it won't be deleted
         by this object, so it's the caller's responsiblity to manage it.
 
-        If you pass 0, then no contraints will be placed on the positioning of the window.
+        If you pass a nullptr, then no contraints will be placed on the positioning of the window.
     */
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer);
 
     /** Calls the window's setBounds method, after first checking these bounds
         with the current constrainer.
-
         @see setConstrainer
     */
     void setBoundsConstrained (const Rectangle<int>& bounds);
@@ -171,7 +162,6 @@ public:
 
     //==============================================================================
     /** Returns true if the window is currently in full-screen mode.
-
         @see setFullScreen
     */
     bool isFullScreen() const;
@@ -186,7 +176,6 @@ public:
     void setFullScreen (bool shouldBeFullScreen);
 
     /** Returns true if the window is currently minimised.
-
         @see setMinimised
     */
     bool isMinimised() const;
@@ -199,9 +188,6 @@ public:
         @see isMinimised
     */
     void setMinimised (bool shouldMinimise);
-
-    /** Adds the window to the desktop using the default flags. */
-    void addToDesktop();
 
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
@@ -313,7 +299,7 @@ public:
     };
 
     //==============================================================================
-    /** @deprecated - use setContentOwned() and setContentNonOwned() instead. */
+    // Deprecated: use setContentOwned() and setContentNonOwned() instead.
     JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
                                                bool deleteOldOne = true,
                                                bool resizeToFit = false));
@@ -322,27 +308,27 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
-    void moved();
+    void moved() override;
     /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
-    void resized();
+    void resized() override;
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void childBoundsChanged (Component* child);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    void parentSizeChanged();
+    void parentSizeChanged() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
 
    #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component
@@ -351,14 +337,14 @@ protected:
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addChildComponent (Component* child, int zOrder = -1);
+    void addChildComponent (Component*, int zOrder = -1);
     /** Overridden to warn people about adding components directly to this component
         instead of using setContentOwned().
 
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addAndMakeVisible (Component* child, int zOrder = -1);
+    void addAndMakeVisible (Component*, int zOrder = -1);
    #endif
 
     ScopedPointer <ResizableCornerComponent> resizableCorner;
@@ -366,7 +352,7 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer <Component> contentComponent;
+    Component::SafePointer<Component> contentComponent;
     bool ownsContentComponent, resizeToFitContent, fullscreen;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
@@ -390,4 +376,4 @@ private:
 };
 
 
-#endif   // __JUCE_RESIZABLEWINDOW_JUCEHEADER__
+#endif   // JUCE_RESIZABLEWINDOW_H_INCLUDED

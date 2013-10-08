@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -206,7 +205,7 @@ SHA256::SHA256 (const File& file)
     }
 }
 
-SHA256::SHA256 (const CharPointer_UTF8& utf8) noexcept
+SHA256::SHA256 (CharPointer_UTF8 utf8) noexcept
 {
     jassert (utf8.getAddress() != nullptr);
     process (utf8.getAddress(), utf8.sizeInBytes() - 1);
@@ -241,27 +240,33 @@ class SHA256Tests  : public UnitTest
 public:
     SHA256Tests() : UnitTest ("SHA-256") {}
 
+    void test (const char* input, const char* expected)
+    {
+        {
+            SHA256 hash (input, strlen (input));
+            expectEquals (hash.toHexString(), String (expected));
+        }
+
+        {
+            CharPointer_UTF8 utf8 (input);
+            SHA256 hash (utf8);
+            expectEquals (hash.toHexString(), String (expected));
+        }
+
+        {
+            MemoryInputStream m (input, strlen (input), false);
+            SHA256 hash (m);
+            expectEquals (hash.toHexString(), String (expected));
+        }
+    }
+
     void runTest()
     {
-        beginTest ("SHA-256");
+        beginTest ("SHA256");
 
-        {
-            char n[] = "";
-            SHA256 sha (n, 0);
-            expectEquals (sha.toHexString(), String ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
-        }
-
-        {
-            const char n[] = "The quick brown fox jumps over the lazy dog";
-            SHA256 sha (n, sizeof (n) - 1);
-            expectEquals (sha.toHexString(), String ("d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592"));
-        }
-
-        {
-            const char n[] = "The quick brown fox jumps over the lazy dog.";
-            SHA256 sha (n, sizeof (n) - 1);
-            expectEquals (sha.toHexString(), String ("ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c"));
-        }
+        test ("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        test ("The quick brown fox jumps over the lazy dog",  "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592");
+        test ("The quick brown fox jumps over the lazy dog.", "ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c");
     }
 };
 

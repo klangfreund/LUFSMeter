@@ -53,7 +53,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2010_78A501D=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -94,7 +94,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2010_78A501D=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -719,12 +719,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_PathStrokeType.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -798,6 +792,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseEvent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.cpp">
@@ -1169,6 +1166,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_linux_WebBrowserComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1332,6 +1332,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPairArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringRef.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
@@ -1340,6 +1341,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Range.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>
@@ -1441,6 +1443,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_CallbackMessage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Initialisation.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
@@ -1509,6 +1512,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_LassoComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseCursor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseEvent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
@@ -1549,6 +1553,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\menus\juce_MenuBarComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\menus\juce_MenuBarModel.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\menus\juce_PopupMenu.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPosition.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPositionBehaviours.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentAnimator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBoundsConstrainer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBuilder.h"/>
@@ -1619,7 +1625,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_BubbleComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Initialisation.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.h"/>

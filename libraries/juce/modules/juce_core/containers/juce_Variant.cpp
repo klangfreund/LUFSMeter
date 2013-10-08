@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -495,7 +498,7 @@ bool operator!= (const var& v1, const char* const v2)       { return v1.toString
 
 
 //==============================================================================
-var var::operator[] (const Identifier& propertyName) const
+var var::operator[] (const Identifier propertyName) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
@@ -508,7 +511,7 @@ var var::operator[] (const char* const propertyName) const
     return operator[] (Identifier (propertyName));
 }
 
-var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
+var var::getProperty (const Identifier propertyName, const var& defaultReturnValue) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
@@ -516,7 +519,7 @@ var var::getProperty (const Identifier& propertyName, const var& defaultReturnVa
     return defaultReturnValue;
 }
 
-var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
+var var::invoke (const Identifier method, const var* arguments, int numArguments) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->invokeMethod (method, arguments, numArguments);
@@ -534,35 +537,35 @@ var var::invokeMethod (DynamicObject* const target, const var* const arguments, 
     return var::null;
 }
 
-var var::call (const Identifier& method) const
+var var::call (const Identifier method) const
 {
     return invoke (method, nullptr, 0);
 }
 
-var var::call (const Identifier& method, const var& arg1) const
+var var::call (const Identifier method, const var& arg1) const
 {
     return invoke (method, &arg1, 1);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2) const
+var var::call (const Identifier method, const var& arg1, const var& arg2) const
 {
     var args[] = { arg1, arg2 };
     return invoke (method, args, 2);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3)
 {
     var args[] = { arg1, arg2, arg3 };
     return invoke (method, args, 3);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
 {
     var args[] = { arg1, arg2, arg3, arg4 };
     return invoke (method, args, 4);
 }
 
-var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+var var::call (const Identifier method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);
@@ -675,12 +678,12 @@ var var::readFromStream (InputStream& input)
 
             case varMarker_Binary:
             {
-                MemoryBlock mb (numBytes - 1);
+                MemoryBlock mb ((size_t) numBytes - 1);
 
                 if (numBytes > 1)
                 {
                     const int numRead = input.read (mb.getData(), numBytes - 1);
-                    mb.setSize (numRead);
+                    mb.setSize ((size_t) numRead);
                 }
 
                 return var (mb);

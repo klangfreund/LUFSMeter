@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -568,32 +567,58 @@ private:
 #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
 
 // Just add a simple icon to the Window system tray area..
-class DemoTaskbarComponent  : public SystemTrayIconComponent
+class DemoTaskbarComponent  : public SystemTrayIconComponent,
+                              private Timer
 {
 public:
     DemoTaskbarComponent()
     {
-        // Create an icon which is just a square with a "j" in it..
+        setIconImage (createImageForIcon());
+        setIconTooltip ("Juce Demo App!");
+    }
+
+    Image createImageForIcon()
+    {
         Image icon (Image::RGB, 32, 32, true);
+
         Graphics g (icon);
+
+        // This draws an icon which is just a square with a "j" in it..
         g.fillAll (Colours::lightblue);
         g.setColour (Colours::black);
         g.setFont (Font ((float) icon.getHeight(), Font::bold));
         g.drawText ("j", 0, 0, icon.getWidth(), icon.getHeight(), Justification::centred, false);
 
-        setIconImage (icon);
-
-        setIconTooltip ("Juce Demo App!");
+        return icon;
     }
 
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent&) override
     {
+        // On OSX, there can be problems launching a menu when we're not the foreground
+        // process, so just in case, we'll first make our process active, and then use a
+        // timer to wait a moment before opening our menu, which gives the OS some time to
+        // get its act together and bring our windows to the front.
+
+        Process::makeForegroundProcess();
+        startTimer (50);
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+
         PopupMenu m;
         m.addItem (1, "Quit the Juce demo");
 
-        const int result = m.show();
+        // It's always better to open menus asynchronously when possible.
+        m.showMenuAsync (PopupMenu::Options(),
+                         ModalCallbackFunction::forComponent (menuInvocationCallback, this));
+    }
 
-        if (result == 1)
+    // This is invoked when the menu is clicked or dismissed
+    static void menuInvocationCallback (int chosenItemID, DemoTaskbarComponent*)
+    {
+        if (chosenItemID == 1)
             JUCEApplication::getInstance()->systemRequestedQuit();
     }
 };

@@ -31,7 +31,7 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
             PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
@@ -87,7 +87,7 @@
             Optimization="3"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
             PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
@@ -139,8 +139,6 @@
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
         <File RelativePath="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
         <File RelativePath="..\..\Source\jucer_Headers.h"/>
-        <File RelativePath="..\..\Source\Application\jucer_JuceUpdater.cpp"/>
-        <File RelativePath="..\..\Source\Application\jucer_JuceUpdater.h"/>
         <File RelativePath="..\..\Source\Application\jucer_Main.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.h"/>
@@ -149,8 +147,9 @@
       </Filter>
       <Filter Name="Project">
         <File RelativePath="..\..\Source\Project\jucer_AudioPluginModule.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Base.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Exporter.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Modules.h"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>
@@ -163,12 +162,11 @@
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Base.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_File.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.h"/>
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
@@ -610,6 +608,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_StringRef.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -662,6 +661,7 @@
         <Filter Name="memory">
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>
@@ -1564,6 +1564,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_Initialisation.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\messages\juce_MessageListener.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -1946,29 +1947,9 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_PathStrokeType.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_Point.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
           <File RelativePath="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.h"/>
         </Filter>
         <Filter Name="placement">
-          <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_Justification.cpp">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -2270,6 +2251,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseEvent.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -2640,6 +2632,8 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\menus\juce_PopupMenu.h"/>
         </Filter>
         <Filter Name="layout">
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPosition.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPositionBehaviours.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentAnimator.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -3408,7 +3402,6 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_gui_basics\application\juce_Initialisation.h"/>
         </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_android_FileChooser.cpp">
@@ -3697,6 +3690,16 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_mac_WebBrowserComponent.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
             <FileConfiguration Name="Debug|Win32"

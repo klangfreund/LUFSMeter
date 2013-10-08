@@ -1,33 +1,34 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
-#define __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
+#ifndef JUCE_LOCALISEDSTRINGS_H_INCLUDED
+#define JUCE_LOCALISEDSTRINGS_H_INCLUDED
 
-#include "juce_StringPairArray.h"
-#include "../files/juce_File.h"
 
 //==============================================================================
 /**
@@ -168,6 +169,19 @@ public:
     */
     const StringArray& getCountryCodes() const            { return countryCodes; }
 
+    /** Provides access to the actual list of mappings. */
+    const StringPairArray& getMappings() const            { return translations; }
+
+    //==============================================================================
+    /** Adds and merges another set of translations into this set.
+
+        Note that the language name and country codes of the new LocalisedStrings
+        object must match that of this object - an assertion will be thrown if they
+        don't match.
+
+        Any existing values will have their mappings overwritten by the new ones.
+    */
+    void addStrings (const LocalisedStrings&);
 
 private:
     //==============================================================================
@@ -213,7 +227,12 @@ String translate (const char* stringLiteral);
 /** Uses the LocalisedStrings class to translate the given string literal.
     @see LocalisedStrings
 */
+String translate (CharPointer_UTF8 stringLiteral);
+
+/** Uses the LocalisedStrings class to translate the given string literal.
+    @see LocalisedStrings
+*/
 String translate (const String& stringLiteral, const String& resultIfNotFound);
 
 
-#endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
+#endif   // JUCE_LOCALISEDSTRINGS_H_INCLUDED

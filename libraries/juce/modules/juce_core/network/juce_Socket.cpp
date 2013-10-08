@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -100,7 +103,8 @@ namespace SocketHelpers
            #if JUCE_WINDOWS
             bytesThisTime = recv (handle, static_cast<char*> (destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
            #else
-            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead), (size_t) (maxBytesToRead - bytesRead))) < 0
+            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead),
+                                                  (size_t) (maxBytesToRead - bytesRead))) < 0
                      && errno == EINTR
                      && connected)
             {
@@ -271,17 +275,15 @@ StreamingSocket::StreamingSocket()
     SocketHelpers::initSockets();
 }
 
-StreamingSocket::StreamingSocket (const String& hostName_,
-                                  const int portNumber_,
-                                  const int handle_)
-    : hostName (hostName_),
-      portNumber (portNumber_),
-      handle (handle_),
+StreamingSocket::StreamingSocket (const String& host, int portNum, int h)
+    : hostName (host),
+      portNumber (portNum),
+      handle (h),
       connected (true),
       isListener (false)
 {
     SocketHelpers::initSockets();
-    SocketHelpers::resetSocketOptions (handle_, false, false);
+    SocketHelpers::resetSocketOptions (h, false, false);
 }
 
 StreamingSocket::~StreamingSocket()
@@ -290,9 +292,11 @@ StreamingSocket::~StreamingSocket()
 }
 
 //==============================================================================
-int StreamingSocket::read (void* destBuffer, const int maxBytesToRead, const bool blockUntilSpecifiedAmountHasArrived)
+int StreamingSocket::read (void* destBuffer, const int maxBytesToRead,
+                           const bool blockUntilSpecifiedAmountHasArrived)
 {
-    return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected, blockUntilSpecifiedAmountHasArrived)
+    return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
+                                                                    connected, blockUntilSpecifiedAmountHasArrived)
                                        : -1;
 }
 
@@ -430,8 +434,9 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
 
 StreamingSocket* StreamingSocket::waitForNextConnection() const
 {
-    jassert (isListener || ! connected); // to call this method, you first have to use createListener() to
-                                         // prepare this socket as a listener.
+    // To call this method, you first have to use createListener() to
+    // prepare this socket as a listener.
+    jassert (isListener || ! connected);
 
     if (connected && isListener)
     {
@@ -455,11 +460,11 @@ bool StreamingSocket::isLocal() const noexcept
 
 //==============================================================================
 //==============================================================================
-DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroadcast_)
+DatagramSocket::DatagramSocket (const int localPortNumber, const bool canBroadcast)
     : portNumber (0),
       handle (-1),
       connected (true),
-      allowBroadcast (allowBroadcast_),
+      allowBroadcast (canBroadcast),
       serverAddress (nullptr)
 {
     SocketHelpers::initSockets();
@@ -468,18 +473,18 @@ DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroad
     bindToPort (localPortNumber);
 }
 
-DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
-                                const int handle_, const int localPortNumber)
-    : hostName (hostName_),
-      portNumber (portNumber_),
-      handle (handle_),
+DatagramSocket::DatagramSocket (const String& host, const int portNum,
+                                const int h, const int localPortNumber)
+    : hostName (host),
+      portNumber (portNum),
+      handle (h),
       connected (true),
       allowBroadcast (false),
       serverAddress (nullptr)
 {
     SocketHelpers::initSockets();
 
-    SocketHelpers::resetSocketOptions (handle_, true, allowBroadcast);
+    SocketHelpers::resetSocketOptions (h, true, allowBroadcast);
     bindToPort (localPortNumber);
 }
 
@@ -561,7 +566,8 @@ int DatagramSocket::waitUntilReady (const bool readyForReading,
 
 int DatagramSocket::read (void* destBuffer, const int maxBytesToRead, const bool blockUntilSpecifiedAmountHasArrived)
 {
-    return connected ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected, blockUntilSpecifiedAmountHasArrived)
+    return connected ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
+                                                  connected, blockUntilSpecifiedAmountHasArrived)
                      : -1;
 }
 

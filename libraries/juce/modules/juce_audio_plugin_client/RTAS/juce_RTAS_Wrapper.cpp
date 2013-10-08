@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -101,7 +100,14 @@
 #ifdef _MSC_VER
  #pragma pack (pop)
 
- #if JUCE_DEBUGxxx // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
+ // This JUCE_RTAS_LINK_TO_DEBUG_LIB setting can be used to force linkage
+ // against only the release build of the RTAS lib, since in older SDKs there
+ // can be problems with the debug build.
+ #if JUCE_DEBUG && ! defined (JUCE_RTAS_LINK_TO_DEBUG_LIB)
+  #define JUCE_RTAS_LINK_TO_DEBUG_LIB 1
+ #endif
+
+ #if JUCE_RTAS_LINK_TO_DEBUG_LIB
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
  #else
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Release\\lib\\"
@@ -236,7 +242,7 @@ public:
             }
         }
 
-        void timerCallback()
+        void timerCallback() override
         {
             if (! juce::Component::isMouseButtonDownAnywhere())
             {
@@ -364,9 +370,9 @@ public:
                #endif
             }
 
-            void paint (Graphics&) {}
+            void paint (Graphics&) override {}
 
-            void resized()
+            void resized() override
             {
                 if (juce::Component* const ed = getEditor())
                     ed->setBounds (getLocalBounds());
@@ -375,7 +381,7 @@ public:
             }
 
            #if JUCE_WINDOWS
-            void globalFocusChanged (juce::Component*)
+            void globalFocusChanged (juce::Component*) override
             {
                #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -384,7 +390,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (juce::Component* child)
+            void childBoundsChanged (juce::Component* child) override
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -395,10 +401,10 @@ public:
                 owner->updateSize();
             }
 
-            void userTriedToCloseWindow() {}
+            void userTriedToCloseWindow() override {}
 
            #if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
-            bool keyPressed (const KeyPress& kp)
+            bool keyPressed (const KeyPress& kp) override
             {
                 owner->updateSize();
                 forwardCurrentKeyEventToHostWindow();
@@ -841,9 +847,9 @@ private:
 
         //==============================================================================
         OSType GetID() const            { return index + 1; }
-        long GetDefaultValue() const    { return floatToLong (0); }
+        long GetDefaultValue() const    { return floatToLong (juceFilter->getParameterDefaultValue (index)); }
         void SetDefaultValue (long)     {}
-        long GetNumSteps() const        { return 0xffffffff; }
+        long GetNumSteps() const        { return juceFilter->getParameterNumSteps (index); }
 
         long ConvertStringToValue (const char* valueString) const
         {
@@ -857,7 +863,7 @@ private:
             // Pro-tools expects all your parameters to have valid names!
             jassert (juceFilter->getParameterName (index).isNotEmpty());
 
-            juceFilter->getParameterName (index).copyToUTF8 (name, (size_t) maxLength);
+            juceFilter->getParameterName (index, maxLength).copyToUTF8 (name, (size_t) maxLength + 1);
         }
 
         long GetPriority() const        { return kFicCooperativeTaskPriority; }
@@ -872,7 +878,7 @@ private:
 
         void GetValueString (char* valueString, int maxLength, long value) const
         {
-            juceFilter->getParameterText (index).copyToUTF8 (valueString, (size_t) maxLength);
+            juceFilter->getParameterText (index, maxLength).copyToUTF8 (valueString, (size_t) maxLength + 1);
         }
 
         Cmn_Bool IsAutomatable() const
@@ -982,11 +988,12 @@ private:
             case 4:   return ePlugIn_StemFormat_Quad;
             case 5:   return ePlugIn_StemFormat_5dot0;
             case 6:   return ePlugIn_StemFormat_5dot1;
-            case 7:   return ePlugIn_StemFormat_6dot1;
 
            #if PT_VERS_MAJOR >= 9
+            case 7:   return ePlugIn_StemFormat_7dot0DTS;
             case 8:   return ePlugIn_StemFormat_7dot1DTS;
            #else
+            case 7:   return ePlugIn_StemFormat_7dot0;
             case 8:   return ePlugIn_StemFormat_7dot1;
            #endif
 

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -31,11 +30,12 @@ public:
     ContentComponent (TreeView& tree)
         : owner (tree),
           buttonUnderMouse (nullptr),
-          isDragging (false)
+          isDragging (false),
+          needSelectionOnMouseUp (false)
     {
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
 
@@ -73,7 +73,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
 
@@ -85,7 +85,7 @@ public:
         }
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent& e) override
     {
         if (e.getNumberOfClicks() != 3 && isEnabled())  // ignore triple clicks
         {
@@ -96,7 +96,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (isEnabled()
              && ! (isDragging || e.mouseWasClicked()
@@ -134,10 +134,10 @@ public:
         }
     }
 
-    void mouseMove (const MouseEvent& e)    { updateButtonUnderMouse (e); }
-    void mouseExit (const MouseEvent& e)    { updateButtonUnderMouse (e); }
+    void mouseMove (const MouseEvent& e) override    { updateButtonUnderMouse (e); }
+    void mouseExit (const MouseEvent& e) override    { updateButtonUnderMouse (e); }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (owner.rootItem != nullptr)
         {
@@ -238,12 +238,12 @@ public:
         return item == buttonUnderMouse;
     }
 
-    void resized()
+    void resized() override
     {
         owner.itemsChanged();
     }
 
-    String getTooltip()
+    String getTooltip() override
     {
         Rectangle<int> pos;
         if (TreeViewItem* const item = findItemAt (getMouseXYRelative().y, pos))
@@ -279,7 +279,7 @@ private:
     TreeViewItem* buttonUnderMouse;
     bool isDragging, needSelectionOnMouseUp;
 
-    void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
+    void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys modifiers)
     {
         TreeViewItem* firstSelected = nullptr;
 
@@ -367,14 +367,12 @@ private:
 
     static bool isMouseDraggingInChildCompOf (Component* const comp)
     {
-        Desktop& desktop = Desktop::getInstance();
+        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
+        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
         {
-            MouseInputSource* const source = desktop.getMouseSource(i);
-
-            if (source->isDragging())
-                if (Component* const underMouse = source->getComponentUnderMouse())
+            if (mi->isDragging())
+                if (Component* const underMouse = mi->getComponentUnderMouse())
                     if (comp == underMouse || comp->isParentOf (underMouse))
                         return true;
         }
@@ -382,7 +380,7 @@ private:
         return false;
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         owner.recalculateIfNeeded();
     }
@@ -409,7 +407,7 @@ public:
         repaint();
     }
 
-    void visibleAreaChanged (const Rectangle<int>& newVisibleArea)
+    void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override
     {
         const bool hasScrolledSideways = (newVisibleArea.getX() != lastX);
         lastX = newVisibleArea.getX();
@@ -421,7 +419,7 @@ public:
         return static_cast <ContentComponent*> (getViewedComponent());
     }
 
-    bool keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key) override
     {
         Component* const tree = getParentComponent();
 
@@ -925,7 +923,7 @@ class TreeView::InsertPointHighlight   : public Component
 {
 public:
     InsertPointHighlight()
-        : lastItem (nullptr)
+        : lastItem (nullptr), lastIndex (0)
     {
         setSize (100, 12);
         setAlwaysOnTop (true);
@@ -941,7 +939,7 @@ public:
                    width - (insertPos.pos.x - offset), getHeight());
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         Path p;
         const float h = (float) getHeight();
@@ -977,7 +975,7 @@ public:
         setBounds (r);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
         g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
@@ -1123,6 +1121,8 @@ TreeViewItem::TreeViewItem()
       y (0),
       itemHeight (0),
       totalHeight (0),
+      itemWidth (0),
+      totalWidth (0),
       selected (false),
       redrawNeeded (true),
       drawLinesInside (true),
@@ -1158,19 +1158,26 @@ TreeViewItem* TreeViewItem::getSubItem (const int index) const noexcept
 
 void TreeViewItem::clearSubItems()
 {
-    if (subItems.size() > 0)
+    if (ownerView != nullptr)
     {
-        if (ownerView != nullptr)
+        const ScopedLock sl (ownerView->nodeAlterationLock);
+
+        if (subItems.size() > 0)
         {
-            const ScopedLock sl (ownerView->nodeAlterationLock);
-            subItems.clear();
+            removeAllSubItemsFromList();
             treeHasChanged();
         }
-        else
-        {
-            subItems.clear();
-        }
     }
+    else
+    {
+        removeAllSubItemsFromList();
+    }
+}
+
+void TreeViewItem::removeAllSubItemsFromList()
+{
+    for (int i = subItems.size(); --i >= 0;)
+        removeSubItemFromList (i, true);
 }
 
 void TreeViewItem::addSubItem (TreeViewItem* const newItem, const int insertPosition)
@@ -1204,22 +1211,31 @@ void TreeViewItem::addSubItem (TreeViewItem* const newItem, const int insertPosi
     }
 }
 
-void TreeViewItem::removeSubItem (const int index, const bool deleteItem)
+void TreeViewItem::removeSubItem (int index, bool deleteItem)
 {
     if (ownerView != nullptr)
     {
         const ScopedLock sl (ownerView->nodeAlterationLock);
 
-        if (isPositiveAndBelow (index, subItems.size()))
-        {
-            subItems.remove (index, deleteItem);
+        if (removeSubItemFromList (index, deleteItem))
             treeHasChanged();
-        }
     }
     else
     {
-        subItems.remove (index, deleteItem);
+        removeSubItemFromList (index, deleteItem);
     }
+}
+
+bool TreeViewItem::removeSubItemFromList (int index, bool deleteItem)
+{
+    if (TreeViewItem* child = subItems [index])
+    {
+        child->parentItem = nullptr;
+        subItems.remove (index, deleteItem);
+        return true;
+    }
+
+    return false;
 }
 
 bool TreeViewItem::isOpen() const noexcept
@@ -1371,7 +1387,7 @@ Rectangle<int> TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLe
 
     Rectangle<int> r (indentX, y, jmax (0, width), totalHeight);
 
-    if (relativeToTreeViewTopLeft)
+    if (relativeToTreeViewTopLeft && ownerView != nullptr)
         r -= ownerView->viewport->getViewPosition();
 
     return r;
@@ -1708,10 +1724,8 @@ int TreeViewItem::getRowNumberInTree() const noexcept
 
         return n;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 void TreeViewItem::setLinesDrawnForSubItems (const bool drawLines) noexcept
@@ -1840,13 +1854,10 @@ XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const
         e->setAttribute ("id", name);
         return e;
     }
-    else
-    {
-        // trying to save the openness for an element that has no name - this won't
-        // work because it needs the names to identify what to open.
-        jassertfalse;
-    }
 
+    // trying to save the openness for an element that has no name - this won't
+    // work because it needs the names to identify what to open.
+    jassertfalse;
     return nullptr;
 }
 

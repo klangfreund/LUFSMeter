@@ -1,29 +1,39 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
 HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
+
+void* getUser32Function (const char* functionName)
+{
+    HMODULE module = GetModuleHandleA ("user32.dll");
+    jassert (module != 0);
+    return (void*) GetProcAddress (module, functionName);
+}
 
 //==============================================================================
 #if ! JUCE_USE_INTRINSICS
@@ -52,59 +62,33 @@ __int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newV
 CriticalSection::CriticalSection() noexcept
 {
     // (just to check the MS haven't changed this structure and broken things...)
-  #if JUCE_VC7_OR_EARLIER
+   #if JUCE_VC7_OR_EARLIER
     static_jassert (sizeof (CRITICAL_SECTION) <= 24);
-  #else
-    static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (internal));
-  #endif
+   #else
+    static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (lock));
+   #endif
 
-    InitializeCriticalSection ((CRITICAL_SECTION*) internal);
+    InitializeCriticalSection ((CRITICAL_SECTION*) lock);
 }
 
-CriticalSection::~CriticalSection() noexcept
-{
-    DeleteCriticalSection ((CRITICAL_SECTION*) internal);
-}
+CriticalSection::~CriticalSection() noexcept        { DeleteCriticalSection ((CRITICAL_SECTION*) lock); }
+void CriticalSection::enter() const noexcept        { EnterCriticalSection ((CRITICAL_SECTION*) lock); }
+bool CriticalSection::tryEnter() const noexcept     { return TryEnterCriticalSection ((CRITICAL_SECTION*) lock) != FALSE; }
+void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRITICAL_SECTION*) lock); }
 
-void CriticalSection::enter() const noexcept
-{
-    EnterCriticalSection ((CRITICAL_SECTION*) internal);
-}
-
-bool CriticalSection::tryEnter() const noexcept
-{
-    return TryEnterCriticalSection ((CRITICAL_SECTION*) internal) != FALSE;
-}
-
-void CriticalSection::exit() const noexcept
-{
-    LeaveCriticalSection ((CRITICAL_SECTION*) internal);
-}
 
 //==============================================================================
 WaitableEvent::WaitableEvent (const bool manualReset) noexcept
-    : internal (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0))
-{
-}
+    : handle (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0)) {}
 
-WaitableEvent::~WaitableEvent() noexcept
-{
-    CloseHandle (internal);
-}
+WaitableEvent::~WaitableEvent() noexcept        { CloseHandle (handle); }
 
-bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
-{
-    return WaitForSingleObject (internal, (DWORD) timeOutMillisecs) == WAIT_OBJECT_0;
-}
+void WaitableEvent::signal() const noexcept     { SetEvent (handle); }
+void WaitableEvent::reset() const noexcept      { ResetEvent (handle); }
 
-void WaitableEvent::signal() const noexcept
+bool WaitableEvent::wait (const int timeOutMs) const noexcept
 {
-    SetEvent (internal);
-}
-
-void WaitableEvent::reset() const noexcept
-{
-    ResetEvent (internal);
+    return WaitForSingleObject (handle, (DWORD) timeOutMs) == WAIT_OBJECT_0;
 }
 
 //==============================================================================
@@ -147,7 +131,7 @@ void Thread::killThread()
     }
 }
 
-void Thread::setCurrentThreadName (const String& name)
+void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 {
    #if JUCE_DEBUG && JUCE_MSVC
     struct
@@ -174,7 +158,7 @@ void Thread::setCurrentThreadName (const String& name)
    #endif
 }
 
-Thread::ThreadID Thread::getCurrentThreadId()
+Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
     return (ThreadID) (pointer_sized_int) GetCurrentThreadId();
 }
@@ -196,7 +180,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
     return SetThreadPriority (handle, pri) != FALSE;
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
     SetThreadAffinityMask (GetCurrentThread(), affinityMask);
 }
@@ -226,17 +210,15 @@ static SleepEvent sleepEvent;
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
+    jassert (millisecs >= 0);
+
     if (millisecs >= 10 || sleepEvent.handle == 0)
-    {
         Sleep ((DWORD) millisecs);
-    }
     else
-    {
         // unlike Sleep() this is guaranteed to return to the current thread after
         // the time expires, so we'll use this for short waits, which are more likely
         // to need to be accurate
         WaitForSingleObject (sleepEvent.handle, (DWORD) millisecs);
-    }
 }
 
 void Thread::yield()
@@ -247,7 +229,7 @@ void Thread::yield()
 //==============================================================================
 static int lastProcessPriority = -1;
 
-// called by WindowDriver because Windows does weird things to process priority
+// called when the app gains focus because Windows does weird things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
 void juce_repeatLastProcessPriority()
 {
@@ -268,7 +250,7 @@ void juce_repeatLastProcessPriority()
     }
 }
 
-void Process::setPriority (ProcessPriority prior)
+void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
 {
     if (lastProcessPriority != (int) prior)
     {
@@ -289,7 +271,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 
 static void* currentModuleHandle = nullptr;
 
-void* Process::getCurrentModuleInstanceHandle() noexcept
+void* JUCE_CALLTYPE Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
         currentModuleHandle = GetModuleHandleA (nullptr);
@@ -297,29 +279,29 @@ void* Process::getCurrentModuleInstanceHandle() noexcept
     return currentModuleHandle;
 }
 
-void Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
+void JUCE_CALLTYPE Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
 {
     currentModuleHandle = newHandle;
 }
 
-void Process::raisePrivilege()
+void JUCE_CALLTYPE Process::raisePrivilege()
 {
     jassertfalse; // xxx not implemented
 }
 
-void Process::lowerPrivilege()
+void JUCE_CALLTYPE Process::lowerPrivilege()
 {
     jassertfalse; // xxx not implemented
 }
 
-void Process::terminate()
+void JUCE_CALLTYPE Process::terminate()
 {
    #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();
    #endif
 
     // bullet in the head in case there's a problem shutting down..
-    ExitProcess (0);
+    ExitProcess (1);
 }
 
 bool juce_isRunningInWine()

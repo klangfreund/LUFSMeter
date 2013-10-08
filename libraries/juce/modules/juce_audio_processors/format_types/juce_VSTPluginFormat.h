@@ -1,32 +1,26 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
-
-#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioPluginFormat.h"
 
 #if JUCE_PLUGINHOST_VST || DOXYGEN
 
@@ -81,15 +75,26 @@ public:
     static void setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions);
 
     //==============================================================================
-    String getName() const                { return "VST"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&);
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive);
-    bool doesPluginStillExist (const PluginDescription&);
-    FileSearchPath getDefaultLocationsToSearch();
-    bool canScanForPlugins() const        { return true; }
+   #if JUCE_64BIT
+    typedef int64 VstIntPtr;
+   #else
+    typedef int32 VstIntPtr;
+   #endif
+
+    /** This simply calls directly to the VST's AEffect::dispatcher() function. */
+    static VstIntPtr JUCE_CALLTYPE dispatcher (AudioPluginInstance*, int32, int32, VstIntPtr, void*, float);
+
+    //==============================================================================
+    String getName() const override                { return "VST"; }
+    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&, double, int) override;
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
+    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
+    bool pluginNeedsRescanning (const PluginDescription&) override;
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive) override;
+    bool doesPluginStillExist (const PluginDescription&) override;
+    FileSearchPath getDefaultLocationsToSearch() override;
+    bool canScanForPlugins() const override        { return true; }
 
 private:
     void recursiveFileSearch (StringArray&, const File&, bool recursive);
@@ -99,4 +104,3 @@ private:
 
 
 #endif
-#endif   // __JUCE_VSTPLUGINFORMAT_JUCEHEADER__

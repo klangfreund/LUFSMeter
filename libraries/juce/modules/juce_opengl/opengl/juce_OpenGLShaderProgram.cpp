@@ -1,32 +1,31 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
 #if JUCE_USE_OPENGL_SHADERS
 
-OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& context_) noexcept
-    : context (context_)
+OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
+    : context (c)
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());
@@ -42,7 +41,9 @@ OpenGLShaderProgram::~OpenGLShaderProgram() noexcept
 double OpenGLShaderProgram::getLanguageVersion()
 {
    #if JUCE_OPENGL_ES
-    jassertfalse; // doesn't work in ES
+    // GLES doesn't support this version number, but that shouldn't matter since
+    // on GLES you probably won't need to check it.
+    jassertfalse;
     return 0;
    #else
     return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
@@ -67,6 +68,8 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
+        // Your GLSL code contained compile errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif
@@ -95,6 +98,8 @@ bool OpenGLShaderProgram::link() noexcept
         errorLog = String (infoLog, (size_t) infoLogLength);
 
        #if JUCE_DEBUG
+        // Your GLSL code contained link errors!
+        // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
         jassertfalse;
        #endif

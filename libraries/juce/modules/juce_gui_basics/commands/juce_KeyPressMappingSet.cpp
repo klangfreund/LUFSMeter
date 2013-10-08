@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -30,8 +29,7 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager& cm)
 }
 
 KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other)
-    : KeyListener(), ChangeBroadcaster(), FocusChangeListener(),
-      commandManager (other.commandManager)
+    : KeyListener(), ChangeBroadcaster(), FocusChangeListener(), commandManager (other.commandManager)
 {
     Desktop::getInstance().addFocusChangeListener (this);
 }
@@ -51,9 +49,7 @@ Array<KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const Comman
     return Array<KeyPress>();
 }
 
-void KeyPressMappingSet::addKeyPress (const CommandID commandID,
-                                      const KeyPress& newKeyPress,
-                                      int insertIndex)
+void KeyPressMappingSet::addKeyPress (const CommandID commandID, const KeyPress& newKeyPress, int insertIndex)
 {
     // If you specify an upper-case letter but no shift key, how is the user supposed to press it!?
     // Stick to lower-case letters when defining a keypress, to avoid ambiguity.
@@ -85,8 +81,20 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                 mappings.add (cm);
                 sendChangeMessage();
             }
+            else
+            {
+                // If you hit this, you're trying to attach a keypress to a command ID that
+                // doesn't exist, so the key is not being attached.
+                jassertfalse;
+            }
         }
     }
+}
+
+static void addKeyPresses (KeyPressMappingSet& set, const ApplicationCommandInfo* const ci)
+{
+    for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
+        set.addKeyPress (ci->commandID, ci->defaultKeypresses.getReference (j));
 }
 
 void KeyPressMappingSet::resetToDefaultMappings()
@@ -94,15 +102,7 @@ void KeyPressMappingSet::resetToDefaultMappings()
     mappings.clear();
 
     for (int i = 0; i < commandManager.getNumCommands(); ++i)
-    {
-        const ApplicationCommandInfo* const ci = commandManager.getCommandForIndex (i);
-
-        for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
-        {
-            addKeyPress (ci->commandID,
-                         ci->defaultKeypresses.getReference (j));
-        }
-    }
+        addKeyPresses (*this, commandManager.getCommandForIndex (i));
 
     sendChangeMessage();
 }
@@ -111,13 +111,8 @@ void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
 {
     clearAllKeyPresses (commandID);
 
-    const ApplicationCommandInfo* const ci = commandManager.getCommandForID (commandID);
-
-    for (int j = 0; j < ci->defaultKeypresses.size(); ++j)
-    {
-        addKeyPress (ci->commandID,
-                     ci->defaultKeypresses.getReference (j));
-    }
+    if (const ApplicationCommandInfo* const ci = commandManager.getCommandForID (commandID))
+        addKeyPresses (*this, ci);
 }
 
 void KeyPressMappingSet::clearAllKeyPresses()
@@ -334,10 +329,8 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key, Component* const origi
                             invokeCommand (cm.commandID, key, true, 0, originatingComponent);
                             return true;
                         }
-                        else
-                        {
-                            commandWasDisabled = true;
-                        }
+
+                        commandWasDisabled = true;
                     }
                 }
             }

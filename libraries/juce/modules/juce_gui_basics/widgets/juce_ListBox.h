@@ -1,32 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_LISTBOX_JUCEHEADER__
-#define __JUCE_LISTBOX_JUCEHEADER__
-
-#include "../layout/juce_Viewport.h"
+#ifndef JUCE_LISTBOX_H_INCLUDED
+#define JUCE_LISTBOX_H_INCLUDED
 
 
 //==============================================================================
@@ -44,13 +41,11 @@ public:
 
     //==============================================================================
     /** This has to return the number of items in the list.
-
         @see ListBox::getNumRows()
     */
     virtual int getNumRows() = 0;
 
-    /** This method must be implemented to draw a row of the list.
-    */
+    /** This method must be implemented to draw a row of the list. */
     virtual void paintListBoxItem (int rowNumber,
                                    Graphics& g,
                                    int width, int height,
@@ -87,20 +82,17 @@ public:
                                                Component* existingComponentToUpdate);
 
     /** This can be overridden to react to the user clicking on a row.
-
         @see listBoxItemDoubleClicked
     */
     virtual void listBoxItemClicked (int row, const MouseEvent& e);
 
     /** This can be overridden to react to the user double-clicking on a row.
-
         @see listBoxItemClicked
     */
     virtual void listBoxItemDoubleClicked (int row, const MouseEvent& e);
 
-    /** This can be overridden to react to the user double-clicking on a part of the list where
+    /** This can be overridden to react to the user clicking on a part of the list where
         there are no rows.
-
         @see listBoxItemClicked
     */
     virtual void backgroundClicked();
@@ -254,21 +246,17 @@ public:
                             int lastRow);
 
     /** Deselects a row.
-
         If it's not currently selected, this will do nothing.
-
         @see selectRow, deselectAllRows
     */
     void deselectRow (int rowNumber);
 
     /** Deselects any currently selected rows.
-
         @see deselectRow
     */
     void deselectAllRows();
 
     /** Selects or deselects a row.
-
         If the row's currently selected, this deselects it, and vice-versa.
     */
     void flipRowSelection (int rowNumber);
@@ -293,7 +281,6 @@ public:
     bool isRowSelected (int rowNumber) const;
 
     /** Returns the number of rows that are currently selected.
-
         @see getSelectedRow, isRowSelected, getLastRowSelected
     */
     int getNumSelectedRows() const;
@@ -333,7 +320,7 @@ public:
         @see selectRow
     */
     void selectRowsBasedOnModifierKeys (int rowThatWasClickedOn,
-                                        const ModifierKeys& modifiers,
+                                        ModifierKeys modifiers,
                                         bool isMouseUpEvent);
 
     //==============================================================================
@@ -358,8 +345,7 @@ public:
     */
     double getVerticalPosition() const;
 
-    /** Scrolls if necessary to make sure that a particular row is visible.
-    */
+    /** Scrolls if necessary to make sure that a particular row is visible. */
     void scrollToEnsureRowIsOnscreen (int row);
 
     /** Returns a pointer to the vertical scrollbar. */
@@ -527,23 +513,23 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown) override;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void paintOverChildren (Graphics&);
+    void paintOverChildren (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void visibilityChanged();
+    void visibilityChanged() override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
     void startDragAndDrop (const MouseEvent&, const var& dragDescription, bool allowDraggingToOtherWindows);
 
@@ -561,7 +547,7 @@ private:
     int outlineThickness;
     int lastRowSelected;
     bool multipleSelection, hasDoneInitialUpdate;
-    SparseSet <int> selected;
+    SparseSet<int> selected;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
@@ -575,4 +561,4 @@ private:
 };
 
 
-#endif   // __JUCE_LISTBOX_JUCEHEADER__
+#endif   // JUCE_LISTBOX_H_INCLUDED

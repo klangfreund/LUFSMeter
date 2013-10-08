@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -44,7 +43,8 @@ namespace juce
 {
 
 #if ! JUCE_64BIT
-static void updateComponentPos (Component* const comp)
+void updateEditorCompBounds (Component*);
+void updateEditorCompBounds (Component* comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                             comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
@@ -64,7 +64,7 @@ static void updateComponentPos (Component* const comp)
 
 static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
 {
-    updateComponentPos ((Component*) user);
+    updateEditorCompBounds ((Component*) user);
     return noErr;
 }
 #endif
@@ -141,7 +141,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
         InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
         comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
-        updateComponentPos (comp);
+        updateEditorCompBounds (comp);
 
        #if ! JucePlugin_EditorRequiresKeyboardFocus
         comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
@@ -209,8 +209,8 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     }
 }
 
-void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host);
-void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight);
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -222,6 +222,7 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
                                                 [hostView frame].size.height + (newHeight - component->getHeight()))];
         }
        #else
+        (void) nsWindow;
 
         if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                      component->getProperties() ["dummyViewRef"].toString().getHexValue64())
@@ -248,11 +249,12 @@ bool forwardCurrentKeyEventToHost (Component* comp);
 bool forwardCurrentKeyEventToHost (Component* comp)
 {
    #if JUCE_64BIT
+    (void) comp;
     return false;
    #else
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];
     [[win parentWindow] makeKeyWindow];
-    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+    repostCurrentNSEvent();
     return true;
    #endif
 }

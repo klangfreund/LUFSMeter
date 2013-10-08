@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -27,7 +26,7 @@ class Button::RepeatTimer  : public Timer
 {
 public:
     RepeatTimer (Button& b) : owner (b)   {}
-    void timerCallback()    { owner.repeatTimerCallback(); }
+    void timerCallback() override    { owner.repeatTimerCallback(); }
 
 private:
     Button& owner;
@@ -46,8 +45,8 @@ Button::Button (const String& name)
     autoRepeatSpeed (0),
     autoRepeatMinimumDelay (-1),
     radioGroupId (0),
-    commandID (0),
     connectedEdgeFlags (0),
+    commandID(),
     buttonState (buttonNormal),
     lastToggleState (false),
     clickTogglesState (false),
@@ -94,7 +93,7 @@ String Button::getTooltip()
     {
         String tt (commandManagerToUse->getDescriptionOfCommand (commandID));
 
-        Array <KeyPress> keyPresses (commandManagerToUse->getKeyMappings()->getKeyPressesAssignedToCommand (commandID));
+        Array<KeyPress> keyPresses (commandManagerToUse->getKeyMappings()->getKeyPressesAssignedToCommand (commandID));
 
         for (int i = 0; i < keyPresses.size(); ++i)
         {
@@ -114,18 +113,17 @@ String Button::getTooltip()
     return SettableTooltipClient::getTooltip();
 }
 
-void Button::setConnectedEdges (const int connectedEdgeFlags_)
+void Button::setConnectedEdges (const int newFlags)
 {
-    if (connectedEdgeFlags != connectedEdgeFlags_)
+    if (connectedEdgeFlags != newFlags)
     {
-        connectedEdgeFlags = connectedEdgeFlags_;
+        connectedEdgeFlags = newFlags;
         repaint();
     }
 }
 
 //==============================================================================
-void Button::setToggleState (const bool shouldBeOn,
-                             const bool sendChangeNotification)
+void Button::setToggleState (const bool shouldBeOn, const NotificationType notification)
 {
     if (shouldBeOn != lastToggleState)
     {
@@ -137,8 +135,11 @@ void Button::setToggleState (const bool shouldBeOn,
 
         WeakReference<Component> deletionWatcher (this);
 
-        if (sendChangeNotification)
+        if (notification != dontSendNotification)
         {
+            // async callbacks aren't possible here
+            jassert (notification != sendNotificationAsync);
+
             sendClickMessage (ModifierKeys());
 
             if (deletionWatcher == nullptr)
@@ -147,14 +148,20 @@ void Button::setToggleState (const bool shouldBeOn,
 
         if (lastToggleState)
         {
-            turnOffOtherButtonsInGroup (sendChangeNotification);
+            turnOffOtherButtonsInGroup (notification);
 
             if (deletionWatcher == nullptr)
                 return;
         }
 
-        sendStateMessage();
+        if (notification != dontSendNotification)
+            sendStateMessage();
     }
+}
+
+void Button::setToggleState (const bool shouldBeOn, bool sendChange)
+{
+    setToggleState (shouldBeOn, sendChange ? sendNotification : dontSendNotification);
 }
 
 void Button::setClickingTogglesState (const bool shouldToggle) noexcept
@@ -176,21 +183,21 @@ bool Button::getClickingTogglesState() const noexcept
 void Button::valueChanged (Value& value)
 {
     if (value.refersToSameSourceAs (isOn))
-        setToggleState (isOn.getValue(), true);
+        setToggleState (isOn.getValue(), sendNotification);
 }
 
-void Button::setRadioGroupId (const int newGroupId)
+void Button::setRadioGroupId (const int newGroupId, NotificationType notification)
 {
     if (radioGroupId != newGroupId)
     {
         radioGroupId = newGroupId;
 
         if (lastToggleState)
-            turnOffOtherButtonsInGroup (true);
+            turnOffOtherButtonsInGroup (notification);
     }
 }
 
-void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
+void Button::turnOffOtherButtonsInGroup (const NotificationType notification)
 {
     if (Component* const p = getParentComponent())
     {
@@ -208,7 +215,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
                     {
                         if (b->getRadioGroupId() == radioGroupId)
                         {
-                            b->setToggleState (false, sendChangeNotification);
+                            b->setToggleState (false, notification);
 
                             if (deletionWatcher == nullptr)
                                 return;
@@ -265,19 +272,10 @@ void Button::setState (const ButtonState newState)
     }
 }
 
-bool Button::isDown() const noexcept
-{
-    return buttonState == buttonDown;
-}
+bool Button::isDown() const noexcept    { return buttonState == buttonDown; }
+bool Button::isOver() const noexcept    { return buttonState != buttonNormal; }
 
-bool Button::isOver() const noexcept
-{
-    return buttonState != buttonNormal;
-}
-
-void Button::buttonStateChanged()
-{
-}
+void Button::buttonStateChanged() {}
 
 uint32 Button::getMillisecondsSinceButtonDown() const noexcept
 {
@@ -310,7 +308,7 @@ void Button::triggerClick()
 void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
-        setToggleState ((radioGroupId != 0) || ! lastToggleState, false);
+        setToggleState ((radioGroupId != 0) || ! lastToggleState, dontSendNotification);
 
     sendClickMessage (modifiers);
 }
@@ -351,9 +349,6 @@ void Button::removeListener (ButtonListener* const listener)
 {
     buttonListeners.remove (listener);
 }
-
-void Button::addButtonListener (ButtonListener* l)      { addListener (l); }
-void Button::removeButtonListener (ButtonListener* l)   { removeListener (l); }
 
 void Button::sendClickMessage (const ModifierKeys& modifiers)
 {
@@ -397,15 +392,8 @@ void Button::paint (Graphics& g)
 }
 
 //==============================================================================
-void Button::mouseEnter (const MouseEvent&)
-{
-    updateState (true, false);
-}
-
-void Button::mouseExit (const MouseEvent&)
-{
-    updateState (false, false);
-}
+void Button::mouseEnter (const MouseEvent&)     { updateState (true,  false); }
+void Button::mouseExit (const MouseEvent&)      { updateState (false, false); }
 
 void Button::mouseDown (const MouseEvent& e)
 {
@@ -424,9 +412,10 @@ void Button::mouseDown (const MouseEvent& e)
 void Button::mouseUp (const MouseEvent& e)
 {
     const bool wasDown = isDown();
+    const bool wasOver = isOver();
     updateState (isMouseOver(), false);
 
-    if (wasDown && isOver() && ! triggerOnMouseDown)
+    if (wasDown && wasOver && ! triggerOnMouseDown)
         internalClickCallback (e.mods);
 }
 
@@ -474,19 +463,18 @@ void Button::parentHierarchyChanged()
 }
 
 //==============================================================================
-void Button::setCommandToTrigger (ApplicationCommandManager* const commandManagerToUse_,
-                                  const int commandID_,
-                                  const bool generateTooltip_)
+void Button::setCommandToTrigger (ApplicationCommandManager* const newCommandManager,
+                                  const CommandID newCommandID, const bool generateTip)
 {
-    commandID = commandID_;
-    generateTooltip = generateTooltip_;
+    commandID = newCommandID;
+    generateTooltip = generateTip;
 
-    if (commandManagerToUse != commandManagerToUse_)
+    if (commandManagerToUse != newCommandManager)
     {
         if (commandManagerToUse != nullptr)
             commandManagerToUse->removeListener (this);
 
-        commandManagerToUse = commandManagerToUse_;
+        commandManagerToUse = newCommandManager;
 
         if (commandManagerToUse != nullptr)
             commandManagerToUse->addListener (this);
@@ -519,12 +507,15 @@ void Button::applicationCommandListChanged()
     {
         ApplicationCommandInfo info (0);
 
-        ApplicationCommandTarget* const target = commandManagerToUse->getTargetForCommand (commandID, info);
-
-        setEnabled (target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0);
-
-        if (target != nullptr)
-            setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, false);
+        if (commandManagerToUse->getTargetForCommand (commandID, info) != nullptr)
+        {
+            setEnabled ((info.flags & ApplicationCommandInfo::isDisabled) == 0);
+            setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, dontSendNotification);
+        }
+        else
+        {
+            setEnabled (false);
+        }
     }
 }
 
@@ -543,18 +534,15 @@ void Button::addShortcut (const KeyPress& key)
 void Button::clearShortcuts()
 {
     shortcuts.clear();
-
     parentHierarchyChanged();
 }
 
 bool Button::isShortcutPressed() const
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
-    {
         for (int i = shortcuts.size(); --i >= 0;)
             if (shortcuts.getReference(i).isCurrentlyDown())
                 return true;
-    }
 
     return false;
 }

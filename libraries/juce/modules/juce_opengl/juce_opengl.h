@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_OPENGL_JUCEHEADER__
-#define __JUCE_OPENGL_JUCEHEADER__
+#ifndef JUCE_OPENGL_H_INCLUDED
+#define JUCE_OPENGL_H_INCLUDED
 
 #include "../juce_gui_extra/juce_gui_extra.h"
 
@@ -78,50 +77,26 @@
 namespace juce
 {
 
-#include "opengl/juce_OpenGLHelpers.h"
+class OpenGLTexture;
+class OpenGLFrameBuffer;
 
-// START_AUTOINCLUDE opengl
-#ifndef __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
- #include "opengl/juce_Draggable3DOrientation.h"
-#endif
-#ifndef __JUCE_MATRIX3D_JUCEHEADER__
- #include "opengl/juce_Matrix3D.h"
-#endif
-#ifndef __JUCE_OPENGLCONTEXT_JUCEHEADER__
- #include "opengl/juce_OpenGLContext.h"
-#endif
-#ifndef __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
- #include "opengl/juce_OpenGLFrameBuffer.h"
-#endif
-#ifndef __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__
- #include "opengl/juce_OpenGLGraphicsContext.h"
-#endif
-#ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
- #include "opengl/juce_OpenGLHelpers.h"
-#endif
-#ifndef __JUCE_OPENGLIMAGE_JUCEHEADER__
- #include "opengl/juce_OpenGLImage.h"
-#endif
-#ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
- #include "opengl/juce_OpenGLPixelFormat.h"
-#endif
-#ifndef __JUCE_OPENGLRENDERER_JUCEHEADER__
- #include "opengl/juce_OpenGLRenderer.h"
-#endif
-#ifndef __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
- #include "opengl/juce_OpenGLShaderProgram.h"
-#endif
-#ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
- #include "opengl/juce_OpenGLTexture.h"
-#endif
-#ifndef __JUCE_QUATERNION_JUCEHEADER__
- #include "opengl/juce_Quaternion.h"
-#endif
-#ifndef __JUCE_VECTOR3D_JUCEHEADER__
- #include "opengl/juce_Vector3D.h"
-#endif
-// END_AUTOINCLUDE
+#include "opengl/juce_OpenGLHelpers.h"
+#include "opengl/juce_Quaternion.h"
+#include "opengl/juce_Matrix3D.h"
+#include "opengl/juce_Draggable3DOrientation.h"
+#include "opengl/juce_OpenGLPixelFormat.h"
+#include "native/juce_OpenGLExtensions.h"
+#include "opengl/juce_OpenGLRenderer.h"
+#include "opengl/juce_OpenGLContext.h"
+#include "opengl/juce_OpenGLFrameBuffer.h"
+#include "opengl/juce_OpenGLGraphicsContext.h"
+#include "opengl/juce_OpenGLHelpers.h"
+#include "opengl/juce_OpenGLImage.h"
+#include "opengl/juce_OpenGLRenderer.h"
+#include "opengl/juce_OpenGLShaderProgram.h"
+#include "opengl/juce_OpenGLTexture.h"
+#include "opengl/juce_Vector3D.h"
 
 }
 
-#endif   // __JUCE_OPENGL_JUCEHEADER__
+#endif   // JUCE_OPENGL_H_INCLUDED

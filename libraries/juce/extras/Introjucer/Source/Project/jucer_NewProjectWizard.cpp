@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -43,7 +42,7 @@ struct NewProjectWizardClasses
         setupComp.addChildAndSetID (c, "filesToCreate");
 
         c->addItemList (fileOptions, 1);
-        c->setSelectedId (1, false);
+        c->setSelectedId (1, dontSendNotification);
 
         Label* l = new Label (String::empty, TRANS("Files to Auto-Generate") + ":");
         l->attachToComponent (c, true);
@@ -84,6 +83,33 @@ struct NewProjectWizardClasses
         return lastFolder;
     }
 
+    static bool isJuceModulesFolder (const File& f)
+    {
+        return f.isDirectory()
+                && f.getChildFile ("juce_core").isDirectory();
+    }
+
+    static File findDefaultModulesFolder (bool mustContainJuceCoreModule = true)
+    {
+        const MainWindowList& windows = IntrojucerApp::getApp().mainWindowList;
+
+        for (int i = windows.windows.size(); --i >= 0;)
+        {
+            if (Project* p = windows.windows.getUnchecked (i)->getProject())
+            {
+                const File f (EnabledModuleList::findDefaultModulesFolder (*p));
+
+                if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
+                    return f;
+            }
+        }
+
+        if (mustContainJuceCoreModule)
+            return findDefaultModulesFolder (false);
+
+        return File::nonexistent;
+    }
+
     //==============================================================================
     struct NewProjectWizard
     {
@@ -99,8 +125,31 @@ struct NewProjectWizardClasses
 
         virtual bool initialiseProject (Project& project) = 0;
 
+        virtual StringArray getDefaultModules()
+        {
+            const char* mods[] =
+            {
+                "juce_core",
+                "juce_events",
+                "juce_graphics",
+                "juce_data_structures",
+                "juce_gui_basics",
+                "juce_gui_extra",
+                "juce_cryptography",
+                "juce_video",
+                "juce_opengl",
+                "juce_audio_basics",
+                "juce_audio_devices",
+                "juce_audio_formats",
+                "juce_audio_processors",
+                nullptr
+            };
+
+            return StringArray (mods);
+        }
+
         String appTitle;
-        File targetFolder, projectFile;
+        File targetFolder, projectFile, modulesFolder;
         Component* ownerWindow;
         StringArray failedFiles;
 
@@ -132,7 +181,6 @@ struct NewProjectWizardClasses
                                       .withFileExtension (Project::projectFileExtension);
 
             ScopedPointer<Project> project (new Project (projectFile));
-            project->addDefaultModules (true);
 
             if (failedFiles.size() == 0)
             {
@@ -143,6 +191,8 @@ struct NewProjectWizardClasses
                 if (! initialiseProject (*project))
                     return nullptr;
 
+                addDefaultModules (*project);
+
                 if (project->save (false, true) != FileBasedDocument::savedOk)
                     return nullptr;
 
@@ -151,15 +201,39 @@ struct NewProjectWizardClasses
 
             if (failedFiles.size() > 0)
             {
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Errors in Creating Project!"),
-                                             TRANS("The following files couldn't be written:")
-                                                + "\n\n"
-                                                + failedFiles.joinIntoString ("\n", 0, 10));
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  TRANS("Errors in Creating Project!"),
+                                                  TRANS("The following files couldn't be written:")
+                                                    + "\n\n"
+                                                    + failedFiles.joinIntoString ("\n", 0, 10));
                 return nullptr;
             }
 
             return project.release();
+        }
+
+        bool selectJuceFolder()
+        {
+            for (;;)
+            {
+                FileChooser fc ("Select your JUCE modules folder...",
+                                findDefaultModulesFolder(),
+                                "*");
+
+                if (! fc.browseForDirectory())
+                    return false;
+
+                if (isJuceModulesFolder (fc.getResult()))
+                {
+                    modulesFolder = fc.getResult();
+                    return true;
+                }
+
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             "Not a valid JUCE modules folder!",
+                                             "Please select the folder containing your juce_* modules!\n\n"
+                                             "This is required so that the new project can be given some essential core modules.");
+            }
         }
 
         //==============================================================================
@@ -172,6 +246,18 @@ struct NewProjectWizardClasses
         {
             if (! getSourceFilesFolder().createDirectory())
                 failedFiles.add (getSourceFilesFolder().getFullPathName());
+        }
+
+        void addDefaultModules (Project& project)
+        {
+            StringArray mods (getDefaultModules());
+
+            ModuleList list;
+            list.addAllModulesInFolder (modulesFolder);
+
+            for (int i = 0; i < mods.size(); ++i)
+                if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
+                    project.getModules().addModule (info->manifestFile, true);
         }
     };
 
@@ -343,10 +429,17 @@ struct NewProjectWizardClasses
     {
         AudioPluginAppWizard()  {}
 
-        String getName()          { return TRANS("Audio Plug-In"); }
-        String getDescription()   { return TRANS("Creates an audio plugin project"); }
+        String getName() override          { return TRANS("Audio Plug-In"); }
+        String getDescription() override   { return TRANS("Creates an audio plugin project"); }
 
-        bool initialiseProject (Project& project)
+        StringArray getDefaultModules() override
+        {
+            StringArray s (NewProjectWizard::getDefaultModules());
+            s.add ("juce_audio_plugin_client");
+            return s;
+        }
+
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
 
@@ -360,7 +453,6 @@ struct NewProjectWizardClasses
             File editorHFile   = editorCppFile.withFileExtension (".h");
 
             project.getProjectTypeValue() = ProjectType::getAudioPluginTypeName();
-            project.addModule ("juce_audio_plugin_client", true);
 
             Project::Item sourceGroup (createSourceGroup (project));
             project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
@@ -405,9 +497,9 @@ struct NewProjectWizardClasses
                 failedFiles.add (editorHFile.getFullPathName());
 
             sourceGroup.addFile (filterCppFile, -1, true);
-            sourceGroup.addFile (filterHFile, -1, false);
+            sourceGroup.addFile (filterHFile,   -1, false);
             sourceGroup.addFile (editorCppFile, -1, true);
-            sourceGroup.addFile (editorHFile, -1, false);
+            sourceGroup.addFile (editorHFile,   -1, false);
 
             project.createExporterForCurrentPlatform();
 
@@ -420,10 +512,10 @@ struct NewProjectWizardClasses
     {
         StaticLibraryWizard()  {}
 
-        String getName()          { return TRANS("Static Library"); }
-        String getDescription()   { return TRANS("Creates a static library"); }
+        String getName() override          { return TRANS("Static Library"); }
+        String getDescription() override   { return TRANS("Creates a static library"); }
 
-        bool initialiseProject (Project& project)
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
             project.getProjectTypeValue() = ProjectType::getStaticLibTypeName();
@@ -440,10 +532,10 @@ struct NewProjectWizardClasses
     {
         DynamicLibraryWizard()  {}
 
-        String getName()          { return TRANS("Dynamic Library"); }
-        String getDescription()   { return TRANS("Creates a dynamic library"); }
+        String getName() override          { return TRANS("Dynamic Library"); }
+        String getDescription() override   { return TRANS("Creates a dynamic library"); }
 
-        bool initialiseProject (Project& project)
+        bool initialiseProject (Project& project) override
         {
             createSourceFolder();
             project.getProjectTypeValue() = ProjectType::getDynamicLibTypeName();
@@ -483,7 +575,7 @@ struct NewProjectWizardClasses
 
             addChildAndSetID (&projectType, "projectType");
             projectType.addItemList (getWizardNames(), 1);
-            projectType.setSelectedId (1, true);
+            projectType.setSelectedId (1, dontSendNotification);
             projectType.setBounds ("100, projectName.bottom + 4, projectName.right, top + 22");
             typeLabel.attachToComponent (&projectType, true);
             projectType.addListener (this);
@@ -510,12 +602,12 @@ struct NewProjectWizardClasses
             updateCreateButton();
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillAll (Colour::greyLevel (0.93f));
         }
 
-        void buttonClicked (Button* b)
+        void buttonClicked (Button* b) override
         {
             if (b == &createButton)
             {
@@ -533,7 +625,7 @@ struct NewProjectWizardClasses
             MainWindow* mw = Component::findParentComponentOfClass<MainWindow>();
             jassert (mw != nullptr);
 
-            ScopedPointer <NewProjectWizard> wizard (createWizard());
+            ScopedPointer<NewProjectWizard> wizard (createWizard());
 
             if (wizard != nullptr)
             {
@@ -547,6 +639,9 @@ struct NewProjectWizardClasses
                     return;
                 }
 
+                if (! wizard->selectJuceFolder())
+                    return;
+
                 ScopedPointer<Project> project (wizard->runWizard (mw, projectName.getText(),
                                                                    fileBrowser.getSelectedFile (0)));
 
@@ -559,18 +654,18 @@ struct NewProjectWizardClasses
         {
             customItems.clear();
 
-            ScopedPointer <NewProjectWizard> wizard (createWizard());
+            ScopedPointer<NewProjectWizard> wizard (createWizard());
 
             if (wizard != nullptr)
                 wizard->addSetupItems (*this, customItems);
         }
 
-        void comboBoxChanged (ComboBox*)
+        void comboBoxChanged (ComboBox*) override
         {
             updateCustomItems();
         }
 
-        void textEditorTextChanged (TextEditor&)
+        void textEditorTextChanged (TextEditor&) override
         {
             updateCreateButton();
 
@@ -615,7 +710,7 @@ struct NewProjectWizardClasses
             default:    jassertfalse; break;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static StringArray getWizardNames()
@@ -624,7 +719,7 @@ struct NewProjectWizardClasses
 
         for (int i = 0; i < getNumWizards(); ++i)
         {
-            ScopedPointer <NewProjectWizard> wiz (createWizardType (i));
+            ScopedPointer<NewProjectWizard> wiz (createWizardType (i));
             s.add (wiz->getName());
         }
 

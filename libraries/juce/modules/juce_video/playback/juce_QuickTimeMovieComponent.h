@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
-#define __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#ifndef JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
+#define JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
 
 // (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
 // amalgamated build)
@@ -140,7 +139,7 @@ public:
         the top or sides.
     */
     void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                          const RectanglePlacement& placement);
+                                          RectanglePlacement placement);
 
     /** Starts the movie playing. */
     void play();
@@ -168,13 +167,11 @@ public:
     void setSpeed (float newSpeed);
 
     /** Changes the movie's playback volume.
-
         @param newVolume    the volume in the range 0 (silent) to 1.0 (full)
     */
     void setMovieVolume (float newVolume);
 
     /** Returns the movie's playback volume.
-
         @returns the volume in the range 0 (silent) to 1.0 (full)
     */
     float getMovieVolume() const;
@@ -183,13 +180,11 @@ public:
     void setLooping (bool shouldLoop);
 
     /** Returns true if the movie is currently looping.
-
         @see setLooping
     */
     bool isLooping() const;
 
     /** True if the native QuickTime controller bar is shown in the window.
-
         @see loadMovie
     */
     bool isControllerVisible() const;
@@ -197,7 +192,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
 
 
 private:
@@ -205,22 +200,21 @@ private:
     File movieFile;
     bool movieLoaded, controllerVisible, looping;
 
-#if JUCE_WINDOWS
-    void parentHierarchyChanged();
-    void visibilityChanged();
-
+   #if JUCE_WINDOWS
+    void parentHierarchyChanged() override;
+    void visibilityChanged() override;
     void createControlIfNeeded();
     bool isControlCreated() const;
 
     class Pimpl;
-    friend class ScopedPointer <Pimpl>;
-    ScopedPointer <Pimpl> pimpl;
-#else
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
+   #else
     void* movie;
-#endif
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent)
 };
 
 #endif
-#endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
+#endif   // JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED

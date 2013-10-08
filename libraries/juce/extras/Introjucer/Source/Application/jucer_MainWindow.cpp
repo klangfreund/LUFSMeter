@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -30,8 +29,6 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Project/jucer_NewProjectWizard.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
-
-ScopedPointer<ApplicationCommandManager> commandManager;
 
 
 //==============================================================================
@@ -51,26 +48,27 @@ MainWindow::MainWindow()
     setResizable (true, false);
     centreWithSize (800, 600);
 
+    ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
+
     // Register all the app commands..
-    commandManager->registerAllCommandsForTarget (this);
-    commandManager->registerAllCommandsForTarget (getProjectContentComponent());
+    commandManager.registerAllCommandsForTarget (this);
+    commandManager.registerAllCommandsForTarget (getProjectContentComponent());
 
     // update key mappings..
     {
-        commandManager->getKeyMappings()->resetToDefaultMappings();
+        commandManager.getKeyMappings()->resetToDefaultMappings();
 
         ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
-            commandManager->getKeyMappings()->restoreFromXml (*keys);
+            commandManager.getKeyMappings()->restoreFromXml (*keys);
 
-        addKeyListener (commandManager->getKeyMappings());
+        addKeyListener (commandManager.getKeyMappings());
     }
 
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-    //getPeer()->setCurrentRenderingEngine (0);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
 
     setResizeLimits (600, 500, 32000, 32000);
@@ -82,7 +80,7 @@ MainWindow::~MainWindow()
     setMenuBar (nullptr);
    #endif
 
-    removeKeyListener (commandManager->getKeyMappings());
+    removeKeyListener (IntrojucerApp::getCommandManager().getKeyMappings());
 
     // save the current size and position to our settings file..
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
@@ -162,7 +160,7 @@ void MainWindow::setProject (Project* newProject)
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
     getProjectContentComponent()->updateMainWindowTitle();
-    commandManager->commandStatusChanged();
+    IntrojucerApp::getCommandManager().commandStatusChanged();
 }
 
 void MainWindow::restoreWindowPosition()
@@ -191,7 +189,7 @@ bool MainWindow::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer <Project> newDoc (new Project (file));
+        ScopedPointer<Project> newDoc (new Project (file));
 
         if (newDoc->loadFrom (file, true)
              && closeCurrentProject())
@@ -211,7 +209,7 @@ bool MainWindow::openFile (const File& file)
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
     for (int i = filenames.size(); --i >= 0;)
-        if (canOpenFile (filenames[i]))
+        if (canOpenFile (File (filenames[i])))
             return true;
 
     return false;
@@ -371,7 +369,7 @@ void MainWindowList::closeWindow (MainWindow* w)
    #if ! JUCE_MAC
     if (windows.size() == 1)
     {
-        JUCEApplication::getInstance()->systemRequestedQuit();
+        JUCEApplicationBase::getInstance()->systemRequestedQuit();
     }
     else
    #endif
@@ -405,7 +403,7 @@ bool MainWindowList::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer <Project> newDoc (new Project (file));
+        ScopedPointer<Project> newDoc (new Project (file));
 
         if (newDoc->loadFrom (file, true))
         {
@@ -528,4 +526,16 @@ void MainWindowList::sendLookAndFeelChange()
 {
     for (int i = windows.size(); --i >= 0;)
         windows.getUnchecked(i)->sendLookAndFeelChange();
+}
+
+Project* MainWindowList::getFrontmostProject()
+{
+    Desktop& desktop = Desktop::getInstance();
+
+    for (int i = desktop.getNumComponents(); --i >= 0;)
+        if (MainWindow* const mw = dynamic_cast <MainWindow*> (desktop.getComponent(i)))
+            if (Project* p = mw->getProject())
+                return p;
+
+    return nullptr;
 }

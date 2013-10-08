@@ -52,10 +52,13 @@ public:
 
     void setFile (const File& file)
     {
-        thumbnail.setSource (new FileInputSource (file));
-        startTime = 0;
-        endTime = thumbnail.getTotalLength();
-        startTimer (1000 / 40);
+        if (! file.isDirectory())
+        {
+            thumbnail.setSource (new FileInputSource (file));
+            startTime = 0;
+            endTime = thumbnail.getTotalLength();
+            startTimer (1000 / 40);
+        }
     }
 
     void setZoomFactor (double amount)
@@ -70,7 +73,7 @@ public:
         }
     }
 
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel) override
     {
         if (thumbnail.getTotalLength() > 0)
         {
@@ -86,7 +89,7 @@ public:
         }
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
         g.setColour (Colours::lightblue);
@@ -103,18 +106,18 @@ public:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         // this method is called by the thumbnail when it has changed, so we should repaint it..
         repaint();
     }
 
-    bool isInterestedInFileDrag (const StringArray& /*files*/)
+    bool isInterestedInFileDrag (const StringArray& /*files*/) override
     {
         return true;
     }
 
-    void filesDropped (const StringArray& files, int /*x*/, int /*y*/)
+    void filesDropped (const StringArray& files, int /*x*/, int /*y*/) override
     {
         AudioDemoPlaybackPage* demoPage = findParentComponentOfClass<AudioDemoPlaybackPage>();
 
@@ -122,22 +125,22 @@ public:
             demoPage->showFile (File (files[0]));
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         transportSource.setPosition (jmax (0.0, xToTime ((float) e.x)));
     }
 
-    void mouseUp (const MouseEvent&)
+    void mouseUp (const MouseEvent&) override
     {
         transportSource.start();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         currentPositionMarker.setVisible (transportSource.isPlaying() || isMouseButtonDown());
 
@@ -374,7 +377,7 @@ BEGIN_JUCER_METADATA
 <JUCER_COMPONENT documentType="Component" className="AudioDemoPlaybackPage" componentName=""
                  parentClasses="public Component, public FileBrowserListener"
                  constructorParams="AudioDeviceManager&amp; deviceManager_" variableInitialisers="deviceManager (deviceManager_),&#10;thread (&quot;audio file preview&quot;),&#10;directoryList (nullptr, thread)"
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
+                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>
   <LABEL name="" id="d4f78f975d81c8d3" memberName="zoomLabel" virtualName=""

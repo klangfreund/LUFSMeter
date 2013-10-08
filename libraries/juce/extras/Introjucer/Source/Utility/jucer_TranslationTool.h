@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCER_TRANSLATIONTOOL_H_E4B7E119__
-#define __JUCER_TRANSLATIONTOOL_H_E4B7E119__
+#ifndef __JUCER_TRANSLATIONTOOL_JUCEHEADER__
+#define __JUCER_TRANSLATIONTOOL_JUCEHEADER__
 
 
 struct TranslationHelpers
@@ -77,7 +76,8 @@ struct TranslationHelpers
                 if (c == '"')
                 {
                     out << String (start, p);
-                    parseStringLiteral (++p, out);
+                    ++p;
+                    parseStringLiteral (p, out);
                     return;
                 }
 
@@ -170,16 +170,12 @@ struct TranslationHelpers
     {
         scanFilesForTranslations (strings, project.getMainGroup());
 
-        const File modulesFolder (ModuleList::getDefaultModulesFolder (&project));
-
         OwnedArray<LibraryModule> modules;
-        ModuleList moduleList;
-        moduleList.rescan (modulesFolder);
-        project.createRequiredModules (moduleList, modules);
+        project.getModules().createRequiredModules (modules);
 
         for (int j = 0; j < modules.size(); ++j)
         {
-            const File localFolder (modules.getUnchecked(j)->getLocalFolderFor (project));
+            const File localFolder (modules.getUnchecked(j)->getFolder());
 
             Array<File> files;
             modules.getUnchecked(j)->findBrowseableFiles (localFolder, files);
@@ -216,6 +212,9 @@ struct TranslationHelpers
             }
         }
 
+        if (currentItem.isNotEmpty())
+            result.add (currentItem);
+
         return result;
     }
 
@@ -232,8 +231,18 @@ struct TranslationHelpers
     {
         StringArray strings;
         scanProject (strings, project);
+        return mungeStrings (strings);
+    }
 
+    static String getPreTranslationText (const LocalisedStrings& strings)
+    {
+        return mungeStrings (strings.getMappings().getAllKeys());
+    }
+
+    static String mungeStrings (const StringArray& strings)
+    {
         MemoryOutputStream s;
+
         for (int i = 0; i < strings.size(); ++i)
         {
             s << getMungingSeparator() << i << "." << newLine << strings[i];
@@ -243,6 +252,23 @@ struct TranslationHelpers
         }
 
         return s.toString();
+    }
+
+    static String createFinishedTranslationFile (const StringArray& preStrings,
+                                                 const StringArray& postStrings)
+    {
+        StringArray lines;
+
+        lines.add ("language: [enter full name of the language here!]");
+        lines.add ("countries: [enter list of 2-character country codes here!]");
+        lines.add (String::empty);
+
+        for (int i = 0; i < preStrings.size(); ++i)
+            lines.add ("\"" + escapeString (preStrings[i])
+                         + "\" = \""
+                         + escapeString (postStrings[i]) + "\"");
+
+        return lines.joinIntoString (newLine);
     }
 };
 
@@ -258,18 +284,21 @@ public:
     {
         setLookAndFeel (&lf);
 
-        instructionsLabel.setText ("This tool scans your project for all TRANS() macros, and "
-                                   "assembles them into a blob of text that can be automatically "
-                                   "translated and disassembled into a JUCE translation file...", dontSendNotification);
+        instructionsLabel.setText (
+            "This utility converts translation files to/from a format that can be passed to automatic translation tools."
+            "\n\n"
+            "First, choose whether to scan the current project for all TRANS() macros, or "
+            "pick an existing translation file to load:", dontSendNotification);
         addAndMakeVisible (&instructionsLabel);
 
-        label1.setText ("Copy-and-paste this text into Google Translate or some other translator:", dontSendNotification);
+        label1.setText ("..then copy-and-paste this annotated text into Google Translate or some other translator:", dontSendNotification);
         addAndMakeVisible (&label1);
 
-        label2.setText ("...then, take the translated result and paste it into this box:", dontSendNotification);
+        label2.setText ("...then, take the translated result and paste it into the box below:", dontSendNotification);
         addAndMakeVisible (&label2);
 
-        label3.setText ("Finally: Click the 'Generate' button, and a valid translation file will be created below...", dontSendNotification);
+        label3.setText ("Finally, click the 'Generate' button, and a translation file will be created below. "
+                        "Remember to update its language code at the top!", dontSendNotification);
         addAndMakeVisible (&label3);
 
         addAndMakeVisible (&editorPre);
@@ -278,7 +307,14 @@ public:
 
         generateButton.setButtonText (TRANS("Generate"));
         addAndMakeVisible (&generateButton);
+        scanButton.setButtonText ("Scan Project for TRANS macros");
+        addAndMakeVisible (&scanButton);
+        loadButton.setButtonText ("Load existing translation File...");
+        addAndMakeVisible (&loadButton);
         generateButton.addListener (this);
+
+        scanButton.addListener (this);
+        loadButton.addListener (this);
     }
 
     void paint (Graphics& g)
@@ -292,21 +328,17 @@ public:
 
         r.removeFromTop (120);
 
-        editorPre.setBounds (10, 95, getWidth() - 20, 130);
-        editorPost.setBounds (10, 271, getWidth() - 20, 114);
-        editorResult.setBounds (10, 470, getWidth() - 20, getHeight() - 480);
+        editorPre.setBounds (10, 165, getWidth() - 20, 130);
+        editorPost.setBounds (10, 338, getWidth() - 20, 114);
+        editorResult.setBounds (10, 503, getWidth() - 20, getHeight() - 510);
 
-        generateButton.setBounds (getWidth() - 150, 413, 140, 30);
-        label1.setBounds (6, 58, getWidth() - 12, 26);
-        label2.setBounds (6, 238, getWidth() - 12, 25);
-        label3.setBounds (6, 402, generateButton.getX() - 20, 54);
-        instructionsLabel.setBounds (6, 10, getWidth() - 12, 44);
-    }
-
-    void initialiseForProject (Project& project)
-    {
-        documentPre.replaceAllContent (TranslationHelpers::getPreTranslationText (project));
-        editorPre.selectAll();
+        generateButton.setBounds (getWidth() - 152, 462, 140, 30);
+        label1.setBounds (10, 128, getWidth() - 20, 26);
+        label2.setBounds (10, 303, getWidth() - 20, 25);
+        label3.setBounds (10, 459, generateButton.getX() - 20, 38);
+        instructionsLabel.setBounds (6, 10, getWidth() - 14, 70);
+        scanButton.setBounds (27, 86, 257, 30);
+        loadButton.setBounds (304, 86, 260, 30);
     }
 
 private:
@@ -315,13 +347,20 @@ private:
     juce::Label label1, label2, label3;
     juce::TextButton generateButton;
     juce::Label instructionsLabel;
+    juce::TextButton scanButton;
+    juce::TextButton loadButton;
 
     IntrojucerLookAndFeel lf;
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button* b)
     {
-        StringArray mappings;
+        if (b == &generateButton)   generate();
+        else if (b == &loadButton)  loadFile();
+        else if (b == &scanButton)  scanProject();
+    }
 
+    void generate()
+    {
         StringArray preStrings  (TranslationHelpers::breakApart (documentPre.getAllContent()));
         StringArray postStrings (TranslationHelpers::breakApart (documentPost.getAllContent()));
 
@@ -334,14 +373,35 @@ private:
             return;
         }
 
-        for (int i = 0; i < preStrings.size(); ++i)
-            mappings.add (TranslationHelpers::escapeString (preStrings[i]).quoted()
-                           + " = "
-                           + TranslationHelpers::escapeString (postStrings[i]).quoted());
+        documentResult.replaceAllContent (TranslationHelpers::createFinishedTranslationFile (preStrings, postStrings));
+    }
 
-        documentResult.replaceAllContent (mappings.joinIntoString (newLine));
+    void loadFile()
+    {
+        FileChooser fc ("Choose a translation file to load",
+                        File::nonexistent,
+                        "*");
+
+        if (fc.browseForFileToOpen())
+            setPreTranslationText (TranslationHelpers::getPreTranslationText (LocalisedStrings (fc.getResult(), false)));
+    }
+
+    void scanProject()
+    {
+        if (Project* project = IntrojucerApp::getApp().mainWindowList.getFrontmostProject())
+            setPreTranslationText (TranslationHelpers::getPreTranslationText (*project));
+        else
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Translation Tool",
+                                              "This will only work when you have a project open!");
+    }
+
+    void setPreTranslationText (const String& text)
+    {
+        documentPre.replaceAllContent (text);
+        editorPre.grabKeyboardFocus();
+        editorPre.selectAll();
     }
 };
 
 
-#endif  // __JUCER_TRANSLATIONTOOL_H_E4B7E119__
+#endif   // __JUCER_TRANSLATIONTOOL_JUCEHEADER__

@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
-#define __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
+#ifndef JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
+#define JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
 
 
 //==============================================================================
@@ -97,32 +96,27 @@ public:
     AudioSampleBuffer (const AudioSampleBuffer& other) noexcept;
 
     /** Copies another buffer onto this one.
-
         This buffer's size will be changed to that of the other buffer.
     */
     AudioSampleBuffer& operator= (const AudioSampleBuffer& other) noexcept;
 
     /** Destructor.
-
         This will free any memory allocated by the buffer.
     */
-    virtual ~AudioSampleBuffer() noexcept;
+    ~AudioSampleBuffer() noexcept;
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
-
         @see getSampleData
     */
     int getNumChannels() const noexcept     { return numChannels; }
 
     /** Returns the number of samples allocated in each of the buffer's channels.
-
         @see getSampleData
     */
     int getNumSamples() const noexcept      { return size; }
 
     /** Returns a pointer one of the buffer's channels.
-
         For speed, this doesn't check whether the channel number is out of range,
         so be careful when using it!
     */
@@ -412,22 +406,25 @@ public:
                      float& minVal,
                      float& maxVal) const noexcept;
 
-    /** Finds the highest absolute sample value within a region of a channel.
-    */
+    /** Finds the highest absolute sample value within a region of a channel. */
     float getMagnitude (int channel,
                         int startSample,
                         int numSamples) const noexcept;
 
-    /** Finds the highest absolute sample value within a region on all channels.
-    */
+    /** Finds the highest absolute sample value within a region on all channels. */
     float getMagnitude (int startSample,
                         int numSamples) const noexcept;
 
-    /** Returns the root mean squared level for a region of a channel.
-    */
+    /** Returns the root mean squared level for a region of a channel. */
     float getRMSLevel (int channel,
                        int startSample,
                        int numSamples) const noexcept;
+
+    /** Reverses a part of a channel. */
+    void reverse (int channel, int startSample, int numSamples) const noexcept;
+
+    /** Reverses a part of the buffer. */
+    void reverse (int startSample, int numSamples) const noexcept;
 
 private:
     //==============================================================================
@@ -444,4 +441,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
+#endif   // JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED

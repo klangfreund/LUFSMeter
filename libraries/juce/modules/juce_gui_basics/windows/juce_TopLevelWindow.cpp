@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -107,7 +106,7 @@ public:
 private:
     TopLevelWindow* currentActive;
 
-    void timerCallback()
+    void timerCallback() override
     {
         checkFocus();
     }
@@ -239,11 +238,11 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
     }
 }
 
-void TopLevelWindow::setUsingNativeTitleBar (const bool useNativeTitleBar_)
+void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
 {
-    if (useNativeTitleBar != useNativeTitleBar_)
+    if (useNativeTitleBar != shouldUseNativeTitleBar)
     {
-        useNativeTitleBar = useNativeTitleBar_;
+        useNativeTitleBar = shouldUseNativeTitleBar;
         recreateDesktopWindow();
         sendLookAndFeelChange();
     }
@@ -256,6 +255,13 @@ void TopLevelWindow::recreateDesktopWindow()
         Component::addToDesktop (getDesktopWindowStyleFlags());
         toFront (true);
     }
+}
+
+void TopLevelWindow::addToDesktop()
+{
+    shadower = nullptr;
+    Component::addToDesktop (getDesktopWindowStyleFlags());
+    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }
 
 void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)
@@ -331,7 +337,7 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
             int numTWLParents = 0;
 
             for (const Component* c = tlw->getParentComponent(); c != nullptr; c = c->getParentComponent())
-                if (dynamic_cast <const TopLevelWindow*> (c) != nullptr)
+                if (dynamic_cast<const TopLevelWindow*> (c) != nullptr)
                     ++numTWLParents;
 
             if (bestNumTWLParents < numTWLParents)

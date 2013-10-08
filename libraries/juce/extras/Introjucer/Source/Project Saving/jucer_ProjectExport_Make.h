@@ -1,28 +1,26 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
-
 
 class MakefileProjectExporter  : public ProjectExporter
 {
@@ -50,17 +48,18 @@ public:
     }
 
     //==============================================================================
-    bool launchProject()                        { return false; }
-    bool usesMMFiles() const                    { return false; }
-    bool isLinux() const                        { return true; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool canLaunchProject() override                    { return false; }
+    bool launchProject() override                       { return false; }
+    bool usesMMFiles() const override                   { return false; }
+    bool isLinux() const override                       { return true; }
+    bool canCopeWithDuplicateFiles() override           { return false; }
 
-    void createExporterProperties (PropertyListBuilder&)
+    void createExporterProperties (PropertyListBuilder&) override
     {
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         Array<RelativePath> files;
         for (int i = 0; i < getAllGroups().size(); ++i)
@@ -86,7 +85,7 @@ protected:
         Value getArchitectureType()                 { return getValue (Ids::linuxArchitecture); }
         String getArchitectureTypeString() const    { return config [Ids::linuxArchitecture]; }
 
-        void createConfigProperties (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props) override
         {
             const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
             const var archFlags[] = { var(), "-m32", "-m64", "-march=armv6", "-march=armv7" };
@@ -97,7 +96,7 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
         return new MakeBuildConfiguration (project, tree);
     }
@@ -217,10 +216,11 @@ private:
         if (makefileIsDLL)
             out << " -fPIC";
 
-        out << " -O" << config.getGCCOptimisationFlag() << newLine;
+        out << " -O" << config.getGCCOptimisationFlag()
+            << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
+            << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) "
-            << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
+        out << "  CXXFLAGS += $(CFLAGS)" << newLine;
 
         writeLinkerFlags (out, config);
 
@@ -240,7 +240,7 @@ private:
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
         if (projectType.isStaticLibrary())
-            out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)" << newLine;
+            out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS)" << newLine;
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
 
@@ -264,6 +264,10 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
+        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
+            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
+            << newLine;
+
         out << "ifndef CONFIG" << newLine
             << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
             << "endif" << newLine
@@ -271,10 +275,6 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, *config);
-
-        out << "# (this disables dependency generation if multiple architectures are set)" << newLine
-            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
-            << newLine;
 
         writeObjects (out, files);
 

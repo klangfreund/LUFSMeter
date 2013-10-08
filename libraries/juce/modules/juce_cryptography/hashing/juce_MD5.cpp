@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -216,16 +215,16 @@ MD5::MD5 (const void* data, const size_t numBytes) noexcept
     processData (data, numBytes);
 }
 
-MD5::MD5 (const CharPointer_UTF8& utf8) noexcept
+MD5::MD5 (CharPointer_UTF8 utf8) noexcept
 {
     jassert (utf8.getAddress() != nullptr);
     processData (utf8.getAddress(), utf8.sizeInBytes() - 1);
 }
 
-MD5 MD5::fromUTF32 (const String& text)
+MD5 MD5::fromUTF32 (StringRef text)
 {
     MD5Generator generator;
-    String::CharPointerType t (text.getCharPointer());
+    String::CharPointerType t (text.text);
 
     while (! t.isEmpty())
     {
@@ -298,3 +297,40 @@ String MD5::toHexString() const
 //==============================================================================
 bool MD5::operator== (const MD5& other) const noexcept   { return memcmp (result, other.result, sizeof (result)) == 0; }
 bool MD5::operator!= (const MD5& other) const noexcept   { return ! operator== (other); }
+
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class MD5Tests  : public UnitTest
+{
+public:
+    MD5Tests() : UnitTest ("MD5") {}
+
+    void test (const char* input, const char* expected)
+    {
+        {
+            MD5 hash (input, strlen (input));
+            expectEquals (hash.toHexString(), String (expected));
+        }
+
+        {
+            MemoryInputStream m (input, strlen (input), false);
+            MD5 hash (m);
+            expectEquals (hash.toHexString(), String (expected));
+        }
+    }
+
+    void runTest()
+    {
+        beginTest ("MD5");
+
+        test ("", "d41d8cd98f00b204e9800998ecf8427e");
+        test ("The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6");
+        test ("The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0");
+    }
+};
+
+static MD5Tests MD5UnitTests;
+
+#endif

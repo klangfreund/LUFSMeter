@@ -1,33 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_IMAGE_JUCEHEADER__
-#define __JUCE_IMAGE_JUCEHEADER__
-
-#include "../colour/juce_Colour.h"
-#include "../contexts/juce_GraphicsContext.h"
+#ifndef JUCE_IMAGE_H_INCLUDED
+#define JUCE_IMAGE_H_INCLUDED
 
 class ImageType;
 class ImagePixelData;
@@ -188,7 +184,7 @@ public:
         This won't do any alpha-blending - it just sets all pixels in the image to
         the given colour (which may be non-opaque if the image has an alpha channel).
     */
-    void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
+    void clear (const Rectangle<int>& area, Colour colourToClearTo = Colour (0x00000000));
 
     /** Returns a rescaled version of this image.
 
@@ -245,7 +241,7 @@ public:
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.
 
-        If the co-ordinates given are beyond the image's boundaries, this will
+        If the coordinates given are beyond the image's boundaries, this will
         return Colours::transparentBlack.
 
         @see setPixelAt, Image::BitmapData::getPixelColour
@@ -254,7 +250,7 @@ public:
 
     /** Sets the colour of one of the image's pixels.
 
-        If the co-ordinates are beyond the image's boundaries, then nothing will happen.
+        If the coordinates are beyond the image's boundaries, then nothing will happen.
 
         Note that this won't do any alpha-blending, it'll just replace the existing pixel
         with the given one. The colour's opacity will be ignored if this image doesn't have
@@ -262,15 +258,15 @@ public:
 
         @see getPixelAt, Image::BitmapData::setPixelColour
     */
-    void setPixelAt (int x, int y, const Colour& colour);
+    void setPixelAt (int x, int y, Colour colour);
 
     /** Changes the opacity of a pixel.
 
         This only has an effect if the image has an alpha channel and if the
-        given co-ordinates are inside the image's boundary.
+        given coordinates are inside the image's boundary.
 
         The multiplier must be in the range 0 to 1.0, and the current alpha
-        at the given co-ordinates will be multiplied by this value.
+        at the given coordinates will be multiplied by this value.
 
         @see setPixelAt
     */
@@ -323,13 +319,13 @@ public:
         ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
-            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+            The coordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
         inline uint8* getLinePointer (int y) const noexcept                 { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
-            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+            The coordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
         inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + y * lineStride + x * pixelStride; }
@@ -344,7 +340,7 @@ public:
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        void setPixelColour (int x, int y, const Colour& colour) const noexcept;
+        void setPixelColour (int x, int y, Colour colour) const noexcept;
 
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }
@@ -384,7 +380,7 @@ public:
         @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
                                 above this level will be considered opaque
     */
-    void createSolidAreaMask (RectangleList& result, float alphaThreshold) const;
+    void createSolidAreaMask (RectangleList<int>& result, float alphaThreshold) const;
 
     //==============================================================================
     /** Returns a NamedValueSet that is attached to the image and which can be used for
@@ -500,8 +496,8 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 //==============================================================================
@@ -516,9 +512,9 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
-    int getTypeID() const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
+    int getTypeID() const override;
 };
 
 
-#endif   // __JUCE_IMAGE_JUCEHEADER__
+#endif   // JUCE_IMAGE_H_INCLUDED

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -222,9 +221,11 @@ namespace DirectWriteTypeLayout
 
         if (const Font* const font = attr.getFont())
         {
+            const String familyName (FontStyleHelpers::getConcreteFamilyName (*font));
+
             BOOL fontFound = false;
             uint32 fontIndex;
-            fontCollection->FindFamilyName (FontStyleHelpers::getConcreteFamilyName (*font).toWideCharPointer(),
+            fontCollection->FindFamilyName (familyName.toWideCharPointer(),
                                             &fontIndex, &fontFound);
 
             if (! fontFound)
@@ -245,7 +246,7 @@ namespace DirectWriteTypeLayout
                     break;
             }
 
-            textLayout->SetFontFamilyName (attr.getFont()->getTypefaceName().toWideCharPointer(), range);
+            textLayout->SetFontFamilyName (familyName.toWideCharPointer(), range);
             textLayout->SetFontWeight (dwFont->GetWeight(), range);
             textLayout->SetFontStretch (dwFont->GetStretch(), range);
             textLayout->SetFontStyle (dwFont->GetStyle(), range);
@@ -268,9 +269,9 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    void setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
+    bool setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
                       ID2D1RenderTarget* const renderTarget, IDWriteFactory* const directWriteFactory,
-                      IDWriteFontCollection* const fontCollection, IDWriteTextLayout** dwTextLayout)
+                      IDWriteFontCollection* const fontCollection, ComSmartPtr<IDWriteTextLayout>& textLayout)
     {
         // To add color to text, we need to create a D2D render target
         // Since we are not actually rendering to a D2D context we create a temporary GDI render target
@@ -304,13 +305,18 @@ namespace DirectWriteTypeLayout
 
         const int textLen = text.getText().length();
 
-        hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen,
-                                                   dwTextFormat, maxWidth, maxHeight, dwTextLayout);
+        hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen, dwTextFormat,
+                                                   maxWidth, maxHeight, textLayout.resetAndGetPointerAddress());
+
+        if (FAILED (hr) || textLayout == nullptr)
+            return false;
 
         const int numAttributes = text.getNumAttributes();
 
         for (int i = 0; i < numAttributes; ++i)
-            addAttributedRange (*text.getAttribute (i), *dwTextLayout, textLen, renderTarget, fontCollection);
+            addAttributedRange (*text.getAttribute (i), textLayout, textLen, renderTarget, fontCollection);
+
+        return true;
     }
 
     void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
@@ -329,7 +335,9 @@ namespace DirectWriteTypeLayout
         HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
 
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
-        setupLayout (text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout.resetAndGetPointerAddress());
+
+        if (! setupLayout (text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout))
+            return;
 
         UINT32 actualLineCount = 0;
         hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
@@ -357,15 +365,16 @@ namespace DirectWriteTypeLayout
                            IDWriteFactory* const directWriteFactory, IDWriteFontCollection* const fontCollection)
     {
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
-        setupLayout (text, area.getWidth(), area.getHeight(), renderTarget, directWriteFactory,
-                     fontCollection, dwTextLayout.resetAndGetPointerAddress());
 
-        ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
-        renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f)),
-                                             d2dBrush.resetAndGetPointerAddress());
+        if (setupLayout (text, area.getWidth(), area.getHeight(), renderTarget, directWriteFactory, fontCollection, dwTextLayout))
+        {
+            ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
+            renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f)),
+                                                 d2dBrush.resetAndGetPointerAddress());
 
-        renderTarget->DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
-                                      dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+            renderTarget->DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
+                                          dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        }
     }
 }
 #endif

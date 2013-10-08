@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -28,39 +27,51 @@ class SVGState
 public:
     //==============================================================================
     explicit SVGState (const XmlElement* const topLevel)
-        : topLevelXml (topLevel),
+        : topLevelXml (topLevel, nullptr),
           elementX (0), elementY (0),
           width (512), height (512),
           viewBoxW (0), viewBoxH (0)
     {
     }
 
-    //==============================================================================
-    Drawable* parseSVGElement (const XmlElement& xml)
+    struct XmlPath
     {
-        if (! xml.hasTagNameIgnoringNamespace ("svg"))
+        XmlPath (const XmlElement* e, const XmlPath* p) noexcept : xml (e), parent (p)  {}
+
+        const XmlElement& operator*() const noexcept            { jassert (xml != nullptr); return *xml; }
+        const XmlElement* operator->() const noexcept           { return xml; }
+        XmlPath getChild (const XmlElement* e) const noexcept   { return XmlPath (e, this); }
+
+        const XmlElement* xml;
+        const XmlPath* parent;
+    };
+
+    //==============================================================================
+    Drawable* parseSVGElement (const XmlPath& xml)
+    {
+        if (! xml->hasTagNameIgnoringNamespace ("svg"))
             return nullptr;
 
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml.getStringAttribute ("id"));
+        drawable->setName (xml->getStringAttribute ("id"));
 
         SVGState newState (*this);
 
-        if (xml.hasAttribute ("transform"))
+        if (xml->hasAttribute ("transform"))
             newState.addTransform (xml);
 
-        newState.elementX = getCoordLength (xml.getStringAttribute ("x",      String (newState.elementX)), viewBoxW);
-        newState.elementY = getCoordLength (xml.getStringAttribute ("y",      String (newState.elementY)), viewBoxH);
-        newState.width    = getCoordLength (xml.getStringAttribute ("width",  String (newState.width)),    viewBoxW);
-        newState.height   = getCoordLength (xml.getStringAttribute ("height", String (newState.height)),   viewBoxH);
+        newState.elementX = getCoordLength (xml->getStringAttribute ("x",      String (newState.elementX)), viewBoxW);
+        newState.elementY = getCoordLength (xml->getStringAttribute ("y",      String (newState.elementY)), viewBoxH);
+        newState.width    = getCoordLength (xml->getStringAttribute ("width",  String (newState.width)),    viewBoxW);
+        newState.height   = getCoordLength (xml->getStringAttribute ("height", String (newState.height)),   viewBoxH);
 
         if (newState.width  <= 0) newState.width  = 100;
         if (newState.height <= 0) newState.height = 100;
 
-        if (xml.hasAttribute ("viewBox"))
+        if (xml->hasAttribute ("viewBox"))
         {
-            const String viewBoxAtt (xml.getStringAttribute ("viewBox"));
+            const String viewBoxAtt (xml->getStringAttribute ("viewBox"));
             String::CharPointerType viewParams (viewBoxAtt.getCharPointer());
             Point<float> vxy, vwh;
 
@@ -74,7 +85,7 @@ public:
 
                 int placementFlags = 0;
 
-                const String aspect (xml.getStringAttribute ("preserveAspectRatio"));
+                const String aspect (xml->getStringAttribute ("preserveAspectRatio"));
 
                 if (aspect.containsIgnoreCase ("none"))
                 {
@@ -337,21 +348,21 @@ public:
 
 private:
     //==============================================================================
-    const XmlElement* const topLevelXml;
+    const XmlPath topLevelXml;
     float elementX, elementY, width, height, viewBoxW, viewBoxH;
     AffineTransform transform;
     String cssStyleText;
 
     //==============================================================================
-    void parseSubElements (const XmlElement& xml, DrawableComposite& parentDrawable)
+    void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable)
     {
-        forEachXmlChildElement (xml, e)
-            parentDrawable.addAndMakeVisible (parseSubElement (*e));
+        forEachXmlChildElement (*xml, e)
+            parentDrawable.addAndMakeVisible (parseSubElement (xml.getChild (e)));
     }
 
-    Drawable* parseSubElement (const XmlElement& xml)
+    Drawable* parseSubElement (const XmlPath& xml)
     {
-        const String tag (xml.getTagNameWithoutNamespace());
+        const String tag (xml->getTagNameWithoutNamespace());
 
         if (tag == "g")           return parseGroupElement (xml);
         if (tag == "svg")         return parseSVGElement (xml);
@@ -369,21 +380,21 @@ private:
         return nullptr;
     }
 
-    DrawableComposite* parseSwitch (const XmlElement& xml)
+    DrawableComposite* parseSwitch (const XmlPath& xml)
     {
-        if (const XmlElement* const group = xml.getChildByName ("g"))
-            return parseGroupElement (*group);
+        if (const XmlElement* const group = xml->getChildByName ("g"))
+            return parseGroupElement (xml.getChild (group));
 
         return nullptr;
     }
 
-    DrawableComposite* parseGroupElement (const XmlElement& xml)
+    DrawableComposite* parseGroupElement (const XmlPath& xml)
     {
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml.getStringAttribute ("id"));
+        drawable->setName (xml->getStringAttribute ("id"));
 
-        if (xml.hasAttribute ("transform"))
+        if (xml->hasAttribute ("transform"))
         {
             SVGState newState (*this);
             newState.addTransform (xml);
@@ -400,23 +411,23 @@ private:
     }
 
     //==============================================================================
-    Drawable* parsePath (const XmlElement& xml) const
+    Drawable* parsePath (const XmlPath& xml) const
     {
         Path path;
-        parsePathString (path, xml.getStringAttribute ("d"));
+        parsePathString (path, xml->getStringAttribute ("d"));
 
-        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
+        if (getStyleAttribute (xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
             path.setUsingNonZeroWinding (false);
 
         return parseShape (xml, path);
     }
 
-    Drawable* parseRect (const XmlElement& xml) const
+    Drawable* parseRect (const XmlPath& xml) const
     {
         Path rect;
 
-        const bool hasRX = xml.hasAttribute ("rx");
-        const bool hasRY = xml.hasAttribute ("ry");
+        const bool hasRX = xml->hasAttribute ("rx");
+        const bool hasRY = xml->hasAttribute ("ry");
 
         if (hasRX || hasRY)
         {
@@ -445,7 +456,7 @@ private:
         return parseShape (xml, rect);
     }
 
-    Drawable* parseCircle (const XmlElement& xml) const
+    Drawable* parseCircle (const XmlPath& xml) const
     {
         Path circle;
 
@@ -458,7 +469,7 @@ private:
         return parseShape (xml, circle);
     }
 
-    Drawable* parseEllipse (const XmlElement& xml) const
+    Drawable* parseEllipse (const XmlPath& xml) const
     {
         Path ellipse;
 
@@ -472,7 +483,7 @@ private:
         return parseShape (xml, ellipse);
     }
 
-    Drawable* parseLine (const XmlElement& xml) const
+    Drawable* parseLine (const XmlPath& xml) const
     {
         Path line;
 
@@ -487,9 +498,9 @@ private:
         return parseShape (xml, line);
     }
 
-    Drawable* parsePolygon (const XmlElement& xml, const bool isPolyline) const
+    Drawable* parsePolygon (const XmlPath& xml, const bool isPolyline) const
     {
-        const String pointsAtt (xml.getStringAttribute ("points"));
+        const String pointsAtt (xml->getStringAttribute ("points"));
         String::CharPointerType points (pointsAtt.getCharPointer());
         Path path;
         Point<float> p;
@@ -514,10 +525,10 @@ private:
     }
 
     //==============================================================================
-    Drawable* parseShape (const XmlElement& xml, Path& path,
+    Drawable* parseShape (const XmlPath& xml, Path& path,
                           const bool shouldParseTransform = true) const
     {
-        if (shouldParseTransform && xml.hasAttribute ("transform"))
+        if (shouldParseTransform && xml->hasAttribute ("transform"))
         {
             SVGState newState (*this);
             newState.addTransform (xml);
@@ -526,7 +537,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
-        dp->setName (xml.getStringAttribute ("id"));
+        dp->setName (xml->getStringAttribute ("id"));
         dp->setFill (Colours::transparentBlack);
 
         path.applyTransform (transform);
@@ -545,47 +556,48 @@ private:
         }
 
         dp->setFill (getPathFillType (path,
-                                      getStyleAttribute (&xml, "fill"),
-                                      getStyleAttribute (&xml, "fill-opacity"),
-                                      getStyleAttribute (&xml, "opacity"),
+                                      getStyleAttribute (xml, "fill"),
+                                      getStyleAttribute (xml, "fill-opacity"),
+                                      getStyleAttribute (xml, "opacity"),
                                       containsClosedSubPath ? Colours::black
                                                             : Colours::transparentBlack));
 
-        const String strokeType (getStyleAttribute (&xml, "stroke"));
+        const String strokeType (getStyleAttribute (xml, "stroke"));
 
         if (strokeType.isNotEmpty() && ! strokeType.equalsIgnoreCase ("none"))
         {
             dp->setStrokeFill (getPathFillType (path, strokeType,
-                                                getStyleAttribute (&xml, "stroke-opacity"),
-                                                getStyleAttribute (&xml, "opacity"),
+                                                getStyleAttribute (xml, "stroke-opacity"),
+                                                getStyleAttribute (xml, "opacity"),
                                                 Colours::transparentBlack));
 
-            dp->setStrokeType (getStrokeFor (&xml));
+            dp->setStrokeType (getStrokeFor (xml));
         }
 
         return dp;
     }
 
-    const XmlElement* findLinkedElement (const XmlElement* e) const
+    struct SetGradientStopsOp
     {
-        const String id (e->getStringAttribute ("xlink:href"));
+        const SVGState* state;
+        ColourGradient* gradient;
 
-        if (! id.startsWithChar ('#'))
-            return nullptr;
+        void operator() (const XmlPath& xml)
+        {
+            state->addGradientStopsIn (*gradient, xml);
+        }
+    };
 
-        return findElementForId (topLevelXml, id.substring (1));
-    }
-
-    void addGradientStopsIn (ColourGradient& cg, const XmlElement* const fillXml) const
+    void addGradientStopsIn (ColourGradient& cg, const XmlPath& fillXml) const
     {
-        if (fillXml != nullptr)
+        if (fillXml.xml != nullptr)
         {
             forEachXmlChildElementWithTagName (*fillXml, e, "stop")
             {
                 int index = 0;
-                Colour col (parseColour (getStyleAttribute  (e, "stop-color"), index, Colours::black));
+                Colour col (parseColour (getStyleAttribute (fillXml.getChild (e), "stop-color"), index, Colours::black));
 
-                const String opacity (getStyleAttribute (e, "stop-opacity", "1"));
+                const String opacity (getStyleAttribute (fillXml.getChild (e), "stop-opacity", "1"));
                 col = col.withMultipliedAlpha (jlimit (0.0f, 1.0f, opacity.getFloatValue()));
 
                 double offset = e->getDoubleAttribute ("offset");
@@ -598,13 +610,22 @@ private:
         }
     }
 
-    FillType getGradientFillType (const XmlElement* fillXml,
+    FillType getGradientFillType (const XmlPath& fillXml,
                                   const Path& path,
                                   const float opacity) const
     {
         ColourGradient gradient;
 
-        addGradientStopsIn (gradient, findLinkedElement (fillXml));
+        {
+            const String id (fillXml->getStringAttribute ("xlink:href"));
+
+            if (id.startsWithChar ('#'))
+            {
+                SetGradientStopsOp op = { this, &gradient, };
+                findElementForId (topLevelXml, id.substring (1), op);
+            }
+        }
+
         addGradientStopsIn (gradient, fillXml);
 
         if (gradient.getNumColours() > 0)
@@ -710,11 +731,26 @@ private:
         return type;
     }
 
+    struct GetFillTypeOp
+    {
+        const SVGState* state;
+        FillType* dest;
+        const Path* path;
+        float opacity;
+
+        void operator() (const XmlPath& xml)
+        {
+            if (xml->hasTagNameIgnoringNamespace ("linearGradient")
+                 || xml->hasTagNameIgnoringNamespace ("radialGradient"))
+                *dest = state->getGradientFillType (xml, *path, opacity);
+        }
+    };
+
     FillType getPathFillType (const Path& path,
                               const String& fill,
                               const String& fillOpacity,
                               const String& overallOpacity,
-                              const Colour& defaultColour) const
+                              const Colour defaultColour) const
     {
         float opacity = 1.0f;
 
@@ -729,10 +765,11 @@ private:
             const String id (fill.fromFirstOccurrenceOf ("#", false, false)
                                  .upToLastOccurrenceOf (")", false, false).trim());
 
-            if (const XmlElement* const fillXml = findElementForId (topLevelXml, id))
-                if (fillXml->hasTagNameIgnoringNamespace ("linearGradient")
-                     || fillXml->hasTagNameIgnoringNamespace ("radialGradient"))
-                    return getGradientFillType (fillXml, path, opacity);
+            FillType result;
+            GetFillTypeOp op = { this, &result, &path, opacity };
+
+            if (findElementForId (topLevelXml, id, op))
+                return result;
         }
 
         if (fill.equalsIgnoreCase ("none"))
@@ -742,7 +779,7 @@ private:
         return parseColour (fill, i, defaultColour).withMultipliedAlpha (opacity);
     }
 
-    PathStrokeType getStrokeFor (const XmlElement* const xml) const
+    PathStrokeType getStrokeFor (const XmlPath& xml) const
     {
         const String strokeWidth (getStyleAttribute (xml, "stroke-width"));
         const String cap (getStyleAttribute (xml, "stroke-linecap"));
@@ -774,32 +811,32 @@ private:
     }
 
     //==============================================================================
-    Drawable* parseText (const XmlElement& xml)
+    Drawable* parseText (const XmlPath& xml)
     {
         Array <float> xCoords, yCoords, dxCoords, dyCoords;
 
-        getCoordList (xCoords, getInheritedAttribute (&xml, "x"), true, true);
-        getCoordList (yCoords, getInheritedAttribute (&xml, "y"), true, false);
-        getCoordList (dxCoords, getInheritedAttribute (&xml, "dx"), true, true);
-        getCoordList (dyCoords, getInheritedAttribute (&xml, "dy"), true, false);
+        getCoordList (xCoords, getInheritedAttribute (xml, "x"), true, true);
+        getCoordList (yCoords, getInheritedAttribute (xml, "y"), true, false);
+        getCoordList (dxCoords, getInheritedAttribute (xml, "dx"), true, true);
+        getCoordList (dyCoords, getInheritedAttribute (xml, "dy"), true, false);
 
 
         //xxx not done text yet!
 
 
-        forEachXmlChildElement (xml, e)
+        forEachXmlChildElement (*xml, e)
         {
             if (e->isTextElement())
             {
                 const String text (e->getText());
 
                 Path path;
-                Drawable* s = parseShape (*e, path);
+                Drawable* s = parseShape (xml.getChild (e), path);
                 delete s;  // xxx not finished!
             }
             else if (e->hasTagNameIgnoringNamespace ("tspan"))
             {
-                Drawable* s = parseText (*e);
+                Drawable* s = parseText (xml.getChild (e));
                 delete s;  // xxx not finished!
             }
         }
@@ -808,9 +845,9 @@ private:
     }
 
     //==============================================================================
-    void addTransform (const XmlElement& xml)
+    void addTransform (const XmlPath& xml)
     {
-        transform = parseTransform (xml.getStringAttribute ("transform"))
+        transform = parseTransform (xml->getStringAttribute ("transform"))
                         .followedBy (transform);
     }
 
@@ -866,9 +903,9 @@ private:
         return n;
     }
 
-    float getCoordLength (const XmlElement& xml, const char* attName, const float sizeForProportions) const
+    float getCoordLength (const XmlPath& xml, const char* attName, const float sizeForProportions) const
     {
-        return getCoordLength (xml.getStringAttribute (attName), sizeForProportions);
+        return getCoordLength (xml->getStringAttribute (attName), sizeForProportions);
     }
 
     void getCoordList (Array <float>& coords, const String& list,
@@ -882,12 +919,31 @@ private:
     }
 
     //==============================================================================
-    void parseCSSStyle (const XmlElement& xml)
+    void parseCSSStyle (const XmlPath& xml)
     {
-        cssStyleText = xml.getAllSubText() + "\n" + cssStyleText;
+        cssStyleText = xml->getAllSubText() + "\n" + cssStyleText;
     }
 
-    String getStyleAttribute (const XmlElement* xml, const String& attributeName,
+    static String::CharPointerType findStyleItem (String::CharPointerType source, String::CharPointerType name)
+    {
+        const int nameLength = (int) name.length();
+
+        while (! source.isEmpty())
+        {
+            if (source.getAndAdvance() == '.'
+                 && CharacterFunctions::compareIgnoreCaseUpTo (source, name, nameLength) == 0)
+            {
+                String::CharPointerType endOfName ((source + nameLength).findEndOfWhitespace());
+
+                if (*endOfName == '{')
+                    return endOfName;
+            }
+        }
+
+        return source;
+    }
+
+    String getStyleAttribute (const XmlPath& xml, const String& attributeName,
                               const String& defaultValue = String::empty) const
     {
         if (xml->hasAttribute (attributeName))
@@ -904,49 +960,36 @@ private:
         }
         else if (xml->hasAttribute ("class"))
         {
-            const String className ("." + xml->getStringAttribute ("class"));
+            String::CharPointerType openBrace = findStyleItem (cssStyleText.getCharPointer(),
+                                                               xml->getStringAttribute ("class").getCharPointer());
 
-            int index = cssStyleText.indexOfIgnoreCase (className + " ");
-
-            if (index < 0)
-                index = cssStyleText.indexOfIgnoreCase (className + "{");
-
-            if (index >= 0)
+            if (! openBrace.isEmpty())
             {
-                const int openBracket = cssStyleText.indexOfChar (index, '{');
+                String::CharPointerType closeBrace = CharacterFunctions::find (openBrace, CharPointer_ASCII ("}"));
 
-                if (openBracket > index)
+                if (closeBrace != openBrace)
                 {
-                    const int closeBracket = cssStyleText.indexOfChar (openBracket, '}');
-
-                    if (closeBracket > openBracket)
-                    {
-                        const String value (getAttributeFromStyleList (cssStyleText.substring (openBracket + 1, closeBracket), attributeName, defaultValue));
-
-                        if (value.isNotEmpty())
-                            return value;
-                    }
+                    const String value (getAttributeFromStyleList (String (openBrace + 1, closeBrace),
+                                                                   attributeName, defaultValue));
+                    if (value.isNotEmpty())
+                        return value;
                 }
             }
         }
 
-        xml = const_cast <XmlElement*> (topLevelXml)->findParentElementOf (xml);
-
-        if (xml != nullptr)
-            return getStyleAttribute (xml, attributeName, defaultValue);
+        if (xml.parent != nullptr)
+            return getStyleAttribute (*xml.parent, attributeName, defaultValue);
 
         return defaultValue;
     }
 
-    String getInheritedAttribute (const XmlElement* xml, const String& attributeName) const
+    String getInheritedAttribute (const XmlPath& xml, const String& attributeName) const
     {
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName);
 
-        xml = const_cast <XmlElement*> (topLevelXml)->findParentElementOf (xml);
-
-        if (xml != nullptr)
-            return getInheritedAttribute  (xml, attributeName);
+        if (xml.parent != nullptr)
+            return getInheritedAttribute  (*xml.parent, attributeName);
 
         return String::empty;
     }
@@ -991,61 +1034,51 @@ private:
     }
 
     //==============================================================================
-    static bool parseNextNumber (String::CharPointerType& s, String& value, const bool allowUnits)
+    static bool parseNextNumber (String::CharPointerType& text, String& value, const bool allowUnits)
     {
+        String::CharPointerType s (text);
+
         while (s.isWhitespace() || *s == ',')
             ++s;
 
         String::CharPointerType start (s);
-        int numChars = 0;
 
         if (s.isDigit() || *s == '.' || *s == '-')
-        {
-            ++numChars;
             ++s;
-        }
 
         while (s.isDigit() || *s == '.')
-        {
-            ++numChars;
             ++s;
-        }
 
         if ((*s == 'e' || *s == 'E')
              && ((s + 1).isDigit() || s[1] == '-' || s[1] == '+'))
         {
             s += 2;
-            numChars += 2;
 
             while (s.isDigit())
-            {
-                ++numChars;
                 ++s;
-            }
         }
 
         if (allowUnits)
-        {
             while (s.isLetter())
-            {
-                ++numChars;
                 ++s;
-            }
+
+        if (s == start)
+        {
+            text = s;
+            return false;
         }
 
-        if (numChars == 0)
-            return false;
-
-        value = String (start, (size_t) numChars);
+        value = String (start, s);
 
         while (s.isWhitespace() || *s == ',')
             ++s;
 
+        text = s;
         return true;
     }
 
     //==============================================================================
-    static Colour parseColour (const String& s, int& index, const Colour& defaultColour)
+    static Colour parseColour (const String& s, int& index, const Colour defaultColour)
     {
         if (s [index] == '#')
         {
@@ -1071,9 +1104,10 @@ private:
                            (uint8) ((hex [2] << 4) + hex [3]),
                            (uint8) ((hex [4] << 4) + hex [5]));
         }
-        else if (s [index] == 'r'
-                  && s [index + 1] == 'g'
-                  && s [index + 2] == 'b')
+
+        if (s [index] == 'r'
+              && s [index + 1] == 'g'
+              && s [index + 2] == 'b')
         {
             const int openBracket = s.indexOfChar (index, '(');
             const int closeBracket = s.indexOfChar (openBracket, ')');
@@ -1101,7 +1135,7 @@ private:
         return Colours::findColourForName (s, defaultColour);
     }
 
-    static const AffineTransform parseTransform (String t)
+    static AffineTransform parseTransform (String t)
     {
         AffineTransform result;
 
@@ -1244,21 +1278,25 @@ private:
         deltaAngle = fmod (deltaAngle, double_Pi * 2.0);
     }
 
-    static const XmlElement* findElementForId (const XmlElement* const parent, const String& id)
+    template <typename OperationType>
+    static bool findElementForId (const XmlPath& parent, const String& id, OperationType& op)
     {
         forEachXmlChildElement (*parent, e)
         {
             if (e->compareAttribute ("id", id))
-                return e;
+            {
+                op (parent.getChild (e));
+                return true;
+            }
 
-            if (const XmlElement* const found = findElementForId (e, id))
-                return found;
+            if (findElementForId (parent.getChild (e), id, op))
+                return true;
         }
 
-        return nullptr;
+        return false;
     }
 
-    SVGState& operator= (const SVGState&);
+    SVGState& operator= (const SVGState&) JUCE_DELETED_FUNCTION;
 };
 
 
@@ -1266,7 +1304,7 @@ private:
 Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
 {
     SVGState state (&svgDocument);
-    return state.parseSVGElement (svgDocument);
+    return state.parseSVGElement (SVGState::XmlPath (&svgDocument, nullptr));
 }
 
 Path Drawable::parseSVGPath (const String& svgPath)

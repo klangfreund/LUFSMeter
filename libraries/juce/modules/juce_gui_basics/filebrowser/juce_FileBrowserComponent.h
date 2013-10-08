@@ -1,36 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-
-#include "juce_DirectoryContentsDisplayComponent.h"
-#include "juce_FilePreviewComponent.h"
-#include "../widgets/juce_TextEditor.h"
-#include "../widgets/juce_ComboBox.h"
-#include "../buttons/juce_DrawableButton.h"
+#ifndef JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
+#define JUCE_FILEBROWSERCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -177,36 +170,42 @@ public:
     */
     void removeListener (FileBrowserListener* listener);
 
+    /** Returns a platform-specific list of names and paths for some suggested places the user
+        might want to use as root folders.
+        The list returned contains empty strings to indicate section breaks.
+        @see getRoots()
+    */
+    static void getDefaultRoots (StringArray& rootNames, StringArray& rootPaths);
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void buttonClicked (Button*);
+    void buttonClicked (Button*) override;
     /** @internal */
-    void comboBoxChanged (ComboBox*);
+    void comboBoxChanged (ComboBox*) override;
     /** @internal */
-    void textEditorTextChanged (TextEditor&);
+    void textEditorTextChanged (TextEditor&) override;
     /** @internal */
-    void textEditorReturnKeyPressed (TextEditor&);
+    void textEditorReturnKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorEscapeKeyPressed (TextEditor&);
+    void textEditorEscapeKeyPressed (TextEditor&) override;
     /** @internal */
-    void textEditorFocusLost (TextEditor&);
+    void textEditorFocusLost (TextEditor&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void selectionChanged();
+    void selectionChanged() override;
     /** @internal */
-    void fileClicked (const File&, const MouseEvent&);
+    void fileClicked (const File&, const MouseEvent&) override;
     /** @internal */
-    void fileDoubleClicked (const File&);
+    void fileDoubleClicked (const File&) override;
     /** @internal */
-    void browserRootChanged (const File&);
+    void browserRootChanged (const File&) override;
     /** @internal */
-    bool isFileSuitable (const File&) const;
+    bool isFileSuitable (const File&) const override;
     /** @internal */
-    bool isDirectorySuitable (const File&) const;
+    bool isDirectorySuitable (const File&) const override;
 
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const noexcept;
@@ -216,7 +215,9 @@ public:
 
 protected:
     /** Returns a list of names and paths for the default places the user might want to look.
-        Use an empty string to indicate a section break.
+
+        By default this just calls getDefaultRoots(), but you may want to override it to
+        return a custom list.
     */
     virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
@@ -250,4 +251,4 @@ private:
 
 
 
-#endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_FILEBROWSERCOMPONENT_H_INCLUDED

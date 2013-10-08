@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -51,10 +54,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 
-bool Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                        const String& emailSubject,
-                                        const String& bodyText,
-                                        const StringArray& filesToAttach)
+JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
+                                                               const String& emailSubject,
+                                                               const String& bodyText,
+                                                               const StringArray& filesToAttach)
 {
     // TODO
     return false;
@@ -65,7 +68,6 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
 class WebInputStream  : public InputStream
 {
 public:
-    //==============================================================================
     WebInputStream (String address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers, int timeOutMs, StringPairArray* responseHeaders)
@@ -129,12 +131,12 @@ public:
     }
 
     //==============================================================================
-    bool isExhausted()                  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
-    int64 getTotalLength()              { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
-    int64 getPosition()                 { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
-    bool setPosition (int64 wantedPos)  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.setPosition, (jlong) wantedPos); }
+    bool isExhausted() override                  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
+    int64 getTotalLength() override              { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
+    int64 getPosition() override                 { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
+    bool setPosition (int64 wantedPos) override  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.setPosition, (jlong) wantedPos); }
 
-    int read (void* buffer, int bytesToRead)
+    int read (void* buffer, int bytesToRead) override
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 

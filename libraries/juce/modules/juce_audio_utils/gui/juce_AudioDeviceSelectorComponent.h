@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
-#define __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#ifndef JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
+#define JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -61,14 +60,14 @@ public:
                                         are shown, with an "advanced" button that shows the rest of them
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
-                                  const int minAudioInputChannels,
-                                  const int maxAudioInputChannels,
-                                  const int minAudioOutputChannels,
-                                  const int maxAudioOutputChannels,
-                                  const bool showMidiInputOptions,
-                                  const bool showMidiOutputSelector,
-                                  const bool showChannelsAsStereoPairs,
-                                  const bool hideAdvancedOptionsWithButton);
+                                  int minAudioInputChannels,
+                                  int maxAudioInputChannels,
+                                  int minAudioOutputChannels,
+                                  int maxAudioOutputChannels,
+                                  bool showMidiInputOptions,
+                                  bool showMidiOutputSelector,
+                                  bool showChannelsAsStereoPairs,
+                                  bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -78,9 +77,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
 
 private:
     //==============================================================================
@@ -93,17 +92,17 @@ private:
     const bool hideAdvancedOptionsWithButton;
 
     class MidiInputSelectorComponentListBox;
-    friend class ScopedPointer<MidiInputSelectorComponentListBox>;
+    friend struct ContainerDeletePolicy<MidiInputSelectorComponentListBox>;
     ScopedPointer<MidiInputSelectorComponentListBox> midiInputsList;
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
-    void comboBoxChanged (ComboBox*);
-    void changeListenerCallback (ChangeBroadcaster*);
+    void comboBoxChanged (ComboBox*) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
     void updateAllControls();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent)
 };
 
 
-#endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
+#endif   // JUCE_AUDIODEVICESELECTORCOMPONENT_H_INCLUDED
