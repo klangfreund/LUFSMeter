@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -113,7 +112,7 @@ void BinaryResources::add (const String& name, const String& originalFileName, c
 {
     BinaryResource* r = findResource (name);
 
-    if (r == 0)
+    if (r == nullptr)
     {
         resources.add (r = new BinaryResource());
         r->name = name;
@@ -121,7 +120,7 @@ void BinaryResources::add (const String& name, const String& originalFileName, c
 
     r->originalFilename = originalFileName;
     r->data = data;
-    deleteAndZero (r->drawable);
+    r->drawable = nullptr;
 
     changed();
 }
@@ -188,15 +187,16 @@ void BinaryResources::remove (const int i)
 
 const Drawable* BinaryResources::getDrawable (const String& name) const
 {
-    BinaryResources::BinaryResource* const res = const_cast <BinaryResources::BinaryResource*> (getResource (name));
+    if (BinaryResources::BinaryResource* const res = const_cast <BinaryResources::BinaryResource*> (getResource (name)))
+    {
+        if (res->drawable == nullptr && res->data.getSize() > 0)
+            res->drawable = Drawable::createFromImageData (res->data.getData(),
+                                                           res->data.getSize());
 
-    if (res == 0)
-        return 0;
+        return res->drawable;
+    }
 
-    if (res->drawable == 0 && res->data.getSize() > 0)
-        res->drawable = Drawable::createFromImageData (res->data.getData(), res->data.getSize());
-
-    return res->drawable;
+    return nullptr;
 }
 
 Image BinaryResources::getImageFromCache (const String& name) const
@@ -263,7 +263,7 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                 jassert (size < (int) out.getDataSize() && size > (int) out.getDataSize() - 2);
 
                 MemoryBlock mb (out.getData(), out.getDataSize());
-                mb.setSize (size);
+                mb.setSize ((size_t) size);
 
                 add (resourceName, originalFileName, mb);
             }
@@ -278,7 +278,8 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
     {
         code.publicMemberDeclarations << "// Binary resources:\n";
 
-        String defs;
+        MemoryOutputStream defs;
+
         defs << "//==============================================================================\n";
         defs << "// Binary resources - be careful not to edit any of these sections!\n\n";
 
@@ -305,35 +306,29 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             line1 << "static const unsigned char resource_"
                   << code.className << "_" << name << "[] = { ";
 
-            defs += line1;
+            defs << line1;
 
-            MemoryOutputStream out (65536);
             int charsOnLine = line1.length();
 
             for (size_t j = 0; j < mb.getSize(); ++j)
             {
-                const int num = ((int) (unsigned char) mb[j]);
-                out << num << ',';
+                const int num = (int) (unsigned char) mb[j];
+                defs << num << ',';
 
                 charsOnLine += 2;
-                if (num >= 10)
-                    ++charsOnLine;
-                if (num >= 100)
-                    ++charsOnLine;
+                if (num >= 10)   ++charsOnLine;
+                if (num >= 100)  ++charsOnLine;
 
                 if (charsOnLine >= 200)
                 {
                     charsOnLine = 0;
-                    out << '\n';
+                    defs << '\n';
                 }
             }
 
-            out << (char) 0;
-
             defs
-              << (const char*) out.getData()
-              << "0,0};\n\nconst char* "
-              << code.className << "::" << name
+              << "0,0};\n\n"
+                 "const char* " << code.className << "::" << name
               << " = (const char*) resource_" << code.className << "_" << name
               << ";\nconst int "
               << code.className << "::" << name << "Size = "
@@ -341,16 +336,6 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
               << ";\n\n";
         }
 
-        code.staticMemberDefinitions += defs;
+        code.staticMemberDefinitions << defs.toString();
     }
-}
-
-BinaryResources::BinaryResource::BinaryResource()
-    : drawable (0)
-{
-}
-
-BinaryResources::BinaryResource::~BinaryResource()
-{
-    deleteAndZero (drawable);
 }

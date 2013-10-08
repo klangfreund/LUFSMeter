@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -152,23 +151,22 @@ class TabbedButtonBar::BehindFrontTabComp  : public Component,
                                              public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
-    BehindFrontTabComp (TabbedButtonBar& owner_)
-        : owner (owner_)
+    BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)
     {
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         getLookAndFeel().drawTabAreaBehindFrontButton (owner, g, getWidth(), getHeight());
     }
 
-    void enablementChanged()
+    void enablementChanged() override
     {
         repaint();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         owner.showExtraItemsMenu();
     }
@@ -228,7 +226,7 @@ void TabbedButtonBar::clearTabs()
 }
 
 void TabbedButtonBar::addTab (const String& tabName,
-                              const Colour& tabBackgroundColour,
+                              Colour tabBackgroundColour,
                               int insertIndex)
 {
     jassert (tabName.isNotEmpty()); // you have to give them all a name..
@@ -272,12 +270,13 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
+    const int oldIndex = currentTabIndex;
     if (tabIndex == currentTabIndex)
         setCurrentTabIndex (-1);
 
-    TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.remove (tabIndex);
-    currentTabIndex = tabs.indexOf (currentTab);
+
+    setCurrentTabIndex (oldIndex);
     resized();
 }
 
@@ -322,7 +321,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
         for (int i = 0; i < tabs.size(); ++i)
         {
             TabBarButton* tb = tabs.getUnchecked(i)->button;
-            tb->setToggleState (i == newIndex, false);
+            tb->setToggleState (i == newIndex, dontSendNotification);
         }
 
         resized();
@@ -336,8 +335,10 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
 
 TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 {
-    TabInfo* const tab = tabs[index];
-    return tab == nullptr ? nullptr : static_cast <TabBarButton*> (tab->button);
+    if (TabInfo* tab = tabs[index])
+        return static_cast<TabBarButton*> (tab->button);
+
+    return nullptr;
 }
 
 int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
@@ -353,6 +354,11 @@ void TabbedButtonBar::lookAndFeelChanged()
 {
     extraTabsButton = nullptr;
     resized();
+}
+
+void TabbedButtonBar::paint (Graphics& g)
+{
+    getLookAndFeel().drawTabbedButtonBarBackground (*this, g);
 }
 
 void TabbedButtonBar::resized()
@@ -479,11 +485,13 @@ void TabbedButtonBar::resized()
 //==============================================================================
 Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
 {
-    TabInfo* const tab = tabs [tabIndex];
-    return tab == nullptr ? Colours::white : tab->colour;
+    if (TabInfo* tab = tabs [tabIndex])
+        return tab->colour;
+
+    return Colours::transparentBlack;
 }
 
-void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
+void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, Colour newColour)
 {
     if (TabInfo* const tab = tabs [tabIndex])
     {

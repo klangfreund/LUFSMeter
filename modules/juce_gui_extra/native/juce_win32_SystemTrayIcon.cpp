@@ -1,29 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-// (these functions are from juce_win32_Windowing.cpp)
 extern void* getUser32Function (const char*);
 
 namespace IconConverters
@@ -50,7 +48,7 @@ public:
         iconData.uCallbackMessage = WM_TRAYNOTIFY;
         iconData.hIcon = hicon;
 
-        Shell_NotifyIcon (NIM_ADD, &iconData);
+        notify (NIM_ADD);
 
         // In order to receive the "TaskbarCreated" message, we need to request that it's not filtered out.
         // (Need to load dynamically, as ChangeWindowMessageFilter is only available in Vista and later)
@@ -66,7 +64,7 @@ public:
         SetWindowLongPtr (iconData.hWnd, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
 
         iconData.uFlags = 0;
-        Shell_NotifyIcon (NIM_DELETE, &iconData);
+        notify (NIM_DELETE);
         DestroyIcon (iconData.hIcon);
     }
 
@@ -76,7 +74,7 @@ public:
 
         iconData.hIcon = hicon;
         iconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-        Shell_NotifyIcon (NIM_MODIFY, &iconData);
+        notify (NIM_MODIFY);
 
         DestroyIcon (oldIcon);
     }
@@ -85,7 +83,7 @@ public:
     {
         iconData.uFlags = NIF_TIP;
         toolTip.copyToUTF16 (iconData.szTip, sizeof (iconData.szTip) - 1);
-        Shell_NotifyIcon (NIM_MODIFY, &iconData);
+        notify (NIM_MODIFY);
     }
 
     void handleTaskBarEvent (const LPARAM lParam)
@@ -126,7 +124,7 @@ public:
             {
                 owner.mouseUp (e);
             }
-            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_RBUTTONDBLCLK)
             {
                 owner.mouseDoubleClick (e);
             }
@@ -164,18 +162,29 @@ public:
         else if (message == taskbarCreatedMessage)
         {
             iconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-            Shell_NotifyIcon (NIM_ADD, &iconData);
+            notify (NIM_ADD);
         }
 
         return CallWindowProc (originalWndProc, hwnd, message, wParam, lParam);
     }
 
-private:
+    void showBubble (const String& title, const String& content)
+    {
+        iconData.uFlags = 0x10 /*NIF_INFO*/;
+        title.copyToUTF16 (iconData.szInfoTitle, sizeof (iconData.szInfoTitle) - 1);
+        content.copyToUTF16 (iconData.szInfo, sizeof (iconData.szInfo) - 1);
+        notify (NIM_MODIFY);
+    }
+
     SystemTrayIconComponent& owner;
     NOTIFYICONDATA iconData;
+
+private:
     WNDPROC originalWndProc;
     const DWORD taskbarCreatedMessage;
     enum { WM_TRAYNOTIFY = WM_USER + 100 };
+
+    void notify (DWORD message) noexcept    { Shell_NotifyIcon (message, &iconData); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -202,4 +211,25 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 {
     if (pimpl != nullptr)
         pimpl->setToolTip (tooltip);
+}
+
+void SystemTrayIconComponent::setHighlighted (bool)
+{
+    // N/A on Windows.
+}
+
+void SystemTrayIconComponent::showInfoBubble (const String& title, const String& content)
+{
+    if (pimpl != nullptr)
+        pimpl->showBubble (title, content);
+}
+
+void SystemTrayIconComponent::hideInfoBubble()
+{
+    showInfoBubble (String::empty, String::empty);
+}
+
+void* SystemTrayIconComponent::getNativeHandle() const
+{
+    return pimpl != nullptr ? &(pimpl->iconData) : nullptr;
 }

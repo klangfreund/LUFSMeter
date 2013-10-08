@@ -1,30 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-#define __JUCE_PLATFORMDEFS_JUCEHEADER__
+#ifndef JUCE_PLATFORMDEFS_H_INCLUDED
+#define JUCE_PLATFORMDEFS_H_INCLUDED
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -80,6 +83,16 @@
   #define juce_breakDebugger        { __asm int 3 }
 #endif
 
+#if JUCE_CLANG && defined (__has_feature) && ! defined (JUCE_ANALYZER_NORETURN)
+ #if __has_feature (attribute_analyzer_noreturn)
+  inline void __attribute__((analyzer_noreturn)) juce_assert_noreturn() {}
+  #define JUCE_ANALYZER_NORETURN juce_assert_noreturn();
+ #endif
+#endif
+
+#ifndef JUCE_ANALYZER_NORETURN
+ #define JUCE_ANALYZER_NORETURN
+#endif
 
 //==============================================================================
 #if JUCE_DEBUG || DOXYGEN
@@ -94,7 +107,7 @@
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
   */
-  #define jassertfalse              { juce_LogCurrentAssertion; if (juce::juce_isRunningUnderDebugger()) juce_breakDebugger; }
+  #define jassertfalse              { juce_LogCurrentAssertion; if (juce::juce_isRunningUnderDebugger()) juce_breakDebugger; JUCE_ANALYZER_NORETURN }
 
   //==============================================================================
   /** Platform-independent assertion macro.
@@ -162,8 +175,8 @@ namespace juce
     };@endcode
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
-    className (const className&);\
-    className& operator= (const className&);
+    className (const className&) JUCE_DELETED_FUNCTION;\
+    className& operator= (const className&) JUCE_DELETED_FUNCTION;
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
@@ -177,8 +190,8 @@ namespace juce
 */
 #define JUCE_PREVENT_HEAP_ALLOCATION \
    private: \
-    static void* operator new (size_t); \
-    static void operator delete (void*);
+    static void* operator new (size_t) JUCE_DELETED_FUNCTION; \
+    static void operator delete (void*) JUCE_DELETED_FUNCTION;
 
 
 //==============================================================================
@@ -209,17 +222,17 @@ namespace juce
   #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
     #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
   #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
+    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
         object so they can be logged by the application if it wants to.
     */
     #define JUCE_CATCH_EXCEPTION \
       catch (const std::exception& e)  \
       { \
-          juce::JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
       } \
       catch (...) \
       { \
-          juce::JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
+          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 
@@ -258,13 +271,19 @@ namespace juce
 
 //==============================================================================
 // Cross-compiler deprecation macros..
-#if DOXYGEN || (JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS)
- /** This can be used to wrap a function which has been deprecated. */
- #define JUCE_DEPRECATED(functionDef)     __declspec(deprecated) functionDef
-#elif JUCE_GCC  && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)     functionDef __attribute__ ((deprecated))
+#ifdef DOXYGEN
+ /** This macro can be used to wrap a function which has been deprecated. */
+ #define JUCE_DEPRECATED(functionDef)
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)
+#elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
+ #define JUCE_DEPRECATED(functionDef)                   __declspec(deprecated) functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   __declspec(deprecated) functionDef body
+#elif JUCE_GCC && ! JUCE_NO_DEPRECATION_WARNINGS
+ #define JUCE_DEPRECATED(functionDef)                   functionDef __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef __attribute__ ((deprecated)) body
 #else
- #define JUCE_DEPRECATED(functionDef)     functionDef
+ #define JUCE_DEPRECATED(functionDef)                   functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
 #endif
 
 //==============================================================================
@@ -294,6 +313,10 @@ namespace juce
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL)
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
+
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && ! defined (JUCE_DELETED_FUNCTION)
+  #define JUCE_DELETED_FUNCTION = delete
+ #endif
 #endif
 
 #if JUCE_CLANG && defined (__has_feature)
@@ -307,6 +330,10 @@ namespace juce
 
  #if __has_feature (cxx_rvalue_references)
   #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
+ #endif
+
+ #if __has_feature (cxx_deleted_functions)
+  #define JUCE_DELETED_FUNCTION = delete
  #endif
 
  #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
@@ -325,6 +352,10 @@ namespace juce
 
 #if defined (_MSC_VER) && _MSC_VER >= 1700
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
+#endif
+
+#ifndef JUCE_DELETED_FUNCTION
+ #define JUCE_DELETED_FUNCTION
 #endif
 
 //==============================================================================
@@ -351,4 +382,4 @@ namespace juce
  #define override
 #endif
 
-#endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
+#endif   // JUCE_PLATFORMDEFS_H_INCLUDED

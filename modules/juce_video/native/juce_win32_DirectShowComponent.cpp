@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -176,15 +175,15 @@ namespace DirectShowHelpers
 class DirectShowComponent::DirectShowContext    : public AsyncUpdater
 {
 public:
-    DirectShowContext (DirectShowComponent& component_, VideoRendererType type_)
-        : component (component_),
+    DirectShowContext (DirectShowComponent& c, VideoRendererType renderType)
+        : component (c),
           hwnd (0),
           hdc (0),
           state (uninitializedState),
           hasVideo (false),
           videoWidth (0),
           videoHeight (0),
-          type (type_),
+          type (renderType),
           needToUpdateViewport (true),
           needToRecreateNativeWindow (false)
     {
@@ -253,9 +252,9 @@ public:
             videoRenderer->setVideoWindow (hwnd);
     }
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
-        if (hwnd  != 0)
+        if (hwnd != 0)
         {
             if (needToRecreateNativeWindow)
             {
@@ -320,7 +319,17 @@ public:
 
         // build filter graph
         if (SUCCEEDED (hr))
+        {
             hr = graphBuilder->RenderFile (fileOrURLPath.toWideCharPointer(), nullptr);
+
+            if (FAILED (hr))
+            {
+                // Annoyingly, if we don't run the msg loop between failing and deleting the window, the
+                // whole OS message-dispatch system gets itself into a state, and refuses to deliver any
+                // more messages for the whole app. (That's what happens in Win7, anyway)
+                MessageManager::getInstance()->runDispatchLoopUntil (200);
+            }
+        }
 
         // remove video renderer if not connected (no video)
         if (SUCCEEDED (hr))
@@ -725,19 +734,19 @@ public:
     {
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (owner->videoLoaded)
             owner->updateContextPosition();
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         if (owner->videoLoaded)
             owner->recreateNativeWindowAsync();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (owner->videoLoaded)
             owner->showContext (owner->isShowing());
@@ -782,12 +791,8 @@ void DirectShowComponent::updateContextPosition()
     context->updateContextPosition();
 
     if (getWidth() > 0 && getHeight() > 0)
-    {
-        Component* const topComp = getTopLevelComponent();
-
-        if (topComp->getPeer() != nullptr)
-            context->updateWindowPosition (topComp->getLocalArea (this, getLocalBounds()));
-    }
+        if (ComponentPeer* peer = getTopLevelComponent()->getPeer())
+            context->updateWindowPosition (peer->getAreaCoveredBy (*this));
 }
 
 void DirectShowComponent::showContext (const bool shouldBeVisible)
@@ -798,16 +803,9 @@ void DirectShowComponent::showContext (const bool shouldBeVisible)
 void DirectShowComponent::paint (Graphics& g)
 {
     if (videoLoaded)
-    {
         context->handleUpdateNowIfNeeded();
-
-        if (ComponentPeer* const peer = getPeer())
-            peer->addMaskedRegion (peer->globalToLocal (getScreenBounds()));
-    }
     else
-    {
         g.fillAll (Colours::grey);
-    }
 }
 
 //======================================================================
@@ -860,7 +858,7 @@ void DirectShowComponent::getMovieNormalSize (int &width, int &height) const
 
 //======================================================================
 void DirectShowComponent::setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
-                                                           const RectanglePlacement& placement)
+                                                           RectanglePlacement placement)
 {
     int normalWidth, normalHeight;
     getMovieNormalSize (normalWidth, normalHeight);

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -68,12 +67,12 @@ public:
 private:
     AlertWindow::AlertIconType iconType;
     String title, message;
-    ModalComponentManager::Callback* callback;
+    ScopedPointer<ModalComponentManager::Callback> callback;
     const char* button1;
     const char* button2;
     const char* button3;
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         const int result = getResult();
 
@@ -105,13 +104,14 @@ private:
     }
 };
 
-
+#if JUCE_MODAL_LOOPS_PERMITTED
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
                                                      const String& title, const String& message,
                                                      Component* /*associatedComponent*/)
 {
     OSXMessageBox::show (iconType, title, message, nullptr, "OK", nullptr, nullptr, false);
 }
+#endif
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
@@ -209,22 +209,27 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentRawMousePosition()
 {
     JUCE_AUTORELEASEPOOL
     {
         const NSPoint p ([NSEvent mouseLocation]);
-        return Point<int> (roundToInt (p.x), roundToInt ([[[NSScreen screens] objectAtIndex: 0] frame].size.height - p.y));
+        return Point<int> (roundToInt (p.x), roundToInt (getMainScreenHeight() - p.y));
     }
 }
 
-void Desktop::setMousePosition (const Point<int>& newPosition)
+void MouseInputSource::setRawMousePosition (Point<int> newPosition)
 {
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
     CGWarpMouseCursorPosition (convertToCGPoint (newPosition));
     CGAssociateMouseAndMouseCursorPosition (true);
+}
+
+double Desktop::getDefaultMasterScale()
+{
+    return 1.0;
 }
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
@@ -251,7 +256,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
         {
@@ -292,7 +297,7 @@ public:
         timerCallback();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (Process::isForegroundProcess())
             UpdateSystemActivity (1 /*UsrActivity*/);
@@ -349,30 +354,36 @@ static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
     return convertToRectInt (r);
 }
 
-void Desktop::Displays::findDisplays()
+void Desktop::Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {
         DisplaySettingsChangeCallback::getInstance();
 
-        NSArray* screens = [NSScreen screens];
-        const CGFloat mainScreenBottom = [[screens objectAtIndex: 0] frame].size.height;
+        CGFloat mainScreenBottom = 0;
 
-        for (unsigned int i = 0; i < [screens count]; ++i)
+        for (NSScreen* s in [NSScreen screens])
         {
-            NSScreen* s = (NSScreen*) [screens objectAtIndex: i];
-
             Display d;
-            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom);
-            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom);
-            d.isMain = (i == 0);
+            d.isMain = false;
+
+            if (mainScreenBottom == 0)
+            {
+                mainScreenBottom = [s frame].size.height;
+                d.isMain = true;
+            }
+
+            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
+            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
+            d.scale = masterScale;
 
            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
             if ([s respondsToSelector: @selector (backingScaleFactor)])
-                d.scale = s.backingScaleFactor;
-            else
+                d.scale *= s.backingScaleFactor;
            #endif
-                d.scale = 1.0;
+
+            NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
+            d.dpi = (dpi.width + dpi.height) / 2.0;
 
             displays.add (d);
         }
@@ -382,17 +393,9 @@ void Desktop::Displays::findDisplays()
 //==============================================================================
 bool juce_areThereAnyAlwaysOnTopWindows()
 {
-    NSArray* windows = [NSApp windows];
-
-    for (unsigned int i = 0; i < [windows count]; ++i)
-    {
-        const NSInteger level = [((NSWindow*) [windows objectAtIndex: i]) level];
-
-        if (level == NSFloatingWindowLevel
-             || level == NSStatusWindowLevel
-             || level == NSModalPanelWindowLevel)
+    for (NSWindow* window in [NSApp windows])
+        if ([window level] > NSNormalWindowLevel)
             return true;
-    }
 
     return false;
 }

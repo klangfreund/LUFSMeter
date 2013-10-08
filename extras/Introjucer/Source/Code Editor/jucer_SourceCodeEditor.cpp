@@ -1,29 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
 #include "jucer_SourceCodeEditor.h"
+#include "../Application/jucer_Application.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
 
@@ -47,8 +47,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 
 Component* SourceCodeDocument::createEditor()
 {
-    SourceCodeEditor* e = new SourceCodeEditor (this);
-    e->createEditor (getCodeDocument());
+    SourceCodeEditor* e = new SourceCodeEditor (this, getCodeDocument());
     applyLastState (*(e->editor));
     return e;
 }
@@ -115,9 +114,19 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 }
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
+    else
+        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
+}
+
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeEditorComponent* ed)
+    : DocumentEditorComponent (doc)
+{
+    setEditor (ed);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
@@ -129,14 +138,6 @@ SourceCodeEditor::~SourceCodeEditor()
 
     if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
-}
-
-void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
-{
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
-    else
-        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
 }
 
 void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
@@ -155,7 +156,7 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
     editor->getDocument().addListener (this);
 }
 
-void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
+void SourceCodeEditor::scrollToKeepRangeOnScreen (Range<int> range)
 {
     const int space = jmin (10, editor->getNumLinesOnScreen() / 3);
     const CodeDocument::Position start (editor->getDocument(), range.getStart());
@@ -164,7 +165,7 @@ void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
     editor->scrollToKeepLinesOnScreen (Range<int> (start.getLineNumber() - space, end.getLineNumber() + space));
 }
 
-void SourceCodeEditor::highlight (const Range<int>& range, bool cursorAtStart)
+void SourceCodeEditor::highlight (Range<int> range, bool cursorAtStart)
 {
     scrollToKeepRangeOnScreen (range);
 
@@ -206,7 +207,7 @@ GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocum
                                                         CodeTokeniser* tokeniser)
    : CodeEditorComponent (codeDocument, tokeniser), file (f)
 {
-    setCommandManager (commandManager);
+    setCommandManager (&IntrojucerApp::getCommandManager());
 }
 
 GenericCodeEditorComponent::~GenericCodeEditorComponent() {}
@@ -318,7 +319,7 @@ public:
 
         addAndMakeVisible (&caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
-        caseButton.setToggleState (isCaseSensitiveSearch(), false);
+        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
         caseButton.addListener (this);
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
@@ -379,7 +380,7 @@ public:
 
     void textEditorReturnKeyPressed (TextEditor&) override
     {
-        commandManager->invokeDirectly (CommandIDs::findNext, true);
+        IntrojucerApp::getCommandManager().invokeDirectly (CommandIDs::findNext, true);
     }
 
     void textEditorEscapeKeyPressed (TextEditor&) override
@@ -415,7 +416,7 @@ void GenericCodeEditorComponent::showFindPanel()
     if (findPanel == nullptr)
     {
         findPanel = new FindPanel();
-        findPanel->setCommandManager (commandManager);
+        findPanel->setCommandManager (&IntrojucerApp::getCommandManager());
 
         addAndMakeVisible (findPanel);
         resized();

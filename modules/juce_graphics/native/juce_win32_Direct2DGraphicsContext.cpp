@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -83,9 +82,9 @@ public:
 
     bool isVectorDevice() const { return false; }
 
-    void setOrigin (int x, int y)
+    void setOrigin (Point<int> o)
     {
-        addTransform (AffineTransform::translation ((float) x, (float) y));
+        addTransform (AffineTransform::translation ((float) o.x, (float) o.y));
     }
 
     void addTransform (const AffineTransform& transform)
@@ -93,7 +92,7 @@ public:
         currentState->transform = transform.followedBy (currentState->transform);
     }
 
-    float getScaleFactor()
+    float getPhysicalPixelScaleFactor()
     {
         return currentState->transform.getScaleFactor();
     }
@@ -104,7 +103,7 @@ public:
         return ! isClipEmpty();
     }
 
-    bool clipToRectangleList (const RectangleList& clipRegion)
+    bool clipToRectangleList (const RectangleList<int>& clipRegion)
     {
         currentState->clipToRectList (rectListToPathGeometry (clipRegion));
         return ! isClipEmpty();
@@ -180,10 +179,21 @@ public:
 
     void fillRect (const Rectangle<int>& r, bool /*replaceExistingContents*/)
     {
+        fillRect (r.toFloat());
+    }
+
+    void fillRect (const Rectangle<float>& r)
+    {
         renderingTarget->SetTransform (transformToMatrix (currentState->transform));
         currentState->createBrush();
         renderingTarget->FillRectangle (rectangleToRectF (r), currentState->currentBrush);
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
+    }
+
+    void fillRectList (const RectangleList<float>& list)
+    {
+        for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
+            fillRect (*r);
     }
 
     void fillPath (const Path& p, const AffineTransform& transform)
@@ -228,30 +238,6 @@ public:
 
         renderingTarget->DrawLine (D2D1::Point2F (line.getStartX(), line.getStartY()),
                                    D2D1::Point2F (line.getEndX(), line.getEndY()),
-                                   currentState->currentBrush);
-        renderingTarget->SetTransform (D2D1::IdentityMatrix());
-    }
-
-    void drawVerticalLine (int x, float top, float bottom)
-    {
-        // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
-        renderingTarget->SetTransform (transformToMatrix (currentState->transform));
-        currentState->createBrush();
-
-        renderingTarget->DrawLine (D2D1::Point2F ((FLOAT) x, top),
-                                   D2D1::Point2F ((FLOAT) x, bottom),
-                                   currentState->currentBrush);
-        renderingTarget->SetTransform (D2D1::IdentityMatrix());
-    }
-
-    void drawHorizontalLine (int y, float left, float right)
-    {
-        // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
-        renderingTarget->SetTransform (transformToMatrix (currentState->transform));
-        currentState->createBrush();
-
-        renderingTarget->DrawLine (D2D1::Point2F (left, (FLOAT) y),
-                                   D2D1::Point2F (right, (FLOAT) y),
                                    currentState->currentBrush);
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
     }
@@ -629,8 +615,8 @@ public:
                     {
                         radialGradient = 0;
 
-                        const Point<float>& p1 = fillType.gradient->point1;
-                        const Point<float>& p2 = fillType.gradient->point2;
+                        const Point<float> p1 = fillType.gradient->point1;
+                        const Point<float> p2 = fillType.gradient->point2;
                         float r = p1.getDistanceFrom (p2);
 
                         D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES props =
@@ -645,8 +631,8 @@ public:
                     {
                         linearGradient = 0;
 
-                        const Point<float>& p1 = fillType.gradient->point1;
-                        const Point<float>& p2 = fillType.gradient->point2;
+                        const Point<float> p1 = fillType.gradient->point1;
+                        const Point<float> p2 = fillType.gradient->point2;
 
                         D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES props =
                             D2D1::LinearGradientBrushProperties (D2D1::Point2F (p1.x, p1.y),
@@ -718,12 +704,13 @@ private:
     OwnedArray<SavedState> states;
 
     //==============================================================================
-    static D2D1_RECT_F rectangleToRectF (const Rectangle<int>& r)
+    template <typename Type>
+    static D2D1_RECT_F rectangleToRectF (const Rectangle<Type>& r)
     {
         return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
-    static D2D1_COLOR_F colourToD2D (const Colour& c)
+    static D2D1_COLOR_F colourToD2D (Colour c)
     {
         return D2D1::ColorF::ColorF (c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha());
     }
@@ -743,7 +730,7 @@ private:
         sink->EndFigure (D2D1_FIGURE_END_CLOSED);
     }
 
-    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList& clipRegion)
+    static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList<int>& clipRegion)
     {
         ID2D1PathGeometry* p = nullptr;
         Direct2DFactories::getInstance().d2dFactory->CreatePathGeometry (&p);

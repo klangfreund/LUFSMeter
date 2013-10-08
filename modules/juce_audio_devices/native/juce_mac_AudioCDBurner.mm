@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -49,8 +48,8 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
 
     struct AudioSourceHolder
     {
-        AudioSourceHolder (AudioSource* source_, int numFrames)
-            : source (source_), readPosition (0), lengthInFrames (numFrames)
+        AudioSourceHolder (AudioSource* s, int numFrames)
+            : source (s), readPosition (0), lengthInFrames (numFrames)
         {
         }
 
@@ -126,15 +125,9 @@ private:
 
                 source->source->getNextAudioBlock (info);
 
-                typedef AudioData::Pointer <AudioData::Int16,
-                                            AudioData::LittleEndian,
-                                            AudioData::Interleaved,
-                                            AudioData::NonConst> CDSampleFormat;
+                typedef AudioData::Pointer <AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst> CDSampleFormat;
+                typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceSampleFormat;
 
-                typedef AudioData::Pointer <AudioData::Float32,
-                                            AudioData::NativeEndian,
-                                            AudioData::NonInterleaved,
-                                            AudioData::Const> SourceSampleFormat;
                 CDSampleFormat left (buffer, 2);
                 left.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (0)), numSamples);
                 CDSampleFormat right (buffer + 2, 2);
@@ -167,8 +160,8 @@ private:
 
 struct OpenDiskDevice
 {
-    OpenDiskDevice (DRDevice* device_)
-        : device (device_),
+    OpenDiskDevice (DRDevice* d)
+        : device (d),
           tracks ([[NSMutableArray alloc] init]),
           underrunProtection (true)
     {
@@ -255,9 +248,8 @@ struct OpenDiskDevice
 
             NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey]
                                                         objectForKey: DRErrorStatusErrorStringKey];
-
             if ([err length] > 0)
-                return CharPointer_UTF8 ([err UTF8String]);
+                return nsStringToJuce (err);
         }
 
         [device releaseMediaReservation];
@@ -274,12 +266,9 @@ struct OpenDiskDevice
 class AudioCDBurner::Pimpl  : public Timer
 {
 public:
-    Pimpl (AudioCDBurner& owner_, const int deviceIndex)
-        : device (0), owner (owner_)
+    Pimpl (AudioCDBurner& b, int deviceIndex)  : owner (b)
     {
-        DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex];
-
-        if (dev != nil)
+        if (DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex])
         {
             device = new OpenDiskDevice (dev);
             lastState = getDiskState();
@@ -292,7 +281,7 @@ public:
         stopTimer();
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         const DiskState state = getDiskState();
 
@@ -308,7 +297,6 @@ public:
         if ([device->device isValid])
         {
             NSDictionary* status = [device->device status];
-
             NSString* state = [status objectForKey: DRDeviceMediaStateKey];
 
             if ([state isEqualTo: DRDeviceMediaStateNone])
@@ -323,8 +311,8 @@ public:
             {
                 if ([[[status objectForKey: DRDeviceMediaInfoKey] objectForKey: DRDeviceMediaBlocksFreeKey] intValue] > 0)
                     return writableDiskPresent;
-                else
-                    return readOnlyDiskPresent;
+
+                return readOnlyDiskPresent;
             }
         }
 
@@ -338,14 +326,8 @@ public:
         Array<int> results;
 
         if ([device->device isValid])
-        {
-            NSArray* speeds = [[[device->device status] objectForKey: DRDeviceMediaInfoKey] objectForKey: DRDeviceBurnSpeedsKey];
-            for (unsigned int i = 0; i < [speeds count]; ++i)
-            {
-                const int kbPerSec = [[speeds objectAtIndex: i] intValue];
-                results.add (kbPerSec / kilobytesPerSecond1x);
-            }
-        }
+            for (id kbPerSec in [[[device->device status] objectForKey: DRDeviceMediaInfoKey] objectForKey: DRDeviceBurnSpeedsKey])
+                results.add ([kbPerSec intValue] / kilobytesPerSecond1x);
 
         return results;
     }
@@ -386,40 +368,21 @@ AudioCDBurner::~AudioCDBurner()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    ScopedPointer <AudioCDBurner> b (new AudioCDBurner (deviceIndex));
+    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
     if (b->pimpl->device == nil)
-        b = 0;
+        b = nullptr;
 
     return b.release();
 }
 
-namespace
-{
-    NSArray* findDiskBurnerDevices()
-    {
-        NSMutableArray* results = [NSMutableArray array];
-        NSArray* devs = [DRDevice devices];
-
-        for (int i = 0; i < [devs count]; ++i)
-        {
-            NSDictionary* dic = [[devs objectAtIndex: i] info];
-            NSString* name = [dic valueForKey: DRDeviceProductNameKey];
-            if (name != nil)
-                [results addObject: name];
-        }
-
-        return results;
-    }
-}
-
 StringArray AudioCDBurner::findAvailableDevices()
 {
-    NSArray* names = findDiskBurnerDevices();
     StringArray s;
 
-    for (unsigned int i = 0; i < [names count]; ++i)
-        s.add (CharPointer_UTF8 ([[names objectAtIndex: i] UTF8String]));
+    for (NSDictionary* dic in [DRDevice devices])
+        if (NSString* name = [dic valueForKey: DRDeviceProductNameKey])
+            s.add (nsStringToJuce (name));
 
     return s;
 }

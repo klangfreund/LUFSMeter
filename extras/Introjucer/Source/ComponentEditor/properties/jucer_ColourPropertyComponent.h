@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -40,7 +39,7 @@ public:
         addAndMakeVisible (colourPropEditor);
     }
 
-    virtual void setColour (const Colour& newColour) = 0;
+    virtual void setColour (Colour newColour) = 0;
     virtual Colour getColour() const = 0;
     virtual void resetToDefault() = 0;
 
@@ -74,7 +73,7 @@ public:
                               Justification::centred, 1);
         }
 
-        virtual void setColour (const Colour& newColour) = 0;
+        virtual void setColour (Colour newColour) = 0;
         virtual void resetToDefault() = 0;
         virtual Colour getColour() const = 0;
 
@@ -156,17 +155,17 @@ public:
                 {
                 }
 
-                int getNumSwatches() const
+                int getNumSwatches() const override
                 {
                     return getAppSettings().swatchColours.size();
                 }
 
-                Colour getSwatchColour (int index) const
+                Colour getSwatchColour (int index) const override
                 {
                     return getAppSettings().swatchColours [index];
                 }
 
-                void setSwatchColour (int index, const Colour& newColour) const
+                void setSwatchColour (int index, const Colour& newColour) const override
                 {
                     getAppSettings().swatchColours.set (index, newColour);
                 }
@@ -193,12 +192,12 @@ public:
               owner (owner_)
         {}
 
-        void setColour (const Colour& newColour)
+        void setColour (Colour newColour) override
         {
             owner->setColour (newColour);
         }
 
-        Colour getColour() const
+        Colour getColour() const override
         {
             return owner->getColour();
         }

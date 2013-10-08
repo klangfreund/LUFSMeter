@@ -47,18 +47,17 @@ class SineWaveVoice  : public SynthesiserVoice
 {
 public:
     SineWaveVoice()
-        : angleDelta (0.0),
-          tailOff (0.0)
+       : currentAngle (0), angleDelta (0), level (0), tailOff (0)
     {
     }
 
     bool canPlaySound (SynthesiserSound* sound)
     {
-        return dynamic_cast <SineWaveSound*> (sound) != 0;
+        return dynamic_cast<SineWaveSound*> (sound) != 0;
     }
 
-    void startNote (const int midiNoteNumber, const float velocity,
-                    SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/)
+    void startNote (int midiNoteNumber, float velocity,
+                    SynthesiserSound*, int /*currentPitchWheelPosition*/)
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
@@ -70,7 +69,7 @@ public:
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote (const bool allowTailOff)
+    void stopNote (bool allowTailOff)
     {
         if (allowTailOff)
         {
@@ -90,12 +89,12 @@ public:
         }
     }
 
-    void pitchWheelMoved (const int /*newValue*/)
+    void pitchWheelMoved (int /*newValue*/)
     {
         // can't be bothered implementing this for the demo!
     }
 
-    void controllerMoved (const int /*controllerNumber*/, const int /*newValue*/)
+    void controllerMoved (int /*controllerNumber*/, int /*newValue*/)
     {
         // not interested in controllers in this case.
     }
@@ -254,7 +253,7 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     sineButton->setButtonText ("Use sine wave");
     sineButton->setRadioGroupId (321);
     sineButton->addListener (this);
-    sineButton->setToggleState (true, false);
+    sineButton->setToggleState (true, dontSendNotification);
 
     addAndMakeVisible (sampledButton = new ToggleButton (String::empty));
     sampledButton->setButtonText ("Use sampled sound");
@@ -362,7 +361,7 @@ BEGIN_JUCER_METADATA
 <JUCER_COMPONENT documentType="Component" className="AudioDemoSynthPage" componentName=""
                  parentClasses="public Component" constructorParams="AudioDeviceManager&amp; deviceManager_"
                  variableInitialisers="deviceManager (deviceManager_)" snapPixels="8"
-                 snapActive="1" snapShown="1" overlayOpacity="0.330000013" fixedSize="0"
+                 snapActive="1" snapShown="1" overlayOpacity="0.330" fixedSize="0"
                  initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffd3d3d3"/>
   <GENERICCOMPONENT name="" id="86605ec4f02c4320" memberName="keyboardComponent"

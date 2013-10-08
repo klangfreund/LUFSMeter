@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -29,7 +28,7 @@ FilenameComponent::FilenameComponent (const String& name,
                                       const bool isDirectory,
                                       const bool isForSaving,
                                       const String& fileBrowserWildcard,
-                                      const String& enforcedSuffix_,
+                                      const String& suffix,
                                       const String& textWhenNothingSelected)
     : Component (name),
       maxRecentFiles (30),
@@ -37,7 +36,7 @@ FilenameComponent::FilenameComponent (const String& name,
       isSaving (isForSaving),
       isFileDragOver (false),
       wildcard (fileBrowserWildcard),
-      enforcedSuffix (enforcedSuffix_)
+      enforcedSuffix (suffix)
 {
     addAndMakeVisible (&filenameBox);
     filenameBox.setEditableText (canEditFilename);
@@ -97,13 +96,18 @@ void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
     defaultBrowseFile = newDefaultDirectory;
 }
 
+File FilenameComponent::getLocationToBrowse()
+{
+    return getCurrentFile() == File::nonexistent ? defaultBrowseFile
+                                                 : getCurrentFile();
+}
+
 void FilenameComponent::buttonClicked (Button*)
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (isDir ? TRANS ("Choose a new directory")
                           : TRANS ("Choose a new file"),
-                    getCurrentFile() == File::nonexistent ? defaultBrowseFile
-                                                          : getCurrentFile(),
+                    getLocationToBrowse(),
                     wildcard);
 
     if (isDir ? fc.browseForDirectory()
@@ -153,7 +157,7 @@ void FilenameComponent::fileDragExit (const StringArray&)
 //==============================================================================
 File FilenameComponent::getCurrentFile() const
 {
-    File f (filenameBox.getText());
+    File f (File::getCurrentWorkingDirectory().getChildFile (filenameBox.getText()));
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);
@@ -175,7 +179,7 @@ void FilenameComponent::setCurrentFile (File newFile,
         if (addToRecentlyUsedList)
             addRecentlyUsedFile (newFile);
 
-        filenameBox.setText (lastFilename, true);
+        filenameBox.setText (lastFilename, dontSendNotification);
 
         if (notification != dontSendNotification)
         {

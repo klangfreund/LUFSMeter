@@ -45,17 +45,21 @@ LiveAudioInputDisplayComp::~LiveAudioInputDisplayComp()
 
 void LiveAudioInputDisplayComp::paint (Graphics& g)
 {
-    g.fillAll (Colours::black);
+    RectangleList<float> waveform;
 
-    g.setColour (Colours::green);
     const float midY = getHeight() * 0.5f;
     int sampleNum = (nextSample + numElementsInArray (samples) - 1);
 
     for (int x = jmin (getWidth(), (int) numElementsInArray (samples)); --x >= 0;)
     {
         const float sampleSize = midY * samples [sampleNum-- % numElementsInArray (samples)];
-        g.drawVerticalLine (x, midY - sampleSize, midY + sampleSize);
+        waveform.addWithoutMerging (Rectangle<float> ((float) x, midY - sampleSize, 1.0f, sampleSize * 2.0f));
     }
+
+    g.fillAll (Colours::black);
+
+    g.setColour (Colours::green);
+    g.fillRectList (waveform);
 }
 
 void LiveAudioInputDisplayComp::timerCallback()
@@ -186,7 +190,7 @@ BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="AudioDemoTabComponent" componentName=""
                  parentClasses="public Component" constructorParams="" variableInitialisers=""
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
+                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">
   <BACKGROUND backgroundColour="ffffffff"/>
   <TABBEDCOMPONENT name="new tabbed component" id="83c980d7793cdced" memberName="tabbedComponent"

@@ -1,33 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_FONT_JUCEHEADER__
-#define __JUCE_FONT_JUCEHEADER__
-
-#include "juce_Typeface.h"
-class LowLevelGraphicsContext;
+#ifndef JUCE_FONT_H_INCLUDED
+#define JUCE_FONT_H_INCLUDED
 
 
 //==============================================================================
@@ -204,14 +200,6 @@ public:
     static Typeface::Ptr getDefaultTypefaceForFont (const Font& font);
 
     //==============================================================================
-    /** Returns the total height of this font.
-        This is the maximum height, from the top of the ascent to the bottom of the
-        descenders.
-
-        @see withHeight, setHeightWithoutChangingWidth, getAscent
-    */
-    float getHeight() const noexcept;
-
     /** Returns a copy of this font with a new height. */
     Font withHeight (float height) const;
 
@@ -228,17 +216,45 @@ public:
     */
     void setHeightWithoutChangingWidth (float newHeight);
 
-    /** Returns the height of the font above its baseline.
+    /** Returns the total height of this font, in pixels.
+        This is the maximum height, from the top of the ascent to the bottom of the
+        descenders.
+
+        @see withHeight, setHeightWithoutChangingWidth, getAscent
+    */
+    float getHeight() const noexcept;
+
+    /** Returns the total height of this font, in points.
+        This is the maximum height, from the top of the ascent to the bottom of the
+        descenders.
+
+        @see withPointHeight, getHeight
+    */
+    float getHeightInPoints() const;
+
+    /** Returns the height of the font above its baseline, in pixels.
         This is the maximum height from the baseline to the top.
         @see getHeight, getDescent
     */
     float getAscent() const;
 
-    /** Returns the amount that the font descends below its baseline.
+    /** Returns the height of the font above its baseline, in points.
+        This is the maximum height from the baseline to the top.
+        @see getHeight, getDescent
+    */
+    float getAscentInPoints() const;
+
+    /** Returns the amount that the font descends below its baseline, in pixels.
         This is calculated as (getHeight() - getAscent()).
         @see getAscent, getHeight
     */
     float getDescent() const;
+
+    /** Returns the amount that the font descends below its baseline, in points.
+        This is calculated as (getHeight() - getAscent()).
+        @see getAscent, getHeight
+    */
+    float getDescentInPoints() const;
 
     //==============================================================================
     /** Returns the font's style flags.
@@ -436,8 +452,9 @@ private:
     ReferenceCountedObjectPtr <SharedFontInternal> font;
     void dupeInternalIfShared();
     void checkTypefaceSuitability();
+    float getHeightToPointsFactor() const;
 
     JUCE_LEAK_DETECTOR (Font)
 };
 
-#endif   // __JUCE_FONT_JUCEHEADER__
+#endif   // JUCE_FONT_H_INCLUDED

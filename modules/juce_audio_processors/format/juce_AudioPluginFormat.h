@@ -1,33 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
-
-#include "../processors/juce_AudioPluginInstance.h"
-class PluginDescription;
+#ifndef JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
+#define JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
 
 
 //==============================================================================
@@ -64,7 +60,9 @@ public:
     /** Tries to recreate a type from a previously generated PluginDescription.
         @see PluginDescription::createInstance
     */
-    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc) = 0;
+    virtual AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc,
+                                                                double initialSampleRate,
+                                                                int initialBufferSize) = 0;
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.
@@ -76,6 +74,9 @@ public:
 
     /** Returns a readable version of the name of the plugin that this identifier refers to. */
     virtual String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
+
+    /** Returns true if this plugin's version or date has changed and it should be re-checked. */
+    virtual bool pluginNeedsRescanning (const PluginDescription&) = 0;
 
     /** Checks whether this plugin could possibly be loaded.
         It doesn't actually need to load it, just to check whether the file or component
@@ -108,4 +109,4 @@ protected:
 };
 
 
-#endif   // __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
+#endif   // JUCE_AUDIOPLUGINFORMAT_H_INCLUDED

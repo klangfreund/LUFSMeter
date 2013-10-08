@@ -1,36 +1,37 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
-#define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#ifndef JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+#define JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 //==============================================================================
 /**
     A class that can be used to run a simple standalone application containing your filter.
 
-    Just create one of these objects in your JUCEApplication::initialise() method, and
+    Just create one of these objects in your JUCEApplicationBase::initialise() method, and
     let it do its work. It will create your filter object using the same createFilter() function
     that the other plugin wrappers use.
 */
@@ -45,7 +46,7 @@ public:
         class and deleted automatically when no longer needed. (It can also be null)
     */
     StandaloneFilterWindow (const String& title,
-                            const Colour& backgroundColour,
+                            Colour backgroundColour,
                             PropertySet* settingsToUse)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           settings (settingsToUse),
@@ -62,7 +63,7 @@ public:
         if (filter == nullptr)
         {
             jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
-            JUCEApplication::quit();
+            JUCEApplicationBase::quit();
         }
 
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
@@ -240,13 +241,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
-        JUCEApplication::quit();
+        JUCEApplicationBase::quit();
     }
 
     /** @internal */
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         if (filter != nullptr)
         {
@@ -270,7 +271,7 @@ public:
     }
 
     /** @internal */
-    void resized()
+    void resized() override
     {
         DocumentWindow::resized();
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
@@ -300,4 +301,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
-#endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
+#endif   // JUCE_STANDALONEFILTERWINDOW_H_INCLUDED

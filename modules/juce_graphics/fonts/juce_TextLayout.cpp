@@ -1,29 +1,28 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-TextLayout::Glyph::Glyph (const int glyphCode_, const Point<float>& anchor_, float width_) noexcept
+TextLayout::Glyph::Glyph (const int glyphCode_, Point<float> anchor_, float width_) noexcept
     : glyphCode (glyphCode_), anchor (anchor_), width (width_)
 {
 }
@@ -49,7 +48,7 @@ TextLayout::Run::Run() noexcept
 {
 }
 
-TextLayout::Run::Run (const Range<int>& range, const int numGlyphsToPreallocate)
+TextLayout::Run::Run (Range<int> range, const int numGlyphsToPreallocate)
     : colour (0xff000000), stringRange (range)
 {
     glyphs.ensureStorageAllocated (numGlyphsToPreallocate);
@@ -71,7 +70,7 @@ TextLayout::Line::Line() noexcept
 {
 }
 
-TextLayout::Line::Line (const Range<int>& stringRange_, const Point<float>& lineOrigin_,
+TextLayout::Line::Line (Range<int> stringRange_, Point<float> lineOrigin_,
                         const float ascent_, const float descent_, const float leading_,
                         const int numRunsToPreallocate)
     : stringRange (stringRange_), lineOrigin (lineOrigin_),
@@ -105,7 +104,7 @@ Range<float> TextLayout::Line::getLineBoundsX() const noexcept
             float minX = run.glyphs.getReference(0).anchor.x;
             float maxX = minX;
 
-            for (int j = run.glyphs.size(); --j > 0;)
+            for (int j = run.glyphs.size(); --j >= 0;)
             {
                 const Glyph& glyph = run.glyphs.getReference (j);
                 const float x = glyph.anchor.x;
@@ -251,7 +250,7 @@ namespace TextLayoutHelpers
 
     struct RunAttribute
     {
-        RunAttribute (const FontAndColour& fc, const Range<int>& r) noexcept
+        RunAttribute (const FontAndColour& fc, const Range<int> r) noexcept
             : fontAndColour (fc), range (r)
         {}
 
@@ -261,7 +260,7 @@ namespace TextLayoutHelpers
 
     struct Token
     {
-        Token (const String& t, const Font& f, const Colour& c, const bool whitespace)
+        Token (const String& t, const Font& f, Colour c, const bool whitespace)
             : text (t), font (f), colour (c),
               area (font.getStringWidthFloat (t), f.getHeight()),
               isWhitespace (whitespace),
@@ -308,7 +307,7 @@ namespace TextLayoutHelpers
 
                 Array <int> newGlyphs;
                 Array <float> xOffsets;
-                t.font.getGlyphPositions (t.text.trimEnd(), newGlyphs, xOffsets);
+                t.font.getGlyphPositions (getTrimmedEndIfNotAllWhitespace (t.text), newGlyphs, xOffsets);
 
                 if (currentRun == nullptr)  currentRun  = new TextLayout::Run();
                 if (currentLine == nullptr) currentLine = new TextLayout::Line();
@@ -415,8 +414,8 @@ namespace TextLayoutHelpers
             return CharacterFunctions::isWhitespace (c) ? 2 : 1;
         }
 
-        void appendText (const AttributedString& text, const Range<int>& stringRange,
-                         const Font& font, const Colour& colour)
+        void appendText (const AttributedString& text, const Range<int> stringRange,
+                         const Font& font, Colour colour)
         {
             const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
             String::CharPointerType t (stringText.getCharPointer());
@@ -507,7 +506,7 @@ namespace TextLayoutHelpers
             {
                 const int stringLength = text.getText().length();
                 int rangeStart = 0;
-                FontAndColour lastFontAndColour (nullptr);
+                FontAndColour lastFontAndColour (&defaultFont);
 
                 // Iterate through every character in the string
                 for (int i = 0; i < stringLength; ++i)
@@ -542,6 +541,15 @@ namespace TextLayoutHelpers
                 const RunAttribute& r = runAttributes.getReference(i);
                 appendText (text, r.range, *(r.fontAndColour.font), r.fontAndColour.colour);
             }
+        }
+
+        static String getTrimmedEndIfNotAllWhitespace (const String& s)
+        {
+            String trimmed (s.trimEnd());
+            if (trimmed.isEmpty() && ! s.isEmpty())
+                trimmed = s.replaceCharacters ("\r\n\t", "   ");
+
+            return trimmed;
         }
 
         OwnedArray<Token> tokens;

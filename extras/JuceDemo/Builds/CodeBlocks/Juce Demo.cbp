@@ -905,6 +905,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_StringRef.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/text/juce_TextDiff.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -950,6 +954,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/memory/juce_ByteOrder.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -1677,6 +1685,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_events/messages/juce_Initialisation.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_events/messages/juce_Message.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1973,15 +1985,7 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_graphics/geometry/juce_RectangleList.cpp">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../../../modules/juce_graphics/geometry/juce_RectangleList.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
-    <Unit filename="../../../../modules/juce_graphics/placement/juce_Justification.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -2202,6 +2206,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseEvent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseInactivityDetector.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/mouse/juce_MouseInactivityDetector.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -2490,6 +2502,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/menus/juce_PopupMenu.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/layout/juce_AnimatedPosition.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_basics/layout/juce_AnimatedPositionBehaviours.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -3045,10 +3065,6 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../../../modules/juce_gui_basics/application/juce_Initialisation.h">
-      <Option compile="0"/>
-      <Option link="0"/>
-    </Unit>
     <Unit filename="../../../../modules/juce_gui_basics/native/juce_android_FileChooser.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -3270,6 +3286,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

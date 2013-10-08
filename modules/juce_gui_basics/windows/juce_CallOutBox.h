@@ -1,32 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
-#define __JUCE_CALLOUTBOX_JUCEHEADER__
-
-#include "../components/juce_Component.h"
+#ifndef JUCE_CALLOUTBOX_H_INCLUDED
+#define JUCE_CALLOUTBOX_H_INCLUDED
 
 
 //==============================================================================
@@ -38,16 +35,19 @@
     other component - but it looks fancier, and has an arrow that can indicate the
     object that it applies to.
 
-    Normally, you'd create one of these on the stack and run it modally, e.g.
+    The class works best when shown modally, but obviously running modal loops is
+    evil and must never be done, so the launchAsynchronously method is provided as
+    a handy way of launching an instance of a CallOutBox and automatically managing
+    its lifetime, e.g.
 
     @code
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent&)
     {
-        MyContentComponent content;
-        content.setSize (300, 300);
+        FoobarContentComp* content = new FoobarContentComp();
+        content->setSize (300, 300);
 
-        CallOutBox callOut (content, *this, nullptr);
-        callOut.runModalLoop();
+        CallOutBox& myBox
+            = CallOutBox::launchAsynchronously (content, getScreenBounds(), nullptr);
     }
     @endcode
 
@@ -98,7 +98,10 @@ public:
 
         This method will create and display a callout, returning immediately, after which
         the box will continue to run modally until the user clicks on some other component, at
-        which point it will be dismissed automatically.
+        which point it will be dismissed and deleted automatically.
+
+        It returns a reference to the newly-created box so that you can customise it, but don't
+        keep a pointer to it, as it'll be deleted at some point when it gets closed.
 
         @param contentComponent     the component to display inside the call-out. This should
                                     already have a size set (although the call-out will also
@@ -117,21 +120,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void moved();
+    void moved() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    void inputAttemptWhenModal();
+    void inputAttemptWhenModal() override;
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void handleCommandMessage (int commandId);
+    void handleCommandMessage (int) override;
 
 private:
     //==============================================================================
@@ -149,4 +152,4 @@ private:
 };
 
 
-#endif   // __JUCE_CALLOUTBOX_JUCEHEADER__
+#endif   // JUCE_CALLOUTBOX_H_INCLUDED

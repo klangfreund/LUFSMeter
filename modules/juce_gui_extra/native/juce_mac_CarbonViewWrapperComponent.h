@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
-#define __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#ifndef JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
+#define JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -45,7 +44,8 @@ public:
           wrapperWindow (0),
           carbonWindow (0),
           embeddedView (0),
-          recursiveResize (false)
+          recursiveResize (false),
+          repaintChildOnCreation (true)
     {
     }
 
@@ -193,11 +193,14 @@ public:
 
             if (wrapperWindow != 0)
             {
+                jassert (getTopLevelComponent()->getDesktopScaleFactor() == 1.0f);
+                Rectangle<int> screenBounds (getScreenBounds() * Desktop::getInstance().getGlobalScaleFactor());
+
                 Rect wr;
-                wr.left   = (short) getScreenX();
-                wr.top    = (short) getScreenY();
-                wr.right  = (short) (wr.left + getWidth());
-                wr.bottom = (short) (wr.top + getHeight());
+                wr.left   = (short) screenBounds.getX();
+                wr.top    = (short) screenBounds.getY();
+                wr.right  = (short) screenBounds.getRight();
+                wr.bottom = (short) screenBounds.getBottom();
 
                 SetWindowBounds (wrapperWindow, kWindowContentRgn, &wr);
 
@@ -219,18 +222,27 @@ public:
         }
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         setEmbeddedWindowToOurSize();
     }
 
-    void componentPeerChanged()
+    // (overridden to intercept movements of the top-level window)
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized) override
+    {
+        ComponentMovementWatcher::componentMovedOrResized (component, wasMoved, wasResized);
+
+        if (&component == getTopLevelComponent())
+            setEmbeddedWindowToOurSize();
+    }
+
+    void componentPeerChanged() override
     {
         deleteWindow();
         createWindow();
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         if (isShowing())
             createWindow();
@@ -252,7 +264,7 @@ public:
         }
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (isShowing())
         {
@@ -260,9 +272,14 @@ public:
 
             // To avoid strange overpainting problems when the UI is first opened, we'll
             // repaint it a few times during the first second that it's on-screen..
-            if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+            if (repaintChildOnCreation && (Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
                 recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
         }
+    }
+
+    void setRepaintsChildHIViewWhenCreated (bool b) noexcept
+    {
+        repaintChildOnCreation = b;
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
@@ -304,7 +321,7 @@ protected:
     WindowRef wrapperWindow;
     NSWindow* carbonWindow;
     HIViewRef embeddedView;
-    bool recursiveResize;
+    bool recursiveResize, repaintChildOnCreation;
     Time creationTime;
 
     EventHandlerRef eventHandlerRef;
@@ -312,4 +329,4 @@ protected:
     NSWindow* getOwnerWindow() const    { return [((NSView*) getWindowHandle()) window]; }
 };
 
-#endif   // __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#endif   // JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED

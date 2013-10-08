@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -55,7 +54,7 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colour::greyLevel (0.1f));
         g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 1.0f);
@@ -78,7 +77,7 @@ public:
         setMouseCursor (MouseCursor::CrosshairCursor);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (colours.isNull())
         {
@@ -101,16 +100,19 @@ public:
         }
 
         g.setOpacity (1.0f);
-        g.drawImage (colours, edge, edge, getWidth() - edge * 2, getHeight() - edge * 2,
-                     0, 0, colours.getWidth(), colours.getHeight());
+        g.drawImageTransformed (colours,
+                                RectanglePlacement (RectanglePlacement::stretchToFit)
+                                    .getTransformToFit (colours.getBounds().toFloat(),
+                                                        getLocalBounds().reduced (edge).toFloat()),
+                                false);
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         const float sat = (e.x - edge) / (float) (getWidth() - edge * 2);
         const float val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
@@ -130,7 +132,7 @@ public:
         updateMarker();
     }
 
-    void resized()
+    void resized() override
     {
         colours = Image::null;
         updateMarker();
@@ -165,7 +167,7 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const float cw = (float) getWidth();
         const float ch = (float) getHeight();
@@ -194,13 +196,13 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
-        : owner (cs), h (hue), s (sat), v (val), edge (edgeSize)
+    HueSelectorComp (ColourSelector& cs, float& hue, const int edgeSize)
+        : owner (cs), h (hue), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         ColourGradient cg;
         cg.isRadial = false;
@@ -214,17 +216,17 @@ public:
         g.fillRect (getLocalBounds().reduced (edge));
     }
 
-    void resized()
+    void resized() override
     {
         marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h), getWidth(), edge * 2);
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         mouseDrag (e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         owner.setHue ((e.y - edge) / (float) (getHeight() - edge * 2));
     }
@@ -237,8 +239,6 @@ public:
 private:
     ColourSelector& owner;
     float& h;
-    float& s;
-    float& v;
     HueSelectorMarker marker;
     const int edge;
 
@@ -254,7 +254,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const Colour c (owner.getSwatchColour (index));
 
@@ -263,7 +263,7 @@ public:
                             Colour (0xffffffff).overlaidWith (c));
     }
 
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent&) override
     {
         PopupMenu m;
         m.addItem (1, TRANS("Use this swatch as the current colour"));
@@ -333,7 +333,7 @@ ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const 
     if ((flags & showColourspace) != 0)
     {
         addAndMakeVisible (colourSpace = new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
-        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h, s, v, gapAroundColourSpaceComponent));
+        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
     }
 
     update();
@@ -351,7 +351,7 @@ Colour ColourSelector::getCurrentColour() const
     return ((flags & showAlphaChannel) != 0) ? colour : colour.withAlpha ((uint8) 0xff);
 }
 
-void ColourSelector::setCurrentColour (const Colour& c)
+void ColourSelector::setCurrentColour (Colour c)
 {
     if (c != colour)
     {

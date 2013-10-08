@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -54,6 +53,7 @@ namespace
 const char* const CoreAudioFormat::midiDataBase64   = "midiDataBase64";
 const char* const CoreAudioFormat::tempo            = "tempo";
 const char* const CoreAudioFormat::timeSig          = "time signature";
+const char* const CoreAudioFormat::keySig           = "key signature";
 
 //==============================================================================
 struct CoreAudioFormatMetatdata
@@ -65,9 +65,9 @@ struct CoreAudioFormatMetatdata
     {
         FileHeader (InputStream& input)
         {
-            fileType    = input.readIntBigEndian();
-            fileVersion = input.readShortBigEndian();
-            fileFlags   = input.readShortBigEndian();
+            fileType    = (uint32) input.readIntBigEndian();
+            fileVersion = (uint16) input.readShortBigEndian();
+            fileFlags   = (uint16) input.readShortBigEndian();
         }
 
         uint32 fileType;
@@ -80,8 +80,8 @@ struct CoreAudioFormatMetatdata
     {
         ChunkHeader (InputStream& input)
         {
-            chunkType = input.readIntBigEndian();
-            chunkSize = input.readInt64BigEndian();
+            chunkType = (uint32) input.readIntBigEndian();
+            chunkSize = (int64)  input.readInt64BigEndian();
         }
 
         uint32 chunkType;
@@ -94,12 +94,12 @@ struct CoreAudioFormatMetatdata
         AudioDescriptionChunk (InputStream& input)
         {
             sampleRate          = input.readDoubleBigEndian();
-            formatID            = input.readIntBigEndian();
-            formatFlags         = input.readIntBigEndian();
-            bytesPerPacket      = input.readIntBigEndian();
-            framesPerPacket     = input.readIntBigEndian();
-            channelsPerFrame    = input.readIntBigEndian();
-            bitsPerChannel      = input.readIntBigEndian();
+            formatID            = (uint32) input.readIntBigEndian();
+            formatFlags         = (uint32) input.readIntBigEndian();
+            bytesPerPacket      = (uint32) input.readIntBigEndian();
+            framesPerPacket     = (uint32) input.readIntBigEndian();
+            channelsPerFrame    = (uint32) input.readIntBigEndian();
+            bitsPerChannel      = (uint32) input.readIntBigEndian();
         }
 
         double sampleRate;
@@ -132,7 +132,7 @@ struct CoreAudioFormatMetatdata
         const int64 originalPosition = input.getPosition();
 
         MemoryBlock midiBlock;
-        input.readIntoMemoryBlock (midiBlock, size);
+        input.readIntoMemoryBlock (midiBlock, (ssize_t) size);
         MemoryInputStream midiInputStream (midiBlock, false);
 
         StringPairArray midiMetadata;
@@ -144,6 +144,7 @@ struct CoreAudioFormatMetatdata
 
             findTempoEvents (midiFile, midiMetadata);
             findTimeSigEvents (midiFile, midiMetadata);
+            findKeySigEvents (midiFile, midiMetadata);
         }
 
         input.setPosition (originalPosition + size);
@@ -173,7 +174,7 @@ struct CoreAudioFormatMetatdata
         }
 
         if (tempoSequence.getDataSize() > 0)
-            midiMetadata.set ("tempo sequence", tempoSequence.toString());
+            midiMetadata.set ("tempo sequence", tempoSequence.toUTF8());
     }
 
     static double getTempoFromTempoMetaEvent (MidiMessageSequence::MidiEventHolder* holder)
@@ -218,7 +219,41 @@ struct CoreAudioFormatMetatdata
         }
 
         if (timeSigSequence.getDataSize() > 0)
-            midiMetadata.set ("time signature sequence", timeSigSequence.toString());
+            midiMetadata.set ("time signature sequence", timeSigSequence.toUTF8());
+    }
+
+    static void findKeySigEvents (MidiFile& midiFile, StringPairArray& midiMetadata)
+    {
+        MidiMessageSequence keySigEvents;
+        midiFile.findAllKeySigEvents (keySigEvents);
+        const int numKeySigEvents = keySigEvents.getNumEvents();
+
+        MemoryOutputStream keySigSequence;
+
+        for (int i = 0; i < numKeySigEvents; ++i)
+        {
+            const MidiMessage& message (keySigEvents.getEventPointer (i)->message);
+            const int key = jlimit (0, 14, message.getKeySignatureNumberOfSharpsOrFlats() + 7);
+            const bool isMajor = message.isKeySignatureMajorKey();
+
+            static const char* majorKeys[] = { "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#", "C#" };
+            static const char* minorKeys[] = { "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#" };
+
+            String keySigString (isMajor ? majorKeys[key]
+                                         : minorKeys[key]);
+
+            if (! isMajor)
+                keySigString << 'm';
+
+            if (i == 0)
+                midiMetadata.set (CoreAudioFormat::keySig, keySigString);
+
+            if (numKeySigEvents > 1)
+                keySigSequence << keySigString << ',' << keySigEvents.getEventTime (i) << ';';
+        }
+
+        if (keySigSequence.getDataSize() > 0)
+            midiMetadata.set ("key signature sequence", keySigSequence.toUTF8());
     }
 
     //==============================================================================
@@ -292,7 +327,7 @@ class CoreAudioReader : public AudioFormatReader
 {
 public:
     CoreAudioReader (InputStream* const inp)
-        : AudioFormatReader (inp, TRANS (coreAudioFormatName)),
+        : AudioFormatReader (inp, coreAudioFormatName),
           ok (false), lastReadPosition (0)
     {
         usesFloatingPointData = true;
@@ -361,7 +396,7 @@ public:
 
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
@@ -452,7 +487,7 @@ private:
 
 //==============================================================================
 CoreAudioFormat::CoreAudioFormat()
-    : AudioFormat (TRANS (coreAudioFormatName), findFileExtensionsForCoreAudioCodecs())
+    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodecs())
 {
 }
 
@@ -479,12 +514,12 @@ AudioFormatReader* CoreAudioFormat::createReaderFor (InputStream* sourceStream,
     return nullptr;
 }
 
-AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream* streamToWriteTo,
-                                                     double sampleRateToUse,
-                                                     unsigned int numberOfChannels,
-                                                     int bitsPerSample,
-                                                     const StringPairArray& metadataValues,
-                                                     int qualityOptionIndex)
+AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
+                                                     double /*sampleRateToUse*/,
+                                                     unsigned int /*numberOfChannels*/,
+                                                     int /*bitsPerSample*/,
+                                                     const StringPairArray& /*metadataValues*/,
+                                                     int /*qualityOptionIndex*/)
 {
     jassertfalse; // not yet implemented!
     return nullptr;

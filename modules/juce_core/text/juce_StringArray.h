@@ -1,33 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
-#define __JUCE_STRINGARRAY_JUCEHEADER__
-
-#include "juce_String.h"
-#include "../containers/juce_Array.h"
+#ifndef JUCE_STRINGARRAY_H_INCLUDED
+#define JUCE_STRINGARRAY_H_INCLUDED
 
 
 //==============================================================================
@@ -44,10 +44,10 @@ public:
     StringArray() noexcept;
 
     /** Creates a copy of another string array */
-    StringArray (const StringArray& other);
+    StringArray (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray (StringArray&& other) noexcept;
+    StringArray (StringArray&&) noexcept;
    #endif
 
     /** Creates an array containing a single string. */
@@ -90,27 +90,27 @@ public:
     ~StringArray();
 
     /** Copies the contents of another string array into this one */
-    StringArray& operator= (const StringArray& other);
+    StringArray& operator= (const StringArray&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    StringArray& operator= (StringArray&& other) noexcept;
+    StringArray& operator= (StringArray&&) noexcept;
    #endif
 
     /** Swaps the contents of this and another StringArray. */
-    void swapWith (StringArray& other) noexcept;
+    void swapWith (StringArray&) noexcept;
 
     //==============================================================================
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    true only if the other array contains exactly the same strings in the same order
     */
-    bool operator== (const StringArray& other) const noexcept;
+    bool operator== (const StringArray&) const noexcept;
 
     /** Compares two arrays.
         Comparisons are case-sensitive.
         @returns    false if the other array contains exactly the same strings in the same order
     */
-    bool operator!= (const StringArray& other) const noexcept;
+    bool operator!= (const StringArray&) const noexcept;
 
     //==============================================================================
     /** Returns the number of strings in the array */
@@ -153,7 +153,7 @@ public:
 
         @returns    true if the string is found inside the array
     */
-    bool contains (const String& stringToLookFor,
+    bool contains (StringRef stringToLookFor,
                    bool ignoreCase = false) const;
 
     /** Searches for a string in the array.
@@ -166,13 +166,18 @@ public:
         @returns                the index of the first occurrence of the string in this array,
                                 or -1 if it isn't found.
     */
-    int indexOf (const String& stringToLookFor,
+    int indexOf (StringRef stringToLookFor,
                  bool ignoreCase = false,
                  int startIndex = 0) const;
 
     //==============================================================================
     /** Appends a string at the end of the array. */
     void add (const String& stringToAdd);
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Appends a string at the end of the array. */
+    void add (String&& stringToAdd);
+   #endif
 
     /** Inserts a string into the array.
 
@@ -211,11 +216,10 @@ public:
 
         This will tokenise the given string using whitespace characters as the
         token delimiters, and will add these tokens to the end of the array.
-
         @returns    the number of tokens added
+        @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   bool preserveQuotedStrings);
+    int addTokens (StringRef stringToTokenise, bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
 
@@ -229,10 +233,11 @@ public:
                                     which are treated as quotes. Any text occurring
                                     between quotes is not broken up into tokens.
         @returns    the number of tokens added
+        @see fromTokens
     */
-    int addTokens (const String& stringToTokenise,
-                   const String& breakCharacters,
-                   const String& quoteCharacters);
+    int addTokens (StringRef stringToTokenise,
+                   StringRef breakCharacters,
+                   StringRef quoteCharacters);
 
     /** Breaks up a string into lines and adds them to this array.
 
@@ -240,24 +245,61 @@ public:
         to the array. Line-break characters are omitted from the strings that are added to
         the array.
     */
-    int addLines (const String& stringToBreakUp);
+    int addLines (StringRef stringToBreakUp);
+
+    /** Returns an array containing the tokens in a given string.
+
+        This will tokenise the given string using whitespace characters as the
+        token delimiters, and return these tokens as an array.
+        @see addTokens
+    */
+    static StringArray fromTokens (StringRef stringToTokenise,
+                                   bool preserveQuotedStrings);
+
+    /** Returns an array containing the tokens in a given string.
+
+        This will tokenise the given string using whitespace characters as the
+        token delimiters, and return these tokens as an array.
+
+        @param stringToTokenise     the string to tokenise
+        @param breakCharacters      a string of characters, any of which will be considered
+                                    to be a token delimiter.
+        @param quoteCharacters      if this string isn't empty, it defines a set of characters
+                                    which are treated as quotes. Any text occurring
+                                    between quotes is not broken up into tokens.
+        @see addTokens
+    */
+    static StringArray fromTokens (StringRef stringToTokenise,
+                                   StringRef breakCharacters,
+                                   StringRef quoteCharacters);
+
+    /** Returns an array containing the lines in a given string.
+
+        This breaks a string down into lines separated by \\n or \\r\\n, and returns an
+        array containing these lines. Line-break characters are omitted from the strings that
+        are added to the array.
+    */
+    static StringArray fromLines (StringRef stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */
     void clear();
 
-    /** Removes a string from the array.
+    /** Removes all elements from the array without freeing the array's allocated storage.
+        @see clear
+    */
+    void clearQuick();
 
+    /** Removes a string from the array.
         If the index is out-of-range, no action will be taken.
     */
     void remove (int index);
 
     /** Finds a string in the array and removes it.
-
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */
-    void removeString (const String& stringToRemove,
+    void removeString (StringRef stringToRemove,
                        bool ignoreCase = false);
 
     /** Removes a range of elements from the array.
@@ -341,7 +383,7 @@ public:
         @param numberOfElements     how many elements to join together. If this is less
                                     than zero, all available elements will be used.
     */
-    String joinIntoString (const String& separatorString,
+    String joinIntoString (StringRef separatorString,
                            int startIndex = 0,
                            int numberOfElements = -1) const;
 
@@ -353,6 +395,14 @@ public:
     void sort (bool ignoreCase);
 
     //==============================================================================
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (int minNumElements);
+
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after
@@ -364,10 +414,10 @@ public:
 
 private:
     //==============================================================================
-    Array <String> strings;
+    Array<String> strings;
 
     JUCE_LEAK_DETECTOR (StringArray)
 };
 
 
-#endif   // __JUCE_STRINGARRAY_JUCEHEADER__
+#endif   // JUCE_STRINGARRAY_H_INCLUDED

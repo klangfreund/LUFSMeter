@@ -1,28 +1,26 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
-
 
 class AndroidProjectExporter  : public ProjectExporter
 {
@@ -66,12 +64,13 @@ public:
     }
 
     //==============================================================================
-    bool launchProject()                        { return false; }
-    bool isAndroid() const                      { return true; }
-    bool usesMMFiles() const                    { return false; }
-    bool canCopeWithDuplicateFiles()            { return false; }
+    bool canLaunchProject() override                     { return false; }
+    bool launchProject() override                        { return false; }
+    bool isAndroid() const override                      { return true; }
+    bool usesMMFiles() const override                    { return false; }
+    bool canCopeWithDuplicateFiles() override            { return false; }
 
-    void createExporterProperties (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props) override
     {
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
@@ -156,7 +155,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>& modules) const
+    void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const File target (getTargetFolder());
         const File jniFolder (target.getChildFile ("jni"));
@@ -257,7 +256,7 @@ private:
                 manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
         }
 
-        if (project.isModuleEnabled ("juce_opengl"))
+        if (project.getModules().isModuleEnabled ("juce_opengl"))
         {
             XmlElement* feature = manifest->createNewChildElement ("uses-feature");
             feature->setAttribute ("android:glEsVersion", "0x00020000");
@@ -404,6 +403,7 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
+            << "LOCAL_ARM_MODE := arm" << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 
@@ -447,7 +447,8 @@ private:
     String getLDLIBS (const AndroidBuildConfiguration& config) const
     {
         return "  LOCAL_LDLIBS :=" + config.getGCCLibraryPathFlags()
-                + " -llog -lGLESv2 " + getExternalLibraryFlags (config);
+                + " -llog -lGLESv2 " + getExternalLibraryFlags (config)
+                + " " + replacePreprocessorTokens (config, getExtraLinkerFlagsString());
     }
 
     String createIncludePathFlags (const BuildConfiguration& config) const

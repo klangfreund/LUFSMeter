@@ -1,31 +1,28 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-//==============================================================================
 static const char* const aiffFormatName = "AIFF file";
-static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
 
 //==============================================================================
 const char* const AiffAudioFormat::appleOneShot         = "apple one shot";
@@ -102,7 +99,7 @@ namespace AiffFileHelpers
             if (values.getAllKeys().contains ("MidiUnityNote", true))
             {
                 block.setSize ((sizeof (InstChunk) + 3) & ~(size_t) 3, true);
-                InstChunk& inst = *static_cast <InstChunk*> (block.getData());
+                InstChunk& inst = *static_cast<InstChunk*> (block.getData());
 
                 inst.baseNote      = getValue8 (values, "MidiUnityNote", "60");
                 inst.detune        = getValue8 (values, "Detune", "0");
@@ -138,13 +135,13 @@ namespace AiffFileHelpers
         {
             zerostruct (*this);
 
-            flags       = input.readIntBigEndian();
-            numBeats    = input.readIntBigEndian();
-            rootNote    = input.readShortBigEndian();
-            key         = input.readShortBigEndian();
-            timeSigNum  = input.readShortBigEndian();
-            timeSigDen  = input.readShortBigEndian();
-            oneShot     = input.readShortBigEndian();
+            flags       = (uint32) input.readIntBigEndian();
+            numBeats    = (uint32) input.readIntBigEndian();
+            rootNote    = (uint16) input.readShortBigEndian();
+            key         = (uint16) input.readShortBigEndian();
+            timeSigNum  = (uint16) input.readShortBigEndian();
+            timeSigDen  = (uint16) input.readShortBigEndian();
+            oneShot     = (uint16) input.readShortBigEndian();
             input.read (unknown, sizeof (unknown));
         }
 
@@ -194,6 +191,50 @@ namespace AiffFileHelpers
    #if JUCE_MSVC
     #pragma pack (pop)
    #endif
+
+    //==============================================================================
+    static String readCATEChunk (InputStream& input, const uint32 length)
+    {
+        MemoryBlock mb;
+        input.skipNextBytes (4);
+        input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
+
+        static const char* appleGenres[] =
+        {
+            "Rock/Blues",
+            "Electronic/Dance",
+            "Jazz",
+            "Urban",
+            "World/Ethnic",
+            "Cinematic/New Age",
+            "Orchestral",
+            "Country/Folk",
+            "Experimental",
+            "Other Genre",
+            nullptr
+        };
+
+        const StringArray genres (appleGenres);
+        StringArray tagsArray;
+
+        int bytesLeft = (int) mb.getSize();
+        const char* data = static_cast<const char*> (mb.getData());
+
+        while (bytesLeft > 0)
+        {
+            const String tag (CharPointer_UTF8 (data),
+                              CharPointer_UTF8 (data + bytesLeft));
+
+            if (tag.isNotEmpty())
+                tagsArray.add (data);
+
+            const int numBytesInTag = genres.contains (tag) ? 118 : 50;
+            data += numBytesInTag;
+            bytesLeft -= numBytesInTag;
+        }
+
+        return tagsArray.joinIntoString (";");
+    }
 
     //==============================================================================
     namespace MarkChunk
@@ -322,7 +363,7 @@ class AiffAudioFormatReader  : public AudioFormatReader
 {
 public:
     AiffAudioFormatReader (InputStream* in)
-        : AudioFormatReader (in, TRANS (aiffFormatName))
+        : AudioFormatReader (in, aiffFormatName)
     {
         using namespace AiffFileHelpers;
 
@@ -474,6 +515,11 @@ public:
                     {
                         AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValues);
                     }
+                    else if (type == chunkName ("cate"))
+                    {
+                        metadataValues.set (AiffAudioFormat::appleTag,
+                                            AiffFileHelpers::readCATEChunk (*input, length));;
+                    }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()
                               || input->isExhausted())
@@ -492,7 +538,7 @@ public:
 
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
@@ -560,10 +606,10 @@ private:
 class AiffAudioFormatWriter  : public AudioFormatWriter
 {
 public:
-    AiffAudioFormatWriter (OutputStream* out, double sampleRate_,
+    AiffAudioFormatWriter (OutputStream* out, double rate,
                            unsigned int numChans, unsigned int bits,
                            const StringPairArray& metadataValues)
-        : AudioFormatWriter (out, TRANS (aiffFormatName), sampleRate_, numChans, bits),
+        : AudioFormatWriter (out, aiffFormatName, rate, numChans, bits),
           lengthInSamples (0),
           bytesWritten (0),
           writeFailed (false)
@@ -595,7 +641,7 @@ public:
     }
 
     //==============================================================================
-    bool write (const int** data, int numSamples)
+    bool write (const int** data, int numSamples) override
     {
         jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
@@ -744,15 +790,15 @@ private:
 class MemoryMappedAiffReader   : public MemoryMappedAudioFormatReader
 {
 public:
-    MemoryMappedAiffReader (const File& file, const AiffAudioFormatReader& reader)
-        : MemoryMappedAudioFormatReader (file, reader, reader.dataChunkStart,
+    MemoryMappedAiffReader (const File& f, const AiffAudioFormatReader& reader)
+        : MemoryMappedAudioFormatReader (f, reader, reader.dataChunkStart,
                                          reader.bytesPerFrame * reader.lengthInSamples, reader.bytesPerFrame),
           littleEndian (reader.littleEndian)
     {
     }
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples)
+                      int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
@@ -831,8 +877,7 @@ private:
 };
 
 //==============================================================================
-AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (TRANS (aiffFormatName), StringArray (aiffExtensions))
+AiffAudioFormat::AiffAudioFormat()   : AudioFormat (aiffFormatName, ".aiff .aif")
 {
 }
 
@@ -862,8 +907,10 @@ bool AiffAudioFormat::canHandleFile (const File& f)
         return true;
 
     const OSType type = f.getMacOSType();
-    return type == 'AIFF' || type == 'AIFC'
-        || type == 'aiff' || type == 'aifc';
+
+    // (NB: written as hex to avoid four-char-constant warnings)
+    return type == 0x41494646 /* AIFF */ || type == 0x41494643 /* AIFC */
+        || type == 0x61696666 /* aiff */ || type == 0x61696663 /* aifc */;
 }
 #endif
 

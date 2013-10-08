@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -778,27 +777,37 @@ MidiMessage MidiMessage::timeSignatureMetaEvent (const int numerator, const int 
         ++powerOfTwo;
     }
 
-    const uint8 d[] = { 0xff, 0x58, 0x04, (uint8) numerator,
-                        (uint8) powerOfTwo, 1, 96 };
-
+    const uint8 d[] = { 0xff, 0x58, 0x04, (uint8) numerator, (uint8) powerOfTwo, 1, 96 };
     return MidiMessage (d, 7, 0.0);
 }
 
 MidiMessage MidiMessage::midiChannelMetaEvent (const int channel) noexcept
 {
     const uint8 d[] = { 0xff, 0x20, 0x01, (uint8) jlimit (0, 0xff, channel - 1) };
-
     return MidiMessage (d, 4, 0.0);
 }
 
 bool MidiMessage::isKeySignatureMetaEvent() const noexcept
 {
-    return getMetaEventType() == 89;
+    return getMetaEventType() == 0x59;
 }
 
 int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const noexcept
 {
-    return (int) *getMetaEventData();
+    return (int) getMetaEventData()[0];
+}
+
+bool MidiMessage::isKeySignatureMajorKey() const noexcept
+{
+    return getMetaEventData()[1] == 0;
+}
+
+MidiMessage MidiMessage::keySignatureMetaEvent (int numberOfSharpsOrFlats, bool isMinorKey)
+{
+    jassert (numberOfSharpsOrFlats >= -7 && numberOfSharpsOrFlats <= 7);
+
+    const uint8 d[] = { 0xff, 0x59, 0x02, (uint8) numberOfSharpsOrFlats, isMinorKey ? (uint8) 1 : (uint8) 0 };
+    return MidiMessage (d, 5, 0.0);
 }
 
 MidiMessage MidiMessage::endOfTrack() noexcept

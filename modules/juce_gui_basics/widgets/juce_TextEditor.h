@@ -1,36 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-#define __JUCE_TEXTEDITOR_JUCEHEADER__
-
-#include "../components/juce_Component.h"
-#include "../layout/juce_Viewport.h"
-#include "../menus/juce_PopupMenu.h"
-#include "../keyboard/juce_TextInputTarget.h"
-#include "../keyboard/juce_CaretComponent.h"
+#ifndef JUCE_TEXTEDITOR_H_INCLUDED
+#define JUCE_TEXTEDITOR_H_INCLUDED
 
 
 //==============================================================================
@@ -268,7 +261,7 @@ public:
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
+    void setTextToShowWhenEmpty (const String& text, Colour colourToUse);
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.
@@ -316,7 +309,7 @@ public:
     String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    String getTextInRange (const Range<int>& textRange) const;
+    String getTextInRange (const Range<int>& textRange) const override;
 
     /** Returns true if there are no characters in the editor.
         This is far more efficient than calling getText().isEmpty().
@@ -356,7 +349,7 @@ public:
 
         @see setCaretPosition, getCaretPosition, setHighlightedRegion
     */
-    void insertTextAtCaret (const String& textToInsert);
+    void insertTextAtCaret (const String& textToInsert) override;
 
     /** Deletes all the text from the editor. */
     void clear();
@@ -406,22 +399,22 @@ public:
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle() override;
 
     /** Selects a section of the text. */
-    void setHighlightedRegion (const Range<int>& newSelection);
+    void setHighlightedRegion (const Range<int>& newSelection) override;
 
     /** Returns the range of characters that are selected.
         If nothing is selected, this will return an empty range.
         @see setHighlightedRegion
     */
-    Range<int> getHighlightedRegion() const                   { return selection; }
+    Range<int> getHighlightedRegion() const override            { return selection; }
 
     /** Returns the section of text that is currently selected. */
     String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
-        The co-ordinates are relative to the component's top-left.
+        The coordinates are relative to the component's top-left.
     */
     int getTextIndexAt (int x, int y);
 
@@ -563,7 +556,7 @@ public:
         String allowedCharacters;
         int maxLength;
 
-        String filterNewText (TextEditor&, const String&);
+        String filterNewText (TextEditor&, const String&) override;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LengthAndCharacterRestriction)
     };
@@ -589,39 +582,39 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void paintOverChildren (Graphics&);
+    void paintOverChildren (Graphics&) override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseUp (const MouseEvent&);
+    void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyStateChanged (bool isKeyDown);
+    bool keyStateChanged (bool) override;
     /** @internal */
-    void focusGained (FocusChangeType);
+    void focusGained (FocusChangeType) override;
     /** @internal */
-    void focusLost (FocusChangeType);
+    void focusLost (FocusChangeType) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void enablementChanged();
+    void enablementChanged() override;
     /** @internal */
-    void colourChanged();
+    void colourChanged() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    bool isTextInputActive() const;
+    bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&);
+    void setTemporaryUnderlining (const Array <Range<int> >&) override;
 
 protected:
     //==============================================================================
@@ -695,13 +688,13 @@ private:
 
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);
-    void handleCommandMessage (int);
+    void handleCommandMessage (int) override;
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
-    void insert (const String&, int insertIndex, const Font&, const Colour&, UndoManager*, int newCaretPos);
+    void insert (const String&, int insertIndex, const Font&, const Colour, UndoManager*, int newCaretPos);
     void reinsert (int insertIndex, const Array <UniformTextSection*>&);
-    void remove (const Range<int>& range, UndoManager*, int caretPositionToMoveTo);
+    void remove (Range<int> range, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();
     void updateValueFromText();
@@ -716,7 +709,7 @@ private:
     void updateTextHolderSize();
     float getWordWrapWidth() const;
     void timerCallbackInt();
-    void repaintText (const Range<int>&);
+    void repaintText (Range<int>);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;
@@ -728,4 +721,4 @@ private:
 typedef TextEditor::Listener TextEditorListener;
 
 
-#endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
+#endif   // JUCE_TEXTEDITOR_H_INCLUDED

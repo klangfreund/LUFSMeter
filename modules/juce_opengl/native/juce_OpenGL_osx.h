@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -28,7 +27,9 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixFormat,
-                   void* contextToShare)
+                   void* contextToShare,
+                   bool /*useMultisampling*/)
+        : lastSwapTime (0), minSwapTimeMs (0), underrunCounter (0)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
@@ -133,12 +134,16 @@ public:
     void swapBuffers()
     {
         [renderContext flushBuffer];
+
+        sleepIfRenderingTooFast();
     }
 
     void updateWindowPosition (const Rectangle<int>&) {}
 
     bool setSwapInterval (int numFramesPerSwap)
     {
+        minSwapTimeMs = (numFramesPerSwap * 1000) / 60;
+
         [renderContext setValues: (const GLint*) &numFramesPerSwap
                     forParameter: NSOpenGLCPSwapInterval];
         return true;
@@ -153,9 +158,38 @@ public:
         return numFrames;
     }
 
+    void sleepIfRenderingTooFast()
+    {
+        // When our window is entirely occluded by other windows, the system
+        // fails to correctly implement the swap interval time, so the render
+        // loop spins at full speed, burning CPU. This hack detects when things
+        // are going too fast and slows things down if necessary.
+
+        if (minSwapTimeMs > 0)
+        {
+            const double now = Time::getMillisecondCounterHiRes();
+            const int elapsed = (int) (now - lastSwapTime);
+            lastSwapTime = now;
+
+            if (isPositiveAndBelow (elapsed, minSwapTimeMs - 3))
+            {
+                if (underrunCounter > 3)
+                    Thread::sleep (minSwapTimeMs - elapsed);
+                else
+                    ++underrunCounter;
+            }
+            else
+            {
+                underrunCounter = 0;
+            }
+        }
+    }
+
     NSOpenGLContext* renderContext;
     NSOpenGLView* view;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
+    double lastSwapTime;
+    int minSwapTimeMs, underrunCounter;
 
     //==============================================================================
     struct MouseForwardingNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>

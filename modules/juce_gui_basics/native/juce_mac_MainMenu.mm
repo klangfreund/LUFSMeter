@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -135,7 +134,8 @@ public:
         if (currentModel != nullptr)
             menuNames = currentModel->getMenuBarNames();
 
-        NSMenu* menuBar = [NSApp mainMenu];
+        NSMenu* menuBar = [[NSApp mainMenu] retain];
+
         while ([menuBar numberOfItems] > 1 + menuNames.size())
             [menuBar removeItemAtIndex: [menuBar numberOfItems] - 1];
 
@@ -150,6 +150,8 @@ public:
             else
                 updateTopLevelMenu ([menuBar itemAtIndex: 1 + i], menu, menuNames[i], menuId, i);
         }
+
+        [menuBar release];
     }
 
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
@@ -223,7 +225,10 @@ public:
 
                 if (recent->recentItem != nil)
                 {
-                    [menuToAddTo addItem: [recent->recentItem copyWithZone: nil]];
+                    if (NSMenu* parent = [recent->recentItem menu])
+                        [parent removeItem: recent->recentItem];
+
+                    [menuToAddTo addItem: recent->recentItem];
                     return;
                 }
             }
@@ -256,7 +261,7 @@ public:
 
             if (iter.commandManager != nullptr)
             {
-                const Array <KeyPress> keyPresses (iter.commandManager->getKeyMappings()
+                const Array<KeyPress> keyPresses (iter.commandManager->getKeyMappings()
                                                      ->getKeyPressesAssignedToCommand (iter.itemId));
 
                 if (keyPresses.size() > 0)
@@ -423,7 +428,7 @@ private:
         [menu release];
     }
 
-    static unsigned int juceModsToNSMods (const ModifierKeys& mods)
+    static unsigned int juceModsToNSMods (const ModifierKeys mods)
     {
         unsigned int m = 0;
         if (mods.isShiftDown())    m |= NSShiftKeyMask;
@@ -438,7 +443,7 @@ private:
     public:
         AsyncMenuUpdater() {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->menuBarItemsChanged (nullptr);
@@ -455,7 +460,7 @@ private:
             : commandId (commandId_), topLevelIndex (topLevelIndex_)
         {}
 
-        void messageCallback()
+        void messageCallback() override
         {
             if (instance != nullptr)
                 instance->invokeDirectly (commandId, topLevelIndex);
@@ -545,6 +550,9 @@ public:
         if (const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = new PopupMenu (*appleMenu);
 
+        if (JuceMainMenuHandler::instance != nullptr)
+            oldRecentItems = JuceMainMenuHandler::instance->recentItemsMenuName;
+
         MenuBarModel::setMacMainMenu (nullptr);
 
         NSMenu* menu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Edit")];
@@ -576,12 +584,13 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu, oldRecentItems);
     }
 
 private:
     MenuBarModel* oldMenu;
     ScopedPointer<PopupMenu> oldAppleMenu;
+    String oldRecentItems;
 
     // The OS view already plays an alert when clicking outside
     // the modal comp, so this override avoids adding extra
@@ -593,7 +602,7 @@ private:
     {
     public:
         SilentDummyModalComp() {}
-        void inputAttemptWhenModal() {}
+        void inputAttemptWhenModal() override {}
     };
 
     SilentDummyModalComp dummyModalComponent;
@@ -653,9 +662,9 @@ namespace MainMenuHelpers
     static void rebuildMainMenu (const PopupMenu* extraItems)
     {
         // this can't be used in a plugin!
-        jassert (JUCEApplication::isStandaloneApp());
+        jassert (JUCEApplicationBase::isStandaloneApp());
 
-        if (JUCEApplication* app = JUCEApplication::getInstance())
+        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
         {
             JUCE_AUTORELEASEPOOL
             {
@@ -738,8 +747,4 @@ void juce_initialiseMacMainMenu()
 
     if (JuceMainMenuHandler::instance == nullptr)
         MainMenuHelpers::rebuildMainMenu (nullptr);
-
-    // Forcing a rebuild of the menus like this seems necessary to kick the native
-    // recent-files list into action.. (not sure precisely why though)
-    TemporaryMainMenuWithStandardCommands dummy; (void) dummy;
 }

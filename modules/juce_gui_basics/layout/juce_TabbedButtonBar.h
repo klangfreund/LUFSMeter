@@ -1,32 +1,30 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-#define __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+#ifndef JUCE_TABBEDBUTTONBAR_H_INCLUDED
+#define JUCE_TABBEDBUTTONBAR_H_INCLUDED
 
-#include "../buttons/juce_Button.h"
 class TabbedButtonBar;
 
 
@@ -107,15 +105,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
-    void clicked (const ModifierKeys&);
+    void clicked (const ModifierKeys&) override;
     /** @internal */
-    bool hitTest (int x, int y);
+    bool hitTest (int x, int y) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void childBoundsChanged (Component*);
+    void childBoundsChanged (Component*) override;
 
 protected:
     friend class TabbedButtonBar;
@@ -207,7 +205,7 @@ public:
         If this is the first tab added, it'll also be automatically selected.
     */
     void addTab (const String& tabName,
-                 const Colour& tabBackgroundColour,
+                 Colour tabBackgroundColour,
                  int insertIndex);
 
     /** Changes the name of one of the tabs. */
@@ -274,7 +272,7 @@ public:
     /** Changes the background colour of a tab.
         @see addTab, getTabBackgroundColour
     */
-    void setTabBackgroundColour (int tabIndex, const Colour& newColour);
+    void setTabBackgroundColour (int tabIndex, Colour newColour);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
@@ -297,9 +295,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void resized();
+    void paint (Graphics&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void resized() override;
+    /** @internal */
+    void lookAndFeelChanged() override;
 
 protected:
     //==============================================================================
@@ -327,7 +327,7 @@ private:
 
     class BehindFrontTabComp;
     friend class BehindFrontTabComp;
-    friend class ScopedPointer<BehindFrontTabComp>;
+    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     ScopedPointer<BehindFrontTabComp> behindFrontTab;
     ScopedPointer<Button> extraTabsButton;
 
@@ -338,4 +338,4 @@ private:
 };
 
 
-#endif   // __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+#endif   // JUCE_TABBEDBUTTONBAR_H_INCLUDED

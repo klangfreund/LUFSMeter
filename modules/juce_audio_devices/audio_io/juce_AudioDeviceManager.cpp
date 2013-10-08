@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -52,32 +51,32 @@ public:
     CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
 
 private:
-    void audioDeviceIOCallback (const float** ins, int numIns, float** outs, int numOuts, int numSamples)
+    void audioDeviceIOCallback (const float** ins, int numIns, float** outs, int numOuts, int numSamples) override
     {
         owner.audioDeviceIOCallbackInt (ins, numIns, outs, numOuts, numSamples);
     }
 
-    void audioDeviceAboutToStart (AudioIODevice* device)
+    void audioDeviceAboutToStart (AudioIODevice* device) override
     {
         owner.audioDeviceAboutToStartInt (device);
     }
 
-    void audioDeviceStopped()
+    void audioDeviceStopped() override
     {
         owner.audioDeviceStoppedInt();
     }
 
-    void audioDeviceError (const String& message)
+    void audioDeviceError (const String& message) override
     {
         owner.audioDeviceErrorInt (message);
     }
 
-    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message)
+    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) override
     {
         owner.handleIncomingMidiMessageInt (source, message);
     }
 
-    void audioDeviceListChanged()
+    void audioDeviceListChanged() override
     {
         owner.audioDeviceListChanged();
     }
@@ -95,6 +94,7 @@ AudioDeviceManager::AudioDeviceManager()
       listNeedsScanning (true),
       useInputNames (false),
       inputLevel (0),
+      testSoundPosition (0),
       tempBuffer (2, 2),
       cpuUsageMs (0),
       timeToCpuScale (0)
@@ -137,9 +137,9 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
-        currentSetup.sampleRate = currentAudioDevice->getCurrentSampleRate();
-        currentSetup.bufferSize = currentAudioDevice->getCurrentBufferSizeSamples();
-        currentSetup.inputChannels = currentAudioDevice->getActiveInputChannels();
+        currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
+        currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
+        currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
         currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
     }
 
@@ -886,8 +886,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 
         {
             const ScopedLock sl (audioCallbackLock);
-            oldCallbacks = callbacks;
-            callbacks.clear();
+            oldCallbacks.swapWith (callbacks);
         }
 
         if (currentAudioDevice != nullptr)
@@ -906,7 +905,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 
         {
             const ScopedLock sl (audioCallbackLock);
-            callbacks = oldCallbacks;
+            oldCallbacks.swapWith (callbacks);
         }
 
         updateXml();

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -330,9 +329,9 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         tabbedComponent.addTab ("Resources", tabColour, new ResourceEditorPanel (*document), true);
 
-        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument());
-        codeEditor->setEditor (new CppCodeEditorComponent (document->getCppFile(),
-                                                           document->getCppDocument().getCodeDocument()));
+        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument(),
+                                                             new CppCodeEditorComponent (document->getCppFile(),
+                                                                                         document->getCppDocument().getCodeDocument()));
 
         tabbedComponent.addTab ("Code", tabColour, codeEditor, true);
 
@@ -1076,7 +1075,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 {
     if (key.isKeyCode (KeyPress::deleteKey) || key.isKeyCode (KeyPress::backspaceKey))
     {
-        commandManager->invokeDirectly (StandardApplicationCommandIDs::del, true);
+        IntrojucerApp::getCommandManager().invokeDirectly (StandardApplicationCommandIDs::del, true);
         return true;
     }
 
@@ -1086,7 +1085,7 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 JucerDocumentEditor* JucerDocumentEditor::getActiveDocumentHolder()
 {
     ApplicationCommandInfo info (0);
-    ApplicationCommandTarget* target = commandManager->getTargetForCommand (JucerCommandIDs::editCompLayout, info);
+    ApplicationCommandTarget* target = IntrojucerApp::getCommandManager().getTargetForCommand (JucerCommandIDs::editCompLayout, info);
 
     return dynamic_cast <JucerDocumentEditor*> (target);
 }
@@ -1104,6 +1103,8 @@ const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
 void createGUIEditorMenu (PopupMenu& menu)
 {
+    ApplicationCommandManager* commandManager = &IntrojucerApp::getCommandManager();
+
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
     menu.addSeparator();
@@ -1159,6 +1160,9 @@ void createGUIEditorMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, JucerCommandIDs::zoomNormal);
 
     menu.addSeparator();
+    menu.addCommandItem (commandManager, JucerCommandIDs::test);
+
+    menu.addSeparator();
 
     {
         PopupMenu overlays;
@@ -1191,5 +1195,5 @@ void handleGUIEditorMenuCommand (int menuItemID)
 void registerGUIEditorCommands()
 {
     JucerDocumentEditor dh (nullptr);
-    commandManager->registerAllCommandsForTarget (&dh);
+    IntrojucerApp::getCommandManager().registerAllCommandsForTarget (&dh);
 }

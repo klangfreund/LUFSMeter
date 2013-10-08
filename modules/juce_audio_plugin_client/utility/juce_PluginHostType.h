@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -66,7 +65,9 @@ public:
         FruityLoops,
         WaveBurner,
         DigitalPerformer,
-        StudioOne
+        StudioOne,
+        MergingPyramix,
+        VBVSTScanner
     };
 
     HostType type;
@@ -89,6 +90,8 @@ public:
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isReaper() const noexcept           { return type == Reaper; }
     bool isStudioOne() const noexcept        { return type == StudioOne; }
+    bool isPyramix() const noexcept          { return type == MergingPyramix; }
+    bool isVBVSTScanner() const noexcept     { return type == VBVSTScanner; }
 
     //==============================================================================
     static String getHostPath()
@@ -155,7 +158,8 @@ private:
         if (hostFilename.startsWith         ("FL"))                return FruityLoops;
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
         if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
-
+        if (hostFilename.containsIgnoreCase ("VST_Scanner"))       return VBVSTScanner;
+        if (hostPath.containsIgnoreCase     ("Merging Technologies")) return MergingPyramix;
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
        #else

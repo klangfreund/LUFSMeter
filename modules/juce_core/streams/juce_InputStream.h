@@ -1,33 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-#define __JUCE_INPUTSTREAM_JUCEHEADER__
-
-#include "../text/juce_String.h"
-class MemoryBlock;
+#ifndef JUCE_INPUTSTREAM_H_INCLUDED
+#define JUCE_INPUTSTREAM_H_INCLUDED
 
 
 //==============================================================================
@@ -83,41 +83,28 @@ public:
     virtual int read (void* destBuffer, int maxBytesToRead) = 0;
 
     /** Reads a byte from the stream.
-
         If the stream is exhausted, this will return zero.
-
         @see OutputStream::writeByte
     */
     virtual char readByte();
 
     /** Reads a boolean from the stream.
-
-        The bool is encoded as a single byte - 1 for true, 0 for false.
-
+        The bool is encoded as a single byte - non-zero for true, 0 for false.
         If the stream is exhausted, this will return false.
-
         @see OutputStream::writeBool
     */
     virtual bool readBool();
 
     /** Reads two bytes from the stream as a little-endian 16-bit value.
-
-        If the next two bytes read are byte1 and byte2, this returns
-        (byte1 | (byte2 << 8)).
-
+        If the next two bytes read are byte1 and byte2, this returns (byte1 | (byte2 << 8)).
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeShort, readShortBigEndian
     */
     virtual short readShort();
 
     /** Reads two bytes from the stream as a little-endian 16-bit value.
-
-        If the next two bytes read are byte1 and byte2, this returns
-        (byte2 | (byte1 << 8)).
-
+        If the next two bytes read are byte1 and byte2, this returns (byte2 | (byte1 << 8)).
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeShortBigEndian, readShort
     */
     virtual short readShortBigEndian();
@@ -167,51 +154,36 @@ public:
     virtual int64 readInt64BigEndian();
 
     /** Reads four bytes as a 32-bit floating point value.
-
         The raw 32-bit encoding of the float is read from the stream as a little-endian int.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeFloat, readDouble
     */
     virtual float readFloat();
 
     /** Reads four bytes as a 32-bit floating point value.
-
         The raw 32-bit encoding of the float is read from the stream as a big-endian int.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeFloatBigEndian, readDoubleBigEndian
     */
     virtual float readFloatBigEndian();
 
     /** Reads eight bytes as a 64-bit floating point value.
-
         The raw 64-bit encoding of the double is read from the stream as a little-endian int64.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeDouble, readFloat
     */
     virtual double readDouble();
 
     /** Reads eight bytes as a 64-bit floating point value.
-
         The raw 64-bit encoding of the double is read from the stream as a big-endian int64.
-
         If the stream is exhausted partway through reading the bytes, this will return zero.
-
         @see OutputStream::writeDoubleBigEndian, readFloatBigEndian
     */
     virtual double readDoubleBigEndian();
 
     /** Reads an encoded 32-bit number from the stream using a space-saving compressed format.
-
         For small values, this is more space-efficient than using readInt() and OutputStream::writeInt()
-
         The format used is: number of significant bytes + up to 4 bytes in little-endian order.
-
         @see OutputStream::writeCompressedInt()
     */
     virtual int readCompressedInt();
@@ -256,7 +228,6 @@ public:
 
     //==============================================================================
     /** Returns the offset of the next byte that will be read from the stream.
-
         @see setPosition
     */
     virtual int64 getPosition() = 0;
@@ -292,4 +263,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream)
 };
 
-#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
+#endif   // JUCE_INPUTSTREAM_H_INCLUDED

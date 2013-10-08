@@ -1,29 +1,28 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-MultiDocumentPanelWindow::MultiDocumentPanelWindow (const Colour& backgroundColour)
+MultiDocumentPanelWindow::MultiDocumentPanelWindow (Colour backgroundColour)
     : DocumentWindow (String::empty, backgroundColour,
                       DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
 {
@@ -157,7 +156,7 @@ void MultiDocumentPanel::addWindow (Component* component)
 }
 
 bool MultiDocumentPanel::addDocument (Component* const component,
-                                      const Colour& docColour,
+                                      Colour docColour,
                                       const bool deleteWhenRemoved)
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
@@ -296,6 +295,11 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         }
 
         resized();
+
+        // This ensures that the active tab is painted properly when a tab is closed!
+        if (Component* activeComponent = getActiveDocument())
+            setActiveDocument (activeComponent);
+
         activeDocumentChanged();
     }
     else
@@ -331,6 +335,8 @@ Component* MultiDocumentPanel::getActiveDocument() const noexcept
 
 void MultiDocumentPanel::setActiveDocument (Component* component)
 {
+    jassert (component != nullptr);
+
     if (mode == FloatingWindows)
     {
         component = getContainerComp (component);
@@ -391,11 +397,12 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+                ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
+
+                if (dw != nullptr)
                 {
                     dw->getContentComponent()->getProperties().set ("mdiDocumentPos_", dw->getWindowStateAsString());
                     dw->clearContentComponent();
-                    delete dw;
                 }
             }
         }
@@ -416,7 +423,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
     }
 }
 
-void MultiDocumentPanel::setBackgroundColour (const Colour& newBackgroundColour)
+void MultiDocumentPanel::setBackgroundColour (Colour newBackgroundColour)
 {
     if (backgroundColour != newBackgroundColour)
     {

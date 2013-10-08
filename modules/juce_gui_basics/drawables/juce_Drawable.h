@@ -1,36 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
-#define __JUCE_DRAWABLE_JUCEHEADER__
-
-#include "../components/juce_Component.h"
-#include "../positioning/juce_RelativeCoordinate.h"
-#include "../positioning/juce_RelativeCoordinatePositioner.h"
-#include "../layout/juce_ComponentBuilder.h"
-class DrawableComposite;
+#ifndef JUCE_DRAWABLE_H_INCLUDED
+#define JUCE_DRAWABLE_H_INCLUDED
 
 
 //==============================================================================
@@ -74,7 +67,7 @@ public:
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
-        The co-ordinates passed-in are used to translate the object relative to its own
+        The coordinates passed-in are used to translate the object relative to its own
         origin before drawing it - this is basically a quick way of saying:
 
         @code
@@ -105,7 +98,7 @@ public:
     */
     void drawWithin (Graphics& g,
                      const Rectangle<float>& destArea,
-                     const RectanglePlacement& placement,
+                     RectanglePlacement placement,
                      float opacity) const;
 
 
@@ -113,12 +106,12 @@ public:
     /** Resets any transformations on this drawable, and positions its origin within
         its parent component.
     */
-    void setOriginWithOriginalSize (const Point<float>& originWithinParent);
+    void setOriginWithOriginalSize (Point<float> originWithinParent);
 
     /** Sets a transform for this drawable that will position it within the specified
         area of its parent component.
     */
-    void setTransformToFit (const Rectangle<float>& areaInParent, const RectanglePlacement& placement);
+    void setTransformToFit (const Rectangle<float>& areaInParent, RectanglePlacement placement);
 
     /** Returns the DrawableComposite that contains this object, if there is one. */
     DrawableComposite* getParent() const;
@@ -212,7 +205,7 @@ protected:
     /** @internal */
     void transformContextToCorrectOrigin (Graphics&);
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     void setBoundsToEnclose (const Rectangle<float>&);
 
@@ -251,11 +244,11 @@ protected:
   #endif
 
 private:
-    void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
+    void nonConstDraw (Graphics&, float opacity, const AffineTransform&);
 
     Drawable& operator= (const Drawable&);
     JUCE_LEAK_DETECTOR (Drawable)
 };
 
 
-#endif   // __JUCE_DRAWABLE_JUCEHEADER__
+#endif   // JUCE_DRAWABLE_H_INCLUDED

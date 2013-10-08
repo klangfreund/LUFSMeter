@@ -1,33 +1,30 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
-#define __JUCE_SCROLLBAR_JUCEHEADER__
+#ifndef JUCE_SCROLLBAR_H_INCLUDED
+#define JUCE_SCROLLBAR_H_INCLUDED
 
-#include "../buttons/juce_Button.h"
-class Viewport;
 
 //==============================================================================
 /**
@@ -99,7 +96,7 @@ public:
 
         @see setCurrentRange
     */
-    void setRangeLimits (const Range<double>& newRangeLimit,
+    void setRangeLimits (Range<double> newRangeLimit,
                          NotificationType notification = sendNotificationAsync);
 
     /** Sets the minimum and maximum values that the bar will move between.
@@ -145,7 +142,7 @@ public:
         @returns true if the range was changed, or false if nothing was changed.
         @see getCurrentRange. setCurrentRangeStart
     */
-    bool setCurrentRange (const Range<double>& newRange,
+    bool setCurrentRange (Range<double> newRange,
                           NotificationType notification = sendNotificationAsync);
 
     /** Changes the position of the scrollbar's 'thumb'.
@@ -297,21 +294,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress&);
+    bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    void mouseDown (const MouseEvent&);
+    void mouseDown (const MouseEvent&) override;
     /** @internal */
-    void mouseDrag (const MouseEvent&);
+    void mouseDrag (const MouseEvent&) override;
     /** @internal */
-    void mouseUp   (const MouseEvent&);
+    void mouseUp   (const MouseEvent&) override;
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
 
 private:
     //==============================================================================
@@ -322,13 +319,13 @@ private:
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
     bool vertical, isDraggingThumb, autohides;
     class ScrollbarButton;
-    friend class ScopedPointer<ScrollbarButton>;
+    friend struct ContainerDeletePolicy<ScrollbarButton>;
     ScopedPointer<ScrollbarButton> upButton, downButton;
-    ListenerList <Listener> listeners;
+    ListenerList<Listener> listeners;
 
-    void handleAsyncUpdate();
+    void handleAsyncUpdate() override;
     void updateThumbPosition();
-    void timerCallback();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar)
 };
@@ -337,4 +334,4 @@ private:
 typedef ScrollBar::Listener ScrollBarListener;
 
 
-#endif   // __JUCE_SCROLLBAR_JUCEHEADER__
+#endif   // JUCE_SCROLLBAR_H_INCLUDED

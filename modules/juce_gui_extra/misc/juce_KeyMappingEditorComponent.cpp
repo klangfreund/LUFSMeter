@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -36,11 +35,11 @@ public:
         setWantsKeyboardFocus (false);
         setTriggeredOnMouseDown (keyNum >= 0);
 
-        setTooltip (keyIndex < 0 ? TRANS("adds a new key-mapping")
-                                 : TRANS("click to change this key-mapping"));
+        setTooltip (keyIndex < 0 ? TRANS("Adds a new key-mapping")
+                                 : TRANS("Click to change this key-mapping"));
     }
 
-    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/)
+    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
     {
         getLookAndFeel().drawKeymapChangeButton (g, getWidth(), getHeight(), *this,
                                                  keyNum >= 0 ? getName() : String::empty);
@@ -59,15 +58,15 @@ public:
         }
     }
 
-    void clicked()
+    void clicked() override
     {
         if (keyNum >= 0)
         {
             // existing key clicked..
             PopupMenu m;
-            m.addItem (1, TRANS("change this key-mapping"));
+            m.addItem (1, TRANS("Change this key-mapping"));
             m.addSeparator();
-            m.addItem (2, TRANS("remove this key-mapping"));
+            m.addItem (2, TRANS("Remove this key-mapping"));
 
             m.showMenuAsync (PopupMenu::Options(),
                              ModalCallbackFunction::forComponent (menuCallback, this));
@@ -107,7 +106,7 @@ public:
             grabKeyboardFocus();
         }
 
-        bool keyPressed (const KeyPress& key)
+        bool keyPressed (const KeyPress& key) override
         {
             lastPress = key;
             String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
@@ -124,7 +123,7 @@ public:
             return true;
         }
 
-        bool keyStateChanged (bool)
+        bool keyStateChanged (bool) override
         {
             return true;
         }
@@ -212,7 +211,7 @@ public:
 
         const bool isReadOnly = owner.isCommandReadOnly (commandID);
 
-        const Array <KeyPress> keyPresses (owner.getMappings().getKeyPressesAssignedToCommand (commandID));
+        const Array<KeyPress> keyPresses (owner.getMappings().getKeyPressesAssignedToCommand (commandID));
 
         for (int i = 0; i < jmin ((int) maxNumAssignments, keyPresses.size()); ++i)
             addKeyPressButton (owner.getDescriptionForKeyPress (keyPresses.getReference (i)), i, isReadOnly);
@@ -230,17 +229,17 @@ public:
         addChildComponent (b);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
         g.setColour (findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawFittedText (owner.getCommandManager().getNameOfCommand (commandID),
+        g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
                           Justification::centredLeft, true);
     }
 
-    void resized()
+    void resized() override
     {
         int x = getWidth() - 4;
 
@@ -297,27 +296,26 @@ public:
     bool mightContainSubItems()                 { return true; }
     int getItemHeight() const                   { return 28; }
 
-    void paintItem (Graphics& g, int width, int height)
+    void paintItem (Graphics& g, int width, int height) override
     {
         g.setFont (Font (height * 0.6f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawText (categoryName,
-                    2, 0, width - 2, height,
+        g.drawText (TRANS (categoryName), 2, 0, width - 2, height,
                     Justification::centredLeft, true);
     }
 
-    void itemOpennessChanged (bool isNowOpen)
+    void itemOpennessChanged (bool isNowOpen) override
     {
         if (isNowOpen)
         {
             if (getNumSubItems() == 0)
             {
-                const Array <CommandID> commands (owner.getCommandManager().getCommandsInCategory (categoryName));
+                const Array<CommandID> commands (owner.getCommandManager().getCommandsInCategory (categoryName));
 
                 for (int i = 0; i < commands.size(); ++i)
-                    if (owner.shouldCommandBeIncluded (commands[i]))
-                        addSubItem (new MappingItem (owner, commands[i]));
+                    if (owner.shouldCommandBeIncluded (commands.getUnchecked(i)))
+                        addSubItem (new MappingItem (owner, commands.getUnchecked(i)));
             }
         }
         else
@@ -339,8 +337,7 @@ class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
                                                   private ChangeListener
 {
 public:
-    TopLevelItem (KeyMappingEditorComponent& kec)
-        : owner (kec)
+    TopLevelItem (KeyMappingEditorComponent& kec)   : owner (kec)
     {
         setLinesDrawnForSubItems (false);
         owner.getMappings().addChangeListener (this);
@@ -354,7 +351,7 @@ public:
     bool mightContainSubItems()             { return true; }
     String getUniqueName() const            { return "keys"; }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         const OpennessRestorer opennessRestorer (*this);
         clearSubItems();
@@ -363,11 +360,11 @@ public:
 
         for (int i = 0; i < categories.size(); ++i)
         {
-            const Array <CommandID> commands (owner.getCommandManager().getCommandsInCategory (categories[i]));
+            const Array<CommandID> commands (owner.getCommandManager().getCommandsInCategory (categories[i]));
             int count = 0;
 
             for (int j = 0; j < commands.size(); ++j)
-                if (owner.shouldCommandBeIncluded (commands[j]))
+                if (owner.shouldCommandBeIncluded (commands.getUnchecked(j)))
                     ++count;
 
             if (count > 0)
@@ -381,7 +378,7 @@ public:
             owner->getMappings().resetToDefaultMappings();
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button*) override
     {
         AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                       TRANS("Reset to defaults"),
@@ -424,8 +421,8 @@ KeyMappingEditorComponent::~KeyMappingEditorComponent()
 }
 
 //==============================================================================
-void KeyMappingEditorComponent::setColours (const Colour& mainBackground,
-                                            const Colour& textColour)
+void KeyMappingEditorComponent::setColours (Colour mainBackground,
+                                            Colour textColour)
 {
     setColour (backgroundColourId, mainBackground);
     setColour (textColourId, textColour);

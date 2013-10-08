@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -263,7 +262,7 @@ void GlyphArrangement::addJustifiedText (const Font& font,
                                          const String& text,
                                          float x, float y,
                                          const float maxLineWidth,
-                                         const Justification& horizontalLayout)
+                                         Justification horizontalLayout)
 {
     int lineStartIndex = glyphs.size();
     addLineOfText (font, text, x, y);
@@ -345,7 +344,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       const String& text,
                                       const float x, const float y,
                                       const float width, const float height,
-                                      const Justification& layout,
+                                      Justification layout,
                                       int maximumLines,
                                       const float minimumHorizontalScale)
 {
@@ -542,7 +541,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num, const float d
 }
 
 int GlyphArrangement::fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                                        const Justification& justification, float minimumHorizontalScale)
+                                        Justification justification, float minimumHorizontalScale)
 {
     int numDeleted = 0;
     const float lineStartX = glyphs.getReference (start).getLeft();
@@ -612,7 +611,7 @@ Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num, cons
 
 void GlyphArrangement::justifyGlyphs (const int startIndex, const int num,
                                       const float x, const float y, const float width, const float height,
-                                      const Justification& justification)
+                                      Justification justification)
 {
     jassert (num >= 0 && startIndex >= 0);
 

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -45,33 +44,29 @@ public:
         [view release];
     }
 
-    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized)
+    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized) override
     {
         ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
 
         // The ComponentMovementWatcher version of this method avoids calling
         // us when the top-level comp is resized, but for an NSView we need to know this
-        // because with inverted co-ords, we need to update the position even if the
+        // because with inverted coordinates, we need to update the position even if the
         // top-left pos hasn't changed
         if (comp.isOnDesktop() && wasResized)
             componentMovedOrResized (wasMoved, wasResized);
     }
 
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
-        Component* const topComp = owner.getTopLevelComponent();
-
-        if (topComp->getPeer() != nullptr)
+        if (ComponentPeer* const peer = owner.getTopLevelComponent()->getPeer())
         {
-            const Rectangle<int> area (topComp->getLocalArea (&owner, owner.getLocalBounds()));
-
-            NSRect r = NSMakeRect ((float) area.getX(), (float) area.getY(), (float) area.getWidth(), (float) area.getHeight());
+            NSRect r = makeNSRect (peer->getAreaCoveredBy (owner));
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
             [view setFrame: r];
         }
     }
 
-    void componentPeerChanged()
+    void componentPeerChanged() override
     {
         ComponentPeer* const peer = owner.getPeer();
 
@@ -91,7 +86,7 @@ public:
         [view setHidden: ! owner.isShowing()];
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged() override
     {
         componentPeerChanged();
     }

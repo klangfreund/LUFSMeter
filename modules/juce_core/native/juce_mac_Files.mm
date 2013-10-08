@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -98,7 +101,7 @@ namespace FileHelpers
     }
 
    #if JUCE_IOS
-    String getIOSSystemLocation (NSSearchPathDirectory type)
+    static String getIOSSystemLocation (NSSearchPathDirectory type)
     {
         return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
                                 objectAtIndex: 0]);
@@ -202,7 +205,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             {
                 File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
                 tmp.createDirectory();
-                return tmp.getFullPathName();
+                return File (tmp.getFullPathName());
             }
           #endif
             case userMusicDirectory:                resultPath = "~/Music"; break;
@@ -210,6 +213,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             case userPicturesDirectory:             resultPath = "~/Pictures"; break;
             case userApplicationDataDirectory:      resultPath = "~/Library"; break;
             case commonApplicationDataDirectory:    resultPath = "/Library"; break;
+            case commonDocumentsDirectory:          resultPath = "/Users/Shared"; break;
             case globalApplicationsDirectory:       resultPath = "/Applications"; break;
 
             case invokedExecutableFile:
@@ -241,7 +245,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 buffer.calloc (size + 8);
 
                 _NSGetExecutablePath (buffer.getData(), &size);
-                return String::fromUTF8 (buffer, (int) size);
+                return File (String::fromUTF8 (buffer, (int) size));
             }
 
             default:
@@ -388,45 +392,49 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool Process::openDocument (const String& fileName, const String& parameters)
+bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
 {
-  #if JUCE_IOS
-    return [[UIApplication sharedApplication] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
-  #else
     JUCE_AUTORELEASEPOOL
     {
-        if (parameters.isEmpty())
-        {
-            return [[NSWorkspace sharedWorkspace] openFile: juceStringToNS (fileName)]
-                || [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
-        }
+        NSURL* filenameAsURL = [NSURL URLWithString: juceStringToNS (fileName)];
 
-        bool ok = false;
+      #if JUCE_IOS
+        (void) parameters;
+        return [[UIApplication sharedApplication] openURL: filenameAsURL];
+      #else
+        NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
+
+        if (parameters.isEmpty())
+            return [workspace openFile: juceStringToNS (fileName)]
+                || [workspace openURL: filenameAsURL];
+
         const File file (fileName);
 
         if (file.isBundle())
         {
-            NSMutableArray* urls = [NSMutableArray array];
+            StringArray params;
+            params.addTokens (parameters, true);
 
-            StringArray docs;
-            docs.addTokens (parameters, true);
-            for (int i = 0; i < docs.size(); ++i)
-                [urls addObject: juceStringToNS (docs[i])];
+            NSMutableArray* paramArray = [[[NSMutableArray alloc] init] autorelease];
+            for (int i = 0; i < params.size(); ++i)
+                [paramArray addObject: juceStringToNS (params[i])];
 
-            ok = [[NSWorkspace sharedWorkspace] openURLs: urls
-                                 withAppBundleIdentifier: [[NSBundle bundleWithPath: juceStringToNS (fileName)] bundleIdentifier]
-                                                 options: 0
-                          additionalEventParamDescriptor: nil
-                                       launchIdentifiers: nil];
+            NSMutableDictionary* dict = [[[NSMutableDictionary alloc] init] autorelease];
+            [dict setObject: paramArray
+                     forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
+
+            return [workspace launchApplicationAtURL: filenameAsURL
+                                             options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
+                                       configuration: dict
+                                               error: nil];
         }
-        else if (file.exists())
-        {
-            ok = FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
-        }
 
-        return ok;
+        if (file.exists())
+            return FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
+
+        return false;
+      #endif
     }
-  #endif
 }
 
 void File::revealToUser() const

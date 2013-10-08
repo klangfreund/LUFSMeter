@@ -1,30 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
 
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-#define __JUCE_STANDARDHEADER_JUCEHEADER__
+#ifndef JUCE_STANDARDHEADER_H_INCLUDED
+#define JUCE_STANDARDHEADER_H_INCLUDED
 
 //==============================================================================
 /** Current JUCE version number.
@@ -32,8 +35,8 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      2
-#define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        40
+#define JUCE_MINOR_VERSION      1
+#define JUCE_BUILDNUMBER        5
 
 /** Current Juce version number.
 
@@ -47,7 +50,6 @@
 
 
 //==============================================================================
-#include "juce_TargetPlatform.h"  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
 #include "juce_PlatformDefs.h"
 
 //==============================================================================
@@ -69,6 +71,7 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #if JUCE_USE_INTRINSICS
  #include <intrin.h>
@@ -151,18 +154,4 @@
  #define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
 #endif
 
-//==============================================================================
-// Now include some common headers...
-namespace juce
-{
-    extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
-    extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
-
-    #include "../memory/juce_Memory.h"
-    #include "../maths/juce_MathsFunctions.h"
-    #include "../memory/juce_ByteOrder.h"
-    #include "../logging/juce_Logger.h"
-    #include "../memory/juce_LeakedObjectDetector.h"
-}
-
-#endif   // __JUCE_STANDARDHEADER_JUCEHEADER__
+#endif   // JUCE_STANDARDHEADER_H_INCLUDED

@@ -1,24 +1,27 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the juce_core module of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission to use, copy, modify, and/or distribute this software for any purpose with
+   or without fee is hereby granted, provided that the above copyright notice and this
+   permission notice appear in all copies.
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   ------------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------------
+   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
+   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
+   using any other modules, be sure to check that you also comply with their license.
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   For more details, visit www.juce.com
 
   ==============================================================================
 */
@@ -50,12 +53,17 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 //==============================================================================
-bool Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                        const String& emailSubject,
-                                        const String& bodyText,
-                                        const StringArray& filesToAttach)
+bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
+                                                      const String& emailSubject,
+                                                      const String& bodyText,
+                                                      const StringArray& filesToAttach)
 {
   #if JUCE_IOS
+    (void) targetEmailAddress;
+    (void) emailSubject;
+    (void) bodyText;
+    (void) filesToAttach;
+
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
     return false;
@@ -223,7 +231,7 @@ public:
         signalThreadShouldExit();
     }
 
-    void run()
+    void run() override
     {
         connection = [[NSURLConnection alloc] initWithRequest: request
                                                      delegate: delegate];
@@ -247,18 +255,19 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass <NSObject>
+    struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass <NSObject> ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
         {
-            addIvar <URLConnectionState*> ("state");
+            addIvar<URLConnectionState*> ("state");
 
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,         "v@:@@");
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError,           "v@:@@");
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData,             "v@:@@");
+            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
+            addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
+            addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
             addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData,  "v@:@iii");
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading, "v@:@");
+                                                                   connectionDidSendBodyData,     "v@:@iii");
+            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
+            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@");
 
             registerClass();
         }
@@ -280,6 +289,11 @@ private:
         static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
         {
             getState (self)->didReceiveData (newData);
+        }
+
+        static NSURLRequest* willSendRequest (id, SEL, NSURLConnection*, NSURLRequest* request, NSURLResponse*)
+        {
+            return request;
         }
 
         static void connectionDidSendBodyData (id self, SEL, NSURLConnection*, NSInteger, NSInteger totalBytesWritten, NSInteger totalBytesExpected)
@@ -314,9 +328,8 @@ public:
             if (responseHeaders != nullptr && connection != nullptr && connection->headers != nil)
             {
                 NSEnumerator* enumerator = [connection->headers keyEnumerator];
-                NSString* key;
 
-                while ((key = [enumerator nextObject]) != nil)
+                while (NSString* key = [enumerator nextObject])
                     responseHeaders->set (nsStringToJuce (key),
                                           nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
             }
@@ -324,12 +337,12 @@ public:
     }
 
     //==============================================================================
-    bool isError() const        { return connection == nullptr; }
-    int64 getTotalLength()      { return connection == nullptr ? -1 : connection->contentLength; }
-    bool isExhausted()          { return finished; }
-    int64 getPosition()         { return position; }
+    bool isError() const                { return connection == nullptr; }
+    int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
+    bool isExhausted() override         { return finished; }
+    int64 getPosition() override        { return position; }
 
-    int read (void* buffer, int bytesToRead)
+    int read (void* buffer, int bytesToRead) override
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
@@ -338,7 +351,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            const int bytesRead = connection->read (static_cast <char*> (buffer), bytesToRead);
+            const int bytesRead = connection->read (static_cast<char*> (buffer), bytesToRead);
             position += bytesRead;
 
             if (bytesRead == 0)
@@ -348,7 +361,7 @@ public:
         }
     }
 
-    bool setPosition (int64 wantedPos)
+    bool setPosition (int64 wantedPos) override
     {
         if (wantedPos != position)
         {
@@ -376,8 +389,7 @@ private:
     const bool isPost;
     const int timeOutMs;
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback,
-                           void* progressCallbackContext)
+    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
     {
         jassert (connection == nullptr);
 
@@ -421,9 +433,9 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                       OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                                       const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
 {
-    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                           progressCallback, progressCallbackContext,
-                                                           headers, timeOutMs, responseHeaders));
+    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
+                                                          progressCallback, progressCallbackContext,
+                                                          headers, timeOutMs, responseHeaders));
 
     return wi->isError() ? nullptr : wi.release();
 }

@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#ifndef JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED
+#define JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED
 
 #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC || DOXYGEN
 
@@ -56,16 +55,30 @@ public:
     ~SystemTrayIconComponent();
 
     //==============================================================================
-    /** Changes the image shown in the taskbar.
-    */
+    /** Changes the image shown in the taskbar. */
     void setIconImage (const Image& newImage);
 
-    /** Changes the tooltip that Windows shows above the icon. */
+    /** Changes the icon's tooltip (if the current OS supports this). */
     void setIconTooltip (const String& tooltip);
+
+    /** Highlights the icon (if the current OS supports this). */
+    void setHighlighted (bool);
+
+    /** Shows a floating text bubble pointing to the icon (if the current OS supports this). */
+    void showInfoBubble (const String& title, const String& content);
+
+    /** Hides the icon's floating text bubble (if the current OS supports this). */
+    void hideInfoBubble();
+
+    /** Returns the raw handle to whatever kind of internal OS structure is
+        involved in showing this icon.
+        @see ComponentPeer::getNativeHandle()
+    */
+    void* getNativeHandle() const;
 
    #if JUCE_LINUX
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&) override;
    #endif
 
 private:
@@ -78,4 +91,4 @@ private:
 
 
 #endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#endif   // JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED

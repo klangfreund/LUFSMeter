@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -56,49 +55,14 @@ bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
 
 //==============================================================================
-struct Icon
-{
-    Icon() : path (nullptr) {}
-    Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
-    Icon (const Path* p, const Colour& c)  : path (p),  colour (c) {}
-
-    void draw (Graphics& g, const Rectangle<float>& area, bool isCrossedOut) const
-    {
-        if (path != nullptr)
-        {
-            g.setColour (colour);
-
-            const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
-            g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
-
-            if (isCrossedOut)
-            {
-                g.setColour (Colours::red.withAlpha (0.8f));
-                g.drawLine ((float) area.getX(), area.getY() + area.getHeight() * 0.2f,
-                            (float) area.getRight(), area.getY() + area.getHeight() * 0.8f, 3.0f);
-            }
-        }
-    }
-
-    Icon withContrastingColourTo (const Colour& background) const
-    {
-        return Icon (path, background.contrasting (colour, 0.6f));
-    }
-
-    const Path* path;
-    Colour colour;
-};
-
-
-//==============================================================================
 class RolloverHelpComp   : public Component,
                            private Timer
 {
 public:
     RolloverHelpComp();
 
-    void paint (Graphics& g);
-    void timerCallback();
+    void paint (Graphics&) override;
+    void timerCallback() override;
 
 private:
     Component* lastComp;
@@ -140,24 +104,6 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyListBuilder)
-};
-
-//==============================================================================
-class FloatingLabelComponent    : public Component
-{
-public:
-    FloatingLabelComponent();
-
-    void remove();
-    void update (Component* parent, const String& text, const Colour& textColour,
-                 int x, int y, bool toRight, bool below);
-
-    void paint (Graphics& g);
-
-private:
-    Font font;
-    Colour colour;
-    GlyphArrangement glyphs;
 };
 
 //==============================================================================
@@ -236,7 +182,7 @@ class PopupColourSelector   : public Component,
 {
 public:
     PopupColourSelector (const Value& colour,
-                         const Colour& defaultCol,
+                         Colour defaultCol,
                          const bool canResetToDefault)
         : defaultButton ("Reset to Default"),
           colourValue (colour),
@@ -279,7 +225,7 @@ public:
         return Colour::fromString (colourValue.toString());
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour)
     {
         if (getColour() != newColour)
         {
@@ -324,7 +270,7 @@ class ColourEditorComponent    : public Component,
 {
 public:
     ColourEditorComponent (UndoManager* um, const Value& colour,
-                           const Colour& defaultCol, const bool canReset)
+                           Colour defaultCol, const bool canReset)
         : undoManager (um), colourValue (colour), defaultColour (defaultCol),
           canResetToDefault (canReset)
     {
@@ -355,7 +301,7 @@ public:
         return Colour::fromString (colourValue.toString());
     }
 
-    void setColour (const Colour& newColour)
+    void setColour (Colour newColour)
     {
         if (getColour() != newColour)
         {
@@ -413,7 +359,7 @@ class ColourPropertyComponent  : public PropertyComponent
 {
 public:
     ColourPropertyComponent (UndoManager* undoManager, const String& name, const Value& colour,
-                             const Colour& defaultColour, bool canResetToDefault)
+                             Colour defaultColour, bool canResetToDefault)
         : PropertyComponent (name),
           colourEditor (undoManager, colour, defaultColour, canResetToDefault)
     {

@@ -1,34 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
-#define __JUCE_DOCUMENTWINDOW_JUCEHEADER__
-
-#include "juce_ResizableWindow.h"
-#include "../buttons/juce_Button.h"
-#include "../menus/juce_MenuBarModel.h"
+#ifndef JUCE_DOCUMENTWINDOW_H_INCLUDED
+#define JUCE_DOCUMENTWINDOW_H_INCLUDED
 
 
 //==============================================================================
@@ -90,7 +85,7 @@ public:
         @see TitleBarButtons
     */
     DocumentWindow (const String& name,
-                    const Colour& backgroundColour,
+                    Colour backgroundColour,
                     int requiredButtons,
                     bool addToDesktop = true);
 
@@ -178,8 +173,8 @@ public:
 
         If your app is centred around this window such that the whole app should quit when
         the window is closed, then you will probably want to use this method as an opportunity
-        to call JUCEApplication::quit(), and leave the window to be deleted later by your
-        JUCEApplication::shutdown() method. (Doing it this way means that your window will
+        to call JUCEApplicationBase::quit(), and leave the window to be deleted later by your
+        JUCEApplicationBase::shutdown() method. (Doing it this way means that your window will
         still get cleaned-up if the app is quit by some other means (e.g. a cmd-Q on the mac
         or closing it via the taskbar icon on Windows).
 
@@ -231,25 +226,25 @@ public:
     //==============================================================================
    #ifndef DOXYGEN
     /** @internal */
-    void paint (Graphics&);
+    void paint (Graphics&) override;
     /** @internal */
-    void resized();
+    void resized() override;
     /** @internal */
-    void lookAndFeelChanged();
+    void lookAndFeelChanged() override;
     /** @internal */
-    BorderSize<int> getBorderThickness();
+    BorderSize<int> getBorderThickness() override;
     /** @internal */
-    BorderSize<int> getContentComponentBorder();
+    BorderSize<int> getContentComponentBorder() override;
     /** @internal */
-    void mouseDoubleClick (const MouseEvent&);
+    void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
-    void userTriedToCloseWindow();
+    void userTriedToCloseWindow() override;
     /** @internal */
-    void activeWindowStatusChanged();
+    void activeWindowStatusChanged() override;
     /** @internal */
-    int getDesktopWindowStyleFlags() const;
+    int getDesktopWindowStyleFlags() const override;
     /** @internal */
-    void parentHierarchyChanged();
+    void parentHierarchyChanged() override;
     /** @internal */
     Rectangle<int> getTitleBarArea();
    #endif
@@ -264,8 +259,8 @@ private:
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy;
-    friend class ScopedPointer <ButtonListenerProxy>;
-    ScopedPointer <ButtonListenerProxy> buttonListener;
+    friend struct ContainerDeletePolicy<ButtonListenerProxy>;
+    ScopedPointer<ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();
 
@@ -273,4 +268,4 @@ private:
 };
 
 
-#endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+#endif   // JUCE_DOCUMENTWINDOW_H_INCLUDED

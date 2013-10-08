@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -168,8 +167,10 @@ public:
         handle = nullptr;
     }
 
-    void initialise()
+    void initialise (double initialSampleRate, int initialBlockSize)
     {
+        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
+
         if (initialised || plugin == nullptr || handle == nullptr)
             return;
 
@@ -200,9 +201,7 @@ public:
         for (int i = 0; i < parameters.size(); ++i)
             plugin->connect_port (handle, parameters[i], &(parameterValues[i].scaled));
 
-        setPlayConfigDetails (inputs.size(), outputs.size(),
-                              getSampleRate() > 0 ? getSampleRate() : 44100.0f,
-                              getBlockSize() > 0  ? getBlockSize() : 512);
+        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
 
         setCurrentProgram (0);
         setLatencySamples (0);
@@ -258,12 +257,9 @@ public:
     //==============================================================================
     void prepareToPlay (double newSampleRate, int samplesPerBlockExpected)
     {
-        setPlayConfigDetails (inputs.size(), outputs.size(),
-                              newSampleRate, samplesPerBlockExpected);
-
         setLatencySamples (0);
 
-        initialise();
+        initialise (newSampleRate, samplesPerBlockExpected);
 
         if (initialised)
         {
@@ -585,12 +581,12 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast <LADSPAPluginInstance*> (createInstanceFromDescription (desc)));
+    ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast<LADSPAPluginInstance*> (createInstanceFromDescription (desc, 44100.0, 512)));
 
     if (instance == nullptr || ! instance->isValid())
         return;
 
-    instance->initialise();
+    instance->initialise (44100.0, 512);
 
     instance->fillInPluginDescription (desc);
 
@@ -614,9 +610,10 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     }
 }
 
-AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
+AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
+                                                                        double sampleRate, int blockSize)
 {
-    LADSPAPluginInstance* result = nullptr;
+    ScopedPointer<LADSPAPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -634,15 +631,15 @@ AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const Pl
             result = new LADSPAPluginInstance (module);
 
             if (result->plugin != nullptr && result->isValid())
-                result->initialise();
+                result->initialise (sampleRate, blockSize);
             else
-                deleteAndZero (result);
+                result = nullptr;
         }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result;
+    return result.release();
 }
 
 bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -654,6 +651,11 @@ bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIde
 String LADSPAPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
 {
     return fileOrIdentifier;
+}
+
+bool LADSPAPluginFormat::pluginNeedsRescanning (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).getLastModificationTime() != desc.lastFileModTime;
 }
 
 bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)

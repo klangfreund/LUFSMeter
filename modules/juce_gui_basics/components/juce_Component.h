@@ -1,46 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
-#define __JUCE_COMPONENT_JUCEHEADER__
-
-#include "../mouse/juce_MouseCursor.h"
-#include "../mouse/juce_MouseListener.h"
-#include "../mouse/juce_MouseEvent.h"
-#include "juce_ComponentListener.h"
-#include "../keyboard/juce_KeyListener.h"
-#include "../keyboard/juce_KeyboardFocusTraverser.h"
-#include "juce_ModalComponentManager.h"
-
-class LookAndFeel;
-class MouseInputSource;
-class MouseInputSourceInternal;
-class ComponentPeer;
-class MarkerList;
-class RelativeRectangle;
-class CachedComponentImage;
+#ifndef JUCE_COMPONENT_H_INCLUDED
+#define JUCE_COMPONENT_H_INCLUDED
 
 
 //==============================================================================
@@ -136,7 +119,7 @@ public:
     */
     bool isVisible() const noexcept                         { return flags.visibleFlag; }
 
-    /** Called when this component's visiblility changes.
+    /** Called when this component's visibility changes.
         @see setVisible, isVisible
     */
     virtual void visibilityChanged();
@@ -216,6 +199,15 @@ public:
     */
     virtual void minimisationStateChanged (bool isNowMinimised);
 
+    /** Returns the default scale factor to use for this component when it is placed
+        on the desktop.
+        The default implementation of this method just returns the value from
+        Desktop::getGlobalScaleFactor(), but it can be overridden if a particular component
+        has different requirements. The method only used if this component is added
+        to the desktop - it has no effect for child components.
+    */
+    virtual float getDesktopScaleFactor() const;
+
     //==============================================================================
     /** Brings the component to the front of its siblings.
 
@@ -288,7 +280,7 @@ public:
     int getRight() const noexcept                           { return bounds.getRight(); }
 
     /** Returns the component's top-left position as a Point. */
-    const Point<int>& getPosition() const noexcept          { return bounds.getPosition(); }
+    Point<int> getPosition() const noexcept                 { return bounds.getPosition(); }
 
     /** Returns the y coordinate of the bottom edge of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -331,7 +323,7 @@ public:
         If includeSiblings is true, it will also take into account any siblings
         that may be overlapping the component.
     */
-    void getVisibleArea (RectangleList& result, bool includeSiblings) const;
+    void getVisibleArea (RectangleList<int>& result, bool includeSiblings) const;
 
     //==============================================================================
     /** Returns this component's x coordinate relative the the screen's top-left origin.
@@ -361,7 +353,7 @@ public:
         screen coordinate.
     */
     Point<int> getLocalPoint (const Component* sourceComponent,
-                              const Point<int>& pointRelativeToSourceComponent) const;
+                              Point<int> pointRelativeToSourceComponent) const;
 
     /** Converts a rectangle to be relative to this component's coordinate space.
 
@@ -379,7 +371,7 @@ public:
     /** Converts a point relative to this component's top-left into a screen coordinate.
         @see getLocalPoint, localAreaToGlobal
     */
-    Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+    Point<int> localPointToGlobal (Point<int> localPoint) const;
 
     /** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -419,7 +411,7 @@ public:
 
         @see setBounds, ComponentListener::componentMovedOrResized
     */
-    void setTopLeftPosition (const Point<int>& newTopLeftPosition);
+    void setTopLeftPosition (Point<int> newTopLeftPosition);
 
     /** Moves the component to a new position.
 
@@ -566,7 +558,7 @@ public:
         @see setBounds
     */
     void setBoundsToFit (int x, int y, int width, int height,
-                         const Justification& justification,
+                         Justification justification,
                          bool onlyReduceInSize);
 
     /** Changes the position of the component's centre.
@@ -691,7 +683,7 @@ public:
     /** Looks for a child component with the specified ID.
         @see setComponentID, getComponentID
     */
-    Component* findChildWithID (const String& componentID) const noexcept;
+    Component* findChildWithID (StringRef componentID) const noexcept;
 
     /** Adds a child component to this one.
 
@@ -897,7 +889,7 @@ public:
                     which might be in the way - for that, see reallyContains()
         @see hitTest, reallyContains, getComponentAt
     */
-    bool contains (const Point<int>& localPoint);
+    bool contains (Point<int> localPoint);
 
     /** Returns true if a given point lies in this component, taking any overlapping
         siblings into account.
@@ -907,7 +899,7 @@ public:
                                             this determines whether that is counted as a hit.
         @see contains, getComponentAt
     */
-    bool reallyContains (const Point<int>& localPoint, bool returnTrueIfWithinAChild);
+    bool reallyContains (Point<int> localPoint, bool returnTrueIfWithinAChild);
 
     /** Returns the component at a certain point within this one.
 
@@ -930,7 +922,7 @@ public:
                     instead call getComponentAt on the top-level parent of this component.
         @see hitTest, contains, reallyContains
     */
-    Component* getComponentAt (const Point<int>& position);
+    Component* getComponentAt (Point<int> position);
 
     //==============================================================================
     /** Marks the whole component as needing to be redrawn.
@@ -1242,6 +1234,9 @@ public:
     */
     static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
 
+    /** If any component has keyboard focus, this will defocus it. */
+    static void JUCE_CALLTYPE unfocusAllComponents();
+
     //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
 
@@ -1454,7 +1449,7 @@ public:
                      the source component in which it occurred
         @see mouseEnter, mouseExit, mouseDrag, contains
     */
-    virtual void mouseMove (const MouseEvent& event);
+    virtual void mouseMove (const MouseEvent& event) override;
 
     /** Called when the mouse first enters a component.
 
@@ -1470,7 +1465,7 @@ public:
                      the source component in which it occurred
         @see mouseExit, mouseDrag, mouseMove, contains
     */
-    virtual void mouseEnter (const MouseEvent& event);
+    virtual void mouseEnter (const MouseEvent& event) override;
 
     /** Called when the mouse moves out of a component.
 
@@ -1485,7 +1480,7 @@ public:
                       the source component in which it occurred
         @see mouseEnter, mouseDrag, mouseMove, contains
     */
-    virtual void mouseExit (const MouseEvent& event);
+    virtual void mouseExit (const MouseEvent& event) override;
 
     /** Called when a mouse button is pressed.
 
@@ -1500,7 +1495,7 @@ public:
                       the source component in which it occurred
         @see mouseUp, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseDown (const MouseEvent& event);
+    virtual void mouseDown (const MouseEvent& event) override;
 
     /** Called when the mouse is moved while a button is held down.
 
@@ -1512,7 +1507,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseUp, mouseMove, contains, setDragRepeatInterval
     */
-    virtual void mouseDrag (const MouseEvent& event);
+    virtual void mouseDrag (const MouseEvent& event) override;
 
     /** Called when a mouse button is released.
 
@@ -1527,7 +1522,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseUp (const MouseEvent& event);
+    virtual void mouseUp (const MouseEvent& event) override;
 
     /** Called when a mouse button has been double-clicked on a component.
 
@@ -1539,7 +1534,7 @@ public:
                       the source component in which it occurred
         @see mouseDown, mouseUp
     */
-    virtual void mouseDoubleClick (const MouseEvent& event);
+    virtual void mouseDoubleClick (const MouseEvent& event) override;
 
     /** Called when the mouse-wheel is moved.
 
@@ -1557,7 +1552,7 @@ public:
         @param wheel   details about the mouse wheel movement
     */
     virtual void mouseWheelMove (const MouseEvent& event,
-                                 const MouseWheelDetails& wheel);
+                                 const MouseWheelDetails& wheel) override;
 
     /** Called when a pinch-to-zoom mouse-gesture is used.
 
@@ -2043,7 +2038,7 @@ public:
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    void setColour (int colourId, const Colour& colour);
+    void setColour (int colourId, Colour newColour);
 
     /** If a colour has been set with setColour(), this will remove it.
         This allows you to make a colour revert to its default state.
@@ -2215,12 +2210,10 @@ public:
     CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
 
     //==============================================================================
-   #ifndef DOXYGEN
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
-    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (const Point<int>&) const);
-    JUCE_DEPRECATED (Point<int> globalPositionToRelative (const Point<int>&) const);
-    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
-   #endif
+    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
+    JUCE_DEPRECATED (Point<int> globalPositionToRelative (Point<int>) const);
+    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, Point<int>) const);
 
 private:
     //==============================================================================
@@ -2245,7 +2238,7 @@ private:
 
     class MouseListenerList;
     friend class MouseListenerList;
-    friend class ScopedPointer <MouseListenerList>;
+    friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer <MouseListenerList> mouseListeners;
     ScopedPointer <Array <KeyListener*> > keyListeners;
     ListenerList <ComponentListener> componentListeners;
@@ -2287,14 +2280,14 @@ private:
     uint8 componentTransparency;
 
     //==============================================================================
-    void internalMouseEnter (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseExit  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseDown  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseUp    (MouseInputSource&, const Point<int>&, const Time&, const ModifierKeys& oldModifiers);
-    void internalMouseDrag  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseMove  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseWheel (MouseInputSource&, const Point<int>&, const Time&, const MouseWheelDetails&);
-    void internalMagnifyGesture (MouseInputSource&, const Point<int>&, const Time&, float);
+    void internalMouseEnter (MouseInputSource, Point<int>, Time);
+    void internalMouseExit  (MouseInputSource, Point<int>, Time);
+    void internalMouseDown  (MouseInputSource, Point<int>, Time);
+    void internalMouseUp    (MouseInputSource, Point<int>, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, Point<int>, Time);
+    void internalMouseMove  (MouseInputSource, Point<int>, Time);
+    void internalMouseWheel (MouseInputSource, Point<int>, Time, const MouseWheelDetails&);
+    void internalMagnifyGesture (MouseInputSource, Point<int>, Time, float);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);
@@ -2336,8 +2329,8 @@ private:
     virtual void filesDropped (const StringArray&, int, int) {}
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
-    // favour of contains (const Point<int>&)
-    void contains (int, int);
+    // favour of contains (Point<int>)
+    void contains (int, int) JUCE_DELETED_FUNCTION;
    #endif
 
 protected:
@@ -2348,4 +2341,4 @@ protected:
 };
 
 
-#endif   // __JUCE_COMPONENT_JUCEHEADER__
+#endif   // JUCE_COMPONENT_H_INCLUDED

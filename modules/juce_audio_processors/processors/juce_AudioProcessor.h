@@ -1,34 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOPROCESSOR_JUCEHEADER__
-#define __JUCE_AUDIOPROCESSOR_JUCEHEADER__
-
-#include "juce_AudioProcessorEditor.h"
-#include "juce_AudioProcessorListener.h"
-#include "juce_AudioPlayHead.h"
+#ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
+#define JUCE_AUDIOPROCESSOR_H_INCLUDED
 
 
 //==============================================================================
@@ -404,6 +399,37 @@ public:
     /** Returns the value of a parameter as a text string. */
     virtual const String getParameterText (int parameterIndex) = 0;
 
+    /** Returns the name of a parameter as a text string with a preferred maximum length.
+        If you want to provide customised short versions of your parameter names that
+        will look better in constrained spaces (e.g. the displays on hardware controller
+        devices or mixing desks) then you should implement this method.
+        If you don't override it, the default implementation will call getParameterText(int),
+        and truncate the result.
+    */
+    virtual String getParameterName (int parameterIndex, int maximumStringLength);
+
+    /** Returns the value of a parameter as a text string with a preferred maximum length.
+        If you want to provide customised short versions of your parameter values that
+        will look better in constrained spaces (e.g. the displays on hardware controller
+        devices or mixing desks) then you should implement this method.
+        If you don't override it, the default implementation will call getParameterText(int),
+        and truncate the result.
+    */
+    virtual String getParameterText (int parameterIndex, int maximumStringLength);
+
+    /** Returns the number of discrete steps that this parameter can represent.
+        The default return value if you don't implement this method is 0x7fffffff.
+        If your parameter is boolean, then you may want to make this return 2.
+        The value that is returned may or may not be used, depending on the host.
+    */
+    virtual int getParameterNumSteps (int parameterIndex);
+
+    /** Returns the default value for the parameter.
+        By default, this just returns 0.
+        The value that is returned may or may not be used, depending on the host.
+    */
+    virtual float getParameterDefaultValue (int parameterIndex);
+
     /** Some plugin types may be able to return a label string for a
         parameter's units.
     */
@@ -568,11 +594,12 @@ public:
     void setPlayHead (AudioPlayHead* newPlayHead) noexcept;
 
     //==============================================================================
+    /** This is called by the processor to specify its details before being played. */
+    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
+
+    //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
-
-    /** Not for public use - this is called to initialise the processor before playing. */
-    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
 
     /** Not for public use - this is called to initialise the processor before playing. */
     void setSpeakerArrangement (const String& inputs, const String& outputs);
@@ -593,10 +620,6 @@ public:
     */
     WrapperType wrapperType;
 
-    /** @internal */
-    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
-
-protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
@@ -617,13 +640,17 @@ protected:
     static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
 
     /** @internal */
+    static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
+
+protected:
+    /** @internal */
     AudioPlayHead* playHead;
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
 private:
-    Array <AudioProcessorListener*> listeners;
+    Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;
@@ -641,4 +668,4 @@ private:
 };
 
 
-#endif   // __JUCE_AUDIOPROCESSOR_JUCEHEADER__
+#endif   // JUCE_AUDIOPROCESSOR_H_INCLUDED

@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -147,6 +146,26 @@ namespace MidiFileHelpers
             return 0;
         }
     };
+
+    template <typename MethodType>
+    static void findAllMatchingEvents (const OwnedArray<MidiMessageSequence>& tracks,
+                                       MidiMessageSequence& results,
+                                       MethodType method)
+    {
+        for (int i = 0; i < tracks.size(); ++i)
+        {
+            const MidiMessageSequence& track = *tracks.getUnchecked(i);
+            const int numEvents = track.getNumEvents();
+
+            for (int j = 0; j < numEvents; ++j)
+            {
+                const MidiMessage& m = track.getEventPointer(j)->message;
+
+                if ((m.*method)())
+                    results.addEvent (m);
+            }
+        }
+    }
 }
 
 //==============================================================================
@@ -198,36 +217,19 @@ void MidiFile::setSmpteTimeFormat (const int framesPerSecond,
 }
 
 //==============================================================================
-void MidiFile::findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const
+void MidiFile::findAllTempoEvents (MidiMessageSequence& results) const
 {
-    for (int i = tracks.size(); --i >= 0;)
-    {
-        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
-
-        for (int j = 0; j < numEvents; ++j)
-        {
-            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
-
-            if (m.isTempoMetaEvent())
-                tempoChangeEvents.addEvent (m);
-        }
-    }
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isTempoMetaEvent);
 }
 
-void MidiFile::findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const
+void MidiFile::findAllTimeSigEvents (MidiMessageSequence& results) const
 {
-    for (int i = tracks.size(); --i >= 0;)
-    {
-        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isTimeSignatureMetaEvent);
+}
 
-        for (int j = 0; j < numEvents; ++j)
-        {
-            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
-
-            if (m.isTimeSignatureMetaEvent())
-                timeSigEvents.addEvent (m);
-        }
-    }
+void MidiFile::findAllKeySigEvents (MidiMessageSequence& results) const
+{
+    MidiFileHelpers::findAllMatchingEvents (tracks, results, &MidiMessage::isKeySignatureMetaEvent);
 }
 
 double MidiFile::getLastTimestamp() const
@@ -341,10 +343,7 @@ void MidiFile::convertTimestampTicksToSeconds()
             for (int j = ms.getNumEvents(); --j >= 0;)
             {
                 MidiMessage& m = ms.getEventPointer(j)->message;
-
-                m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(),
-                                                                        tempoEvents,
-                                                                        timeFormat));
+                m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(), tempoEvents, timeFormat));
             }
         }
     }

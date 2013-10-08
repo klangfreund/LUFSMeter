@@ -1,30 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-11 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2013 - Raw Material Software Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef __JUCE_FLOATVECTOROPERATIONS_JUCEHEADER__
-#define __JUCE_FLOATVECTOROPERATIONS_JUCEHEADER__
+#ifndef JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
+#define JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
 
 
 //==============================================================================
@@ -63,6 +62,9 @@ public:
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (float* dest, float multiplier, int numValues) noexcept;
 
+    /** Copies a source vector to a destination, negating each value. */
+    static void JUCE_CALLTYPE negate (float* dest, const float* src, int numValues) noexcept;
+
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
 
@@ -74,7 +76,12 @@ public:
 
     /** Finds the maximum value in the given array. */
     static float JUCE_CALLTYPE findMaximum (const float* src, int numValues) noexcept;
+
+    /** On Intel CPUs, this method enables or disables the SSE flush-to-zero mode.
+        Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
+    */
+    static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
 };
 
 
-#endif   // __JUCE_FLOATVECTOROPERATIONS_JUCEHEADER__
+#endif   // JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
