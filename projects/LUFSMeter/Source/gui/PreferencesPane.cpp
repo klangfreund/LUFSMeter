@@ -33,6 +33,7 @@
 //==============================================================================
 PreferencesPane::PreferencesPane ()
 :
+    //backgroundColour (Colours::lightgoldenrodyellow),
     backgroundColour (Colours::darkgreen),
     preferencesTitleHeight (20),
     borderSize (3),
@@ -48,9 +49,10 @@ PreferencesPane::PreferencesPane ()
     const bool isReadOnly = false;
     const int textEntryBoxWidth = 0;
     const int textEntryBoxHeight = 0; 
-    loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
+    //loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarSize.setPopupDisplayEnabled(true, this);
     loudnessBarSize.setTextValueSuffix(" pixels");
+    loudnessBarSize.setSliderStyle(Slider::LinearBar);
     addAndMakeVisible(&loudnessBarSize);
     
     loudnessBarRange.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
