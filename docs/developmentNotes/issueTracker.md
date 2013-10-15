@@ -2,14 +2,13 @@
 
 This file is the issue tracker as well as the roadmap for the LUFS Meter.
 
-****************
-Issues / Roadmap
-****************
+
+Open issues / Roadmap
+=====================
 
 In order of priority.
 
-Store the plugin parameters in a valuetree object
--------------------------------------------------
+
 
 Rework the preference pane into a self containing object
 --------------------------------------------------------
@@ -28,6 +27,7 @@ Add vectorgraphics to the GUI
 
 Implement some default plugin presets
 -------------------------------------
+
 
 
 
@@ -75,10 +75,18 @@ Linux
 
 
 
+Closed issues
+=============
 
-********************
+Store the plugin parameters in a valuetree object
+-------------------------------------------------
+
+A valuetree is not well suited since it stores instances of var.
+A var can't have listeners. Values can.
+
+
 general improvements
-********************
+====================
 
 general
 =======
