@@ -1,12 +1,34 @@
-.. author: Samuel Gaehwiler (klangfreund.com)
+<!--- author: Samuel Gaehwiler (klangfreund.com) !-->
 
-This file is the issue tracker as well as the roadmap.
+This file is the issue tracker as well as the roadmap for the LUFS Meter.
 
 ****************
 Issues / Roadmap
 ****************
 
 In order of priority.
+
+Store the plugin parameters in a valuetree object
+-------------------------------------------------
+
+Rework the preference pane into a self containing object
+--------------------------------------------------------
+
+How to connect the sliders etc. to the main listener?
+
+
+Add I, S and M to the loudness history
+--------------------------------------
+
+Create corresponding checkboxes on the preferences.
+
+
+Add vectorgraphics to the GUI
+-----------------------------
+
+Implement some default plugin presets
+-------------------------------------
+
 
 
 Multi-Channel Meter for the Momentary Loudness
