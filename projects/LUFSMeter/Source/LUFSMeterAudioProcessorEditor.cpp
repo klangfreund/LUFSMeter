@@ -245,11 +245,13 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
         {
             preferencesPaneXPosition = 0;
             preferencesPaneVisible = true;
+            preferencesPane.toFront (true);
         }
         else
         {
             preferencesPaneXPosition = -380;
             preferencesPaneVisible = false;
+            preferencesPane.toBack();
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();

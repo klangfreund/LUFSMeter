@@ -39,7 +39,9 @@ PreferencesPane::PreferencesPane ()
     borderSize (3),
     topRightHandleWidth (20)
 {
-    setAlpha(0.5);
+    setAlwaysOnTop (true);
+    
+    setAlpha (0.5);
     
     showOrHidePreferences.setButtonText("Preferences");
     showOrHidePreferences.setColour(TextButton::buttonColourId, Colours::black);

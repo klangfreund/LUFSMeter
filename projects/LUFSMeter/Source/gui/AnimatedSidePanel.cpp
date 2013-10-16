@@ -31,8 +31,11 @@
 
 //==============================================================================
 AnimatedSidePanel::AnimatedSidePanel ()
-  : movingPanelVisible (true)
+  : movingPanelVisible (false)
 {
+    setAlwaysOnTop (true);
+    
+    movingPanel.setBounds (-380, 0, 400, 300);
     addAndMakeVisible (&movingPanel);
     
     showOrHideButton.setButtonText("Side Panel");
@@ -82,19 +85,21 @@ void AnimatedSidePanel::buttonClicked (Button* button)
         {
             movingPanelXPosition = 0;
             movingPanelVisible = true;
+            toFront (true);
         }
         else
         {
             movingPanelXPosition = -380;
             movingPanelVisible = false;
+            toBack();
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();
         
         const Rectangle<int> finalBounds = Rectangle<int>(movingPanelXPosition,
                                                           0,
-                                                          getWidth(),
-                                                          getHeight());
+                                                          400,
+                                                          300);
         const float finalAlpha = 0.5f;
         const int animationDurationMilliseconds = 300;
         const bool useProxyComponent = false;
