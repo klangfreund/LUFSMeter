@@ -40,6 +40,8 @@
 #include "gui/LoudnessHistory.h"
 #include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
+// TEMP
+#include "gui/AnimatedSidePanel.h"
 
 
 //==============================================================================
@@ -122,6 +124,9 @@ private:
     const int preferencesPaneYPosition;
     const int preferencesPaneWidth;
     const int preferencesPaneHeight;
+    
+    // TEMP
+    AnimatedSidePanel animatedSidePanel;
     
     Label infoLabel;
     

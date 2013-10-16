@@ -120,7 +120,10 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     preferencesPane.loudnessBarRange.setRange (-100, 0.0, 1);
     preferencesPane.loudnessBarRange.getMinValueObject().referTo (getProcessor()->loudnessBarMinValue);
     preferencesPane.loudnessBarRange.getMaxValueObject().referTo (getProcessor()->loudnessBarMaxValue);
-    addAndMakeVisible(&preferencesPane);
+    addAndMakeVisible (&preferencesPane);
+    
+    // TEMP
+    addAndMakeVisible (&animatedSidePanel);
     
     // Add the triangular resizer component for the bottom-right of the UI.
     addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
@@ -174,6 +177,9 @@ void LUFSMeterAudioProcessorEditor::resized()
                               preferencesPaneYPosition,
                               preferencesPaneWidth,
                               preferencesPaneHeight);
+    
+    // TEMP
+    animatedSidePanel.setBounds(0, 76, 400, 300);
     
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
     

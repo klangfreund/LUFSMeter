@@ -69,11 +69,12 @@ PreferencesPane::~PreferencesPane ()
 void PreferencesPane::paint (Graphics& g)
 {
     // Draw the background
+    // ===================
     const int roundedCornerRadius = (preferencesTitleHeight + 2*borderSize)/2;
     g.setColour(backgroundColour);
     // Draw the main area
     g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
-      // Remove the rounded corners on the left
+    // Remove the rounded corners on the left
     g.fillRect(0, 0, roundedCornerRadius, getHeight());
     // Draw the handle on the top right
     g.fillRoundedRectangle(0, 0, getWidth(), preferencesTitleHeight + 2*borderSize, roundedCornerRadius);

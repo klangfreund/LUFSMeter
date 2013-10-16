@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="efOX8g" name="LUFSMeterStandalone" projectType="guiapp" version="0.0.3"
               bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.1.0"
-              companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1">
+              companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1" includeBinaryInAppConfig="1">
   <MAINGROUP id="AO7N4d" name="LUFSMeterStandalone">
     <GROUP id="{54DB0834-C391-BB20-D2E8-10BA7ED68A39}" name="Source LUFSMeter Plugin">
       <FILE id="HKkacv" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
@@ -50,6 +50,10 @@
               file="../LUFSMeter/Source/gui/PreferencesPane.cpp"/>
         <FILE id="HY1OeA" name="PreferencesPane.h" compile="0" resource="0"
               file="../LUFSMeter/Source/gui/PreferencesPane.h"/>
+        <FILE id="j6MOZW" name="AnimatedSidePanel.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/AnimatedSidePanel.cpp"/>
+        <FILE id="BOanIy" name="AnimatedSidePanel.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/AnimatedSidePanel.h"/>
       </GROUP>
       <FILE id="YGRfQO" name="LUFSMeterAudioProcessor.cpp" compile="1" resource="0"
             file="../LUFSMeter/Source/LUFSMeterAudioProcessor.cpp"/>
@@ -69,27 +73,39 @@
     </GROUP>
   </MAINGROUP>
   <MODULES>
-    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_gui_audio" showAllCode="1" useLocalCopy="1"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" juceFolder="../../libraries/juce/modules">
+    <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
                        isDebug="1" optimisation="1" targetName="LUFSMeterStandalone"/>
         <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
                        isDebug="0" optimisation="2" targetName="LUFSMeterStandalone"/>
       </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../libraries/juce/modules"/>
+      </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
   <JUCEOPTIONS/>
