@@ -54,7 +54,7 @@ PreferencesPane::PreferencesPane ()
     //loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarSize.setPopupDisplayEnabled(true, this);
     loudnessBarSize.setTextValueSuffix(" pixels");
-    loudnessBarSize.setSliderStyle(Slider::LinearBar);
+    loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     addAndMakeVisible(&loudnessBarSize);
     
     loudnessBarRange.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);

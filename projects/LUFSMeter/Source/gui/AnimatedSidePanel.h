@@ -32,7 +32,9 @@
 #include "../MacrosAndJuceHeaders.h"
 
 //==============================================================================
-/**
+/** A self-animated left sided component.
+    Especially useful for a plugin, where pop-up windows are not allowed.
+    Derive from it to create e.g. a preferences pane.
  */
 class AnimatedSidePanel  : public Component,
                            public ButtonListener

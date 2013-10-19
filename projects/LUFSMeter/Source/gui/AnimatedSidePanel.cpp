@@ -31,8 +31,8 @@
 
 //==============================================================================
 AnimatedSidePanel::AnimatedSidePanel ()
-  : backgroundColour (Colours::lightgoldenrodyellow),
-    //backgroundColour (Colours::darkgreen),
+  : //backgroundColour (Colours::lightgoldenrodyellow.withAlpha(0.5f)),
+    backgroundColour (Colours::darkgreen.withAlpha(0.5f)),
     titleHeight (20),
     borderSize (3),
     topRightHandleWidth (titleHeight),
@@ -46,7 +46,7 @@ AnimatedSidePanel::AnimatedSidePanel ()
     
     showOrHideButton.setButtonText("Side Panel");
     showOrHideButton.setColour(TextButton::buttonColourId, Colours::black);
-    showOrHideButton.setColour(TextButton::textColourOffId, Colours::white);
+    showOrHideButton.setColour(TextButton::textColourOffId, Colours::lightgrey);
     showOrHideButton.setAlwaysOnTop (true);
     showOrHideButton.addListener(this);
     addAndMakeVisible(&showOrHideButton);
@@ -58,18 +58,30 @@ AnimatedSidePanel::~AnimatedSidePanel ()
 
 void AnimatedSidePanel::paint (Graphics& g)
 {
-    setAlpha(0.5);
+    //setAlpha(0.5);
     
     // Draw the background
     // ===================
     const int roundedCornerRadius = (titleHeight + 2 * borderSize) / 2;
     g.setColour(backgroundColour);
+    
+    Path contour;
+    // Draw the main area
+    contour.addRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
+    // Remove the rounded corners on the left
+    contour.addRectangle(0, 0, roundedCornerRadius, getHeight());
+    // Draw the handle on the top right
+    contour.addRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
+    
+    g.fillPath(contour);
+    /*
     // Draw the main area
     g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
     // Remove the rounded corners on the left
     g.fillRect(0, 0, roundedCornerRadius, getHeight());
     // Draw the handle on the top right
     g.fillRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
+     */
 }
 
 bool AnimatedSidePanel::hitTest(int x, int y)
@@ -124,7 +136,7 @@ void AnimatedSidePanel::buttonClicked (Button* button)
                                                           getY(),
                                                           getWidth(),
                                                           getHeight());
-        const float finalAlpha = 0.5f;
+        const float finalAlpha = 1.0f;
         const int animationDurationMilliseconds = 300;
         const bool useProxyComponent = false;
         const double startSpeed = 0.0;

@@ -108,7 +108,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // Add the reset button
     resetButton.addListener(this);
     resetButton.setButtonText("reset");
-    resetButton.setColour(TextButton::buttonColourId, Colours::green);
+    resetButton.setColour(TextButton::buttonColourId, Colours::darkred);
+    resetButton.setColour(TextButton::textColourOffId, Colours::lightgrey);
     addAndMakeVisible (&resetButton);
     
     // Add the preferences pane
@@ -173,7 +174,7 @@ void LUFSMeterAudioProcessorEditor::resized()
     infoLabel.setBounds (10, 4, 380, 25);
     
 //    resetButton.setBounds(10, getHeight()-35, 80, 25);
-    resetButton.setBounds(25, 12, 80, 25);
+    resetButton.setBounds(12, 12, 50, 25);
     
     preferencesPane.setBounds(preferencesPaneXPosition,
                               preferencesPaneYPosition,
