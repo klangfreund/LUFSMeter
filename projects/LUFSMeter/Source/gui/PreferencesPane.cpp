@@ -39,13 +39,13 @@ PreferencesPane::PreferencesPane ()
     borderSize (3),
     topRightHandleWidth (20)
 {
-    setAlwaysOnTop (true);
     
     setAlpha (0.5);
     
     showOrHidePreferences.setButtonText("Preferences");
     showOrHidePreferences.setColour(TextButton::buttonColourId, Colours::black);
     showOrHidePreferences.setColour(TextButton::textColourOffId, Colours::white);
+    showOrHidePreferences.setAlwaysOnTop (true);
     addAndMakeVisible(&showOrHidePreferences);
  
     const bool isReadOnly = false;

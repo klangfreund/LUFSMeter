@@ -124,6 +124,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     // TEMP
     addAndMakeVisible (&animatedSidePanel);
+    // TEMP
+    animatedSidePanel.setBounds(-380, 76, 400, 300);
     
     // Add the triangular resizer component for the bottom-right of the UI.
     addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
@@ -177,9 +179,6 @@ void LUFSMeterAudioProcessorEditor::resized()
                               preferencesPaneYPosition,
                               preferencesPaneWidth,
                               preferencesPaneHeight);
-    
-    // TEMP
-    animatedSidePanel.setBounds(0, 76, 400, 300);
     
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
     
@@ -245,13 +244,13 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
         {
             preferencesPaneXPosition = 0;
             preferencesPaneVisible = true;
-            preferencesPane.toFront (true);
+            //preferencesPane.toFront (true);
         }
         else
         {
             preferencesPaneXPosition = -380;
             preferencesPaneVisible = false;
-            preferencesPane.toBack();
+            //preferencesPane.toBack();
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();

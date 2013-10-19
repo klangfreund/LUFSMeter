@@ -31,18 +31,24 @@
 
 //==============================================================================
 AnimatedSidePanel::AnimatedSidePanel ()
-  : movingPanelVisible (false)
+  : backgroundColour (Colours::lightgoldenrodyellow),
+    //backgroundColour (Colours::darkgreen),
+    titleHeight (20),
+    borderSize (3),
+    topRightHandleWidth (titleHeight),
+    panelIsVisible (false)
 {
-    setAlwaysOnTop (true);
+    //setAlwaysOnTop (true);
     
-    movingPanel.setBounds (-380, 0, 400, 300);
-    addAndMakeVisible (&movingPanel);
+    //movingPanel.setBounds (-380, 0, 400, 300);
+    //addAndMakeVisible (&movingPanel);
     
     showOrHideButton.setButtonText("Side Panel");
     showOrHideButton.setColour(TextButton::buttonColourId, Colours::black);
     showOrHideButton.setColour(TextButton::textColourOffId, Colours::white);
+    showOrHideButton.setAlwaysOnTop (true);
     showOrHideButton.addListener(this);
-    movingPanel.addAndMakeVisible(&showOrHideButton);
+    addAndMakeVisible(&showOrHideButton);
 }
 
 AnimatedSidePanel::~AnimatedSidePanel ()
@@ -51,11 +57,23 @@ AnimatedSidePanel::~AnimatedSidePanel ()
 
 void AnimatedSidePanel::paint (Graphics& g)
 {
+    setAlpha(0.5);
+    
+    // Draw the background
+    // ===================
+    const int roundedCornerRadius = (titleHeight + 2 * borderSize) / 2;
+    g.setColour(backgroundColour);
+    // Draw the main area
+    g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
+    // Remove the rounded corners on the left
+    g.fillRect(0, 0, roundedCornerRadius, getHeight());
+    // Draw the handle on the top right
+    g.fillRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
 }
 
 void AnimatedSidePanel::resized()
 {
-    movingPanel.setSize(getWidth(), getHeight());
+    //movingPanel.setSize(getWidth(), getHeight());
     
     showOrHideButton.setBounds(3, 3, getWidth() - 6, 20);
     
@@ -81,67 +99,36 @@ void AnimatedSidePanel::buttonClicked (Button* button)
     {
         int movingPanelXPosition;
         
-        if (!movingPanelVisible)
+        if (!panelIsVisible)
         {
-            movingPanelXPosition = 0;
-            movingPanelVisible = true;
-            toFront (true);
+            movingPanelXPosition = getX() + 380;
+            panelIsVisible = true;
+            //toFront (true);
         }
         else
         {
-            movingPanelXPosition = -380;
-            movingPanelVisible = false;
-            toBack();
+            movingPanelXPosition = getX() - 380;
+            panelIsVisible = false;
+            //toBack();
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();
         
         const Rectangle<int> finalBounds = Rectangle<int>(movingPanelXPosition,
-                                                          0,
-                                                          400,
-                                                          300);
+                                                          getY(),
+                                                          getWidth(),
+                                                          getHeight());
         const float finalAlpha = 0.5f;
         const int animationDurationMilliseconds = 300;
         const bool useProxyComponent = false;
         const double startSpeed = 0.0;
         const double endSpeed = 0.0;
-        animator.animateComponent(&movingPanel, finalBounds, finalAlpha, animationDurationMilliseconds, useProxyComponent , startSpeed, endSpeed);
+        animator.animateComponent(this,
+                                  finalBounds,
+                                  finalAlpha,
+                                  animationDurationMilliseconds,
+                                  useProxyComponent ,
+                                  startSpeed,
+                                  endSpeed);
     }
-}
-
-
-//==============================================================================
-AnimatedSidePanel::MovingPanel::MovingPanel ()
-:   backgroundColour (Colours::lightgoldenrodyellow),
-//backgroundColour (Colours::darkgreen),
-titleHeight (20),
-borderSize (3),
-topRightHandleWidth (titleHeight)
-{
-}
-
-AnimatedSidePanel::MovingPanel::~MovingPanel ()
-{
-}
-
-void AnimatedSidePanel::MovingPanel::paint (Graphics& g)
-{
-    setAlpha(0.5);
-    
-    // Draw the background
-    // ===================
-    const int roundedCornerRadius = (titleHeight + 2 * borderSize) / 2;
-    g.setColour(backgroundColour);
-    // Draw the main area
-    g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
-    // Remove the rounded corners on the left
-    g.fillRect(0, 0, roundedCornerRadius, getHeight());
-    // Draw the handle on the top right
-    g.fillRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
-    
-}
-
-void AnimatedSidePanel::MovingPanel::resized()
-{
-    
 }

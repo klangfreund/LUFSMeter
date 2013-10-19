@@ -51,25 +51,12 @@ public:
     
 private:
     
-    /** The nested class that is actually moving.
-     */
-    class MovingPanel   : public Component
-    {
-    public:
-        MovingPanel ();
-        ~MovingPanel ();
-        void paint (Graphics& g);
-        void resized();
-    private:
-        Colour backgroundColour;
-        int titleHeight;
-        int borderSize;
-        int topRightHandleWidth;
-    };
+    Colour backgroundColour;
+    int titleHeight;
+    int borderSize;
+    int topRightHandleWidth;
     
-    MovingPanel movingPanel;
-    
-    bool movingPanelVisible;
+    bool panelIsVisible;
     TextButton showOrHideButton;
 };
 
