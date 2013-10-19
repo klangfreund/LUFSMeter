@@ -36,7 +36,8 @@ AnimatedSidePanel::AnimatedSidePanel ()
     titleHeight (20),
     borderSize (3),
     topRightHandleWidth (titleHeight),
-    panelIsVisible (false)
+    panelIsVisible (false),
+    xPositionWhenHidden (0)
 {
     //setAlwaysOnTop (true);
     
@@ -71,26 +72,31 @@ void AnimatedSidePanel::paint (Graphics& g)
     g.fillRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
 }
 
+bool AnimatedSidePanel::hitTest(int x, int y)
+{
+    if (isPositiveAndNotGreaterThan(y, getHeight()))
+    {
+        if (isPositiveAndNotGreaterThan(x, getWidth() - topRightHandleWidth))
+        {
+            return true;
+        }
+        // If its on the handle on the top right
+        if (isPositiveAndBelow(y, titleHeight + 2*borderSize)
+            && isPositiveAndNotGreaterThan(x, getWidth()))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void AnimatedSidePanel::resized()
 {
     //movingPanel.setSize(getWidth(), getHeight());
+    xPositionWhenHidden = getX();
     
     showOrHideButton.setBounds(3, 3, getWidth() - 6, 20);
-    
-    /*
-    //    const int leftBorder = 5;
-    //    const int topBorder = 5;
-    showOrHidePreferences.setBounds(borderSize, borderSize, getWidth() - 2*borderSize, preferencesTitleHeight);
-    
-    const int sliderHeight = 20;
-    //    const int rightBorder = 20;
-    const int loudnessBarSizeY = 2*borderSize + preferencesTitleHeight;
-    const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
-    loudnessBarSize.setBounds(borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
-    
-    const int loudnessBarRangeY = loudnessBarSizeY + sliderHeight + borderSize;
-    loudnessBarRange.setBounds(borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
-     */
 }
 
 void AnimatedSidePanel::buttonClicked (Button* button)
@@ -101,13 +107,13 @@ void AnimatedSidePanel::buttonClicked (Button* button)
         
         if (!panelIsVisible)
         {
-            movingPanelXPosition = getX() + 380;
+            movingPanelXPosition = xPositionWhenHidden + 380;
             panelIsVisible = true;
             //toFront (true);
         }
         else
         {
-            movingPanelXPosition = getX() - 380;
+            movingPanelXPosition = xPositionWhenHidden;
             panelIsVisible = false;
             //toBack();
         }

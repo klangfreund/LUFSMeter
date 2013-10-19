@@ -44,6 +44,8 @@ public:
 
     void paint (Graphics& g);
     
+    virtual bool hitTest(int x, int y) override;
+    
     void resized();
     
     /** The ButtonListener method. */
@@ -57,6 +59,7 @@ private:
     int topRightHandleWidth;
     
     bool panelIsVisible;
+    int xPositionWhenHidden;
     TextButton showOrHideButton;
 };
 
