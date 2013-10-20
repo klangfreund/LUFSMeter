@@ -54,7 +54,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     momentaryLoudnessCaption (String::empty, "M"),
     shortTermLoudnessCaption (String::empty, "S"),
     integratedLoudnessCaption (String::empty, "I"),
-    loudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    shortTermLoudnessHistory (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    integratedLoudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     preferencesPane(getProcessor()->loudnessBarWidth,
                     getProcessor()->loudnessBarMinValue,
                     getProcessor()->loudnessBarMaxValue)
@@ -101,7 +102,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&integratedLoudnessCaption);
     
     // Add the loudness history graph.
-    addAndMakeVisible (&loudnessHistory);
+    addAndMakeVisible (&shortTermLoudnessHistory);
+    addAndMakeVisible (&integratedLoudnessHistory);
     
     // Add the reset button
     resetButton.addListener(this);
@@ -127,7 +129,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // Listen to the loudnessBarWidth
     getProcessor()->loudnessBarWidth.addListener (this);
     
-    loudnessHistory.reset();
+    shortTermLoudnessHistory.reset();
+    integratedLoudnessHistory.reset();
     
     // Start the timer which will refresh the GUI elements.
     const int refreshIntervalInMilliseconds = 50;
@@ -218,7 +221,8 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
     if (button == &resetButton)
     {
         getProcessor()->reset();
-        loudnessHistory.reset();
+        shortTermLoudnessHistory.reset();
+        integratedLoudnessHistory.reset();
     }
 }
 
@@ -324,7 +328,11 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     backgroundVerticalLinesAndCaption.setBounds(0, distanceBetweenLoudnessBarAndTop, jmax(backgroundGridCaptionX, 0), loudnessBarBottomPosition + 32 - distanceBetweenLoudnessBarAndTop);
     
     // Loudness history
-    loudnessHistory.setBounds(0, 
+    shortTermLoudnessHistory.setBounds(0,
+                                       distanceBetweenLoudnessBarAndTop,
+                                       jmax(backgroundGridCaptionX, 0),
+                                       heightOfLoudnessBar);
+    integratedLoudnessHistory.setBounds(0,
                               distanceBetweenLoudnessBarAndTop, 
                               jmax(backgroundGridCaptionX, 0), 
                               heightOfLoudnessBar);

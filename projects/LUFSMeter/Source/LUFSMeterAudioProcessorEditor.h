@@ -114,7 +114,9 @@ private:
     Label integratedLoudnessCaption;
     
     /** Level history graph. */
-    LoudnessHistory loudnessHistory;
+    LoudnessHistory shortTermLoudnessHistory;
+    LoudnessHistory integratedLoudnessHistory;
+    
     
     /** Preferences pane. */
     PreferencesPane preferencesPane;
