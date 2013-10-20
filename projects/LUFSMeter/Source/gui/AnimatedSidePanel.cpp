@@ -30,7 +30,7 @@
 #include "AnimatedSidePanel.h"
 
 //==============================================================================
-AnimatedSidePanel::AnimatedSidePanel ()
+AnimatedSidePanel::AnimatedSidePanel (String panelText)
   : //backgroundColour (Colours::lightgoldenrodyellow.withAlpha(0.5f)),
     backgroundColour (Colours::darkgreen.withAlpha(0.5f)),
     titleHeight (20),
@@ -39,12 +39,7 @@ AnimatedSidePanel::AnimatedSidePanel ()
     panelIsVisible (false),
     xPositionWhenHidden (0)
 {
-    //setAlwaysOnTop (true);
-    
-    //movingPanel.setBounds (-380, 0, 400, 300);
-    //addAndMakeVisible (&movingPanel);
-    
-    showOrHideButton.setButtonText("Side Panel");
+    showOrHideButton.setButtonText(panelText);
     showOrHideButton.setColour(TextButton::buttonColourId, Colours::black);
     showOrHideButton.setColour(TextButton::textColourOffId, Colours::lightgrey);
     showOrHideButton.setAlwaysOnTop (true);
@@ -58,13 +53,15 @@ AnimatedSidePanel::~AnimatedSidePanel ()
 
 void AnimatedSidePanel::paint (Graphics& g)
 {
-    //setAlpha(0.5);
     
     // Draw the background
     // ===================
     const int roundedCornerRadius = (titleHeight + 2 * borderSize) / 2;
     g.setColour(backgroundColour);
     
+    // A Path is used because drawing multiple overlapping shapes with a
+    // colour that has an alpha < 1.0 will lead to the visibility of the
+    // overlapping areas.
     Path contour;
     // Draw the main area
     contour.addRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
@@ -74,14 +71,6 @@ void AnimatedSidePanel::paint (Graphics& g)
     contour.addRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
     
     g.fillPath(contour);
-    /*
-    // Draw the main area
-    g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
-    // Remove the rounded corners on the left
-    g.fillRect(0, 0, roundedCornerRadius, getHeight());
-    // Draw the handle on the top right
-    g.fillRoundedRectangle(0, 0, getWidth(), titleHeight + 2*borderSize, roundedCornerRadius);
-     */
 }
 
 bool AnimatedSidePanel::hitTest(int x, int y)
@@ -92,7 +81,7 @@ bool AnimatedSidePanel::hitTest(int x, int y)
         {
             return true;
         }
-        // If its on the handle on the top right
+        // If it's on the handle on the top right.
         if (isPositiveAndBelow(y, titleHeight + 2*borderSize)
             && isPositiveAndNotGreaterThan(x, getWidth()))
         {
@@ -105,7 +94,7 @@ bool AnimatedSidePanel::hitTest(int x, int y)
 
 void AnimatedSidePanel::resized()
 {
-    //movingPanel.setSize(getWidth(), getHeight());
+    // Remeber the position where this component has been initially placed.
     xPositionWhenHidden = getX();
     
     showOrHideButton.setBounds(3, 3, getWidth() - 6, 20);
@@ -121,13 +110,11 @@ void AnimatedSidePanel::buttonClicked (Button* button)
         {
             movingPanelXPosition = xPositionWhenHidden + 380;
             panelIsVisible = true;
-            //toFront (true);
         }
         else
         {
             movingPanelXPosition = xPositionWhenHidden;
             panelIsVisible = false;
-            //toBack();
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();

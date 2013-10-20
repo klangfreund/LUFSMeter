@@ -73,8 +73,7 @@ public:
 private:
     LUFSMeterAudioProcessor* getProcessor() const;
     
-    /**
-        Recalculates the position and size of all GUI components, based on
+    /** Recalculates the position and size of all GUI components, based on
         the width for the loudness bars.
      */
     void resizeGuiComponents();
@@ -119,14 +118,6 @@ private:
     
     /** Preferences pane. */
     PreferencesPane preferencesPane;
-    bool preferencesPaneVisible;
-    int preferencesPaneXPosition;
-    const int preferencesPaneYPosition;
-    const int preferencesPaneWidth;
-    const int preferencesPaneHeight;
-    
-    // TEMP
-    AnimatedSidePanel animatedSidePanel;
     
     Label infoLabel;
     

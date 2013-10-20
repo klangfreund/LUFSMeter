@@ -55,11 +55,9 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     shortTermLoudnessCaption (String::empty, "S"),
     integratedLoudnessCaption (String::empty, "I"),
     loudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
-    preferencesPaneVisible (false),
-    preferencesPaneXPosition (-380),
-    preferencesPaneYPosition(50),
-    preferencesPaneWidth (400),
-    preferencesPaneHeight(300)
+    preferencesPane(getProcessor()->loudnessBarWidth,
+                    getProcessor()->loudnessBarMinValue,
+                    getProcessor()->loudnessBarMaxValue)
 {
     // Add the background
     addAndMakeVisible (&backgroundGrid);
@@ -113,20 +111,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&resetButton);
     
     // Add the preferences pane
-    preferencesPane.showOrHidePreferences.addListener (this);
-//    preferencesPane.loudnessBarSize.addListener (this);
-    preferencesPane.loudnessBarSize.setRange (5.0, 300.0, 1);
-    preferencesPane.loudnessBarSize.getValueObject().referTo (getProcessor()->loudnessBarWidth);
-//    preferencesPane.loudnessBarRange.addListener(this);
-    preferencesPane.loudnessBarRange.setRange (-100, 0.0, 1);
-    preferencesPane.loudnessBarRange.getMinValueObject().referTo (getProcessor()->loudnessBarMinValue);
-    preferencesPane.loudnessBarRange.getMaxValueObject().referTo (getProcessor()->loudnessBarMaxValue);
     addAndMakeVisible (&preferencesPane);
-    
-    // TEMP
-    addAndMakeVisible (&animatedSidePanel);
-    // TEMP
-    animatedSidePanel.setBounds(-380, 76, 400, 300);
+    preferencesPane.setBounds(-380, 50, 400, 200);
     
     // Add the triangular resizer component for the bottom-right of the UI.
     addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
@@ -171,15 +157,10 @@ void LUFSMeterAudioProcessorEditor::resized()
 
     // Some more fix sized components:
     // TEMP
-    infoLabel.setBounds (10, 4, 380, 25);
+    //infoLabel.setBounds (10, 4, 380, 25);
     
 //    resetButton.setBounds(10, getHeight()-35, 80, 25);
     resetButton.setBounds(12, 12, 50, 25);
-    
-    preferencesPane.setBounds(preferencesPaneXPosition,
-                              preferencesPaneYPosition,
-                              preferencesPaneWidth,
-                              preferencesPaneHeight);
     
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
     
@@ -238,34 +219,6 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
     {
         getProcessor()->reset();
         loudnessHistory.reset();
-    }
-    else if (button == &(preferencesPane.showOrHidePreferences))
-    {
-        if (!preferencesPaneVisible)
-        {
-            preferencesPaneXPosition = 0;
-            preferencesPaneVisible = true;
-            //preferencesPane.toFront (true);
-        }
-        else
-        {
-            preferencesPaneXPosition = -380;
-            preferencesPaneVisible = false;
-            //preferencesPane.toBack();
-        }
-        
-        ComponentAnimator& animator = Desktop::getInstance().getAnimator();
-        
-        const Rectangle<int> finalBounds = Rectangle<int>(preferencesPaneXPosition,
-                                                          preferencesPaneYPosition,
-                                                          preferencesPaneWidth,
-                                                          preferencesPaneHeight);
-        const float finalAlpha = 0.5f;
-        const int animationDurationMilliseconds = 300;
-        const bool useProxyComponent = false;
-        const double startSpeed = 0.0;
-        const double endSpeed = 0.0;
-        animator.animateComponent(&preferencesPane, finalBounds, finalAlpha, animationDurationMilliseconds, useProxyComponent , startSpeed, endSpeed);
     }
 }
 

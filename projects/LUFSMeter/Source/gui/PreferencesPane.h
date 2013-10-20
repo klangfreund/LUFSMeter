@@ -30,6 +30,7 @@
 #define __PREFERENCES_PANE__
 
 #include "../MacrosAndJuceHeaders.h"
+#include "AnimatedSidePanel.h"
 #include "LoudnessBarRangeSlider.h"
 
 
@@ -37,32 +38,20 @@
 //==============================================================================
 /**
 */
-class PreferencesPane  : public Component
+class PreferencesPane  : public AnimatedSidePanel
 {
 public:
-    PreferencesPane ();
+    PreferencesPane (const Value& loudnessBarWidth,
+                     const Value& loudnessBarMinValue,
+                     const Value& loudnessBarMaxValue);
     
     ~PreferencesPane ();
-
-    void paint (Graphics& g);
-    
-    void mouseDown(const juce::MouseEvent &event);
     
     void resized();
     
-    TextButton showOrHidePreferences;
-    Slider loudnessBarSize;
-    LoudnessBarRangeSlider loudnessBarRange;
-    
 private:
-    
-    // Temp
-    Colour backgroundColour;
-    
-    int preferencesTitleHeight;
-    int borderSize;
-    int topRightHandleWidth;
-    
+    Slider loudnessBarSize;
+    LoudnessBarRangeSlider loudnessBarRange;   
 };
 
 

@@ -31,32 +31,27 @@
 
 
 //==============================================================================
-PreferencesPane::PreferencesPane ()
-:
-    //backgroundColour (Colours::lightgoldenrodyellow),
-    backgroundColour (Colours::darkgreen),
-    preferencesTitleHeight (20),
-    borderSize (3),
-    topRightHandleWidth (20)
+PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
+                                  const Value& loudnessBarMinValue,
+                                  const Value& loudnessBarMaxValue)
+  :  AnimatedSidePanel("Preferences")
 {
-    
-    setAlpha (0.5);
-    
-    showOrHidePreferences.setButtonText("Preferences");
-    showOrHidePreferences.setColour(TextButton::buttonColourId, Colours::black);
-    showOrHidePreferences.setColour(TextButton::textColourOffId, Colours::white);
-    showOrHidePreferences.setAlwaysOnTop (true);
-    addAndMakeVisible(&showOrHidePreferences);
- 
     const bool isReadOnly = false;
     const int textEntryBoxWidth = 0;
-    const int textEntryBoxHeight = 0; 
-    //loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
+    const int textEntryBoxHeight = 0;
+    
+    loudnessBarSize.setRange (5.0, 300.0, 1);
+    loudnessBarSize.getValueObject().referTo(loudnessBarWidth);
+    loudnessBarSize.setColour(Slider::thumbColourId, Colours::black);
     loudnessBarSize.setPopupDisplayEnabled(true, this);
     loudnessBarSize.setTextValueSuffix(" pixels");
     loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     addAndMakeVisible(&loudnessBarSize);
-    
+
+    loudnessBarRange.setRange (-100, 0.0, 1);
+    loudnessBarRange.getMinValueObject().referTo(loudnessBarMinValue);
+    loudnessBarRange.getMaxValueObject().referTo(loudnessBarMaxValue);
+    loudnessBarRange.setColour(Slider::thumbColourId, Colours::black);
     loudnessBarRange.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarRange.setPopupDisplayEnabled(true, this);
     loudnessBarRange.setTextValueSuffix(" LUFS");
@@ -67,46 +62,12 @@ PreferencesPane::~PreferencesPane ()
 {
 }
 
-//==============================================================================
-void PreferencesPane::paint (Graphics& g)
-{
-    // Draw the background
-    // ===================
-    const int roundedCornerRadius = (preferencesTitleHeight + 2*borderSize)/2;
-    g.setColour(backgroundColour);
-    // Draw the main area
-    g.fillRoundedRectangle(0, 0, getWidth() - topRightHandleWidth, getHeight(), roundedCornerRadius);
-    // Remove the rounded corners on the left
-    g.fillRect(0, 0, roundedCornerRadius, getHeight());
-    // Draw the handle on the top right
-    g.fillRoundedRectangle(0, 0, getWidth(), preferencesTitleHeight + 2*borderSize, roundedCornerRadius);
-}
-
-void PreferencesPane::mouseDown(const juce::MouseEvent &event)
-{
-//    backgroundColour = Colours::green;
-//    
-//    ComponentAnimator& animator = Desktop::getInstance().getAnimator();
-//    
-//    const Rectangle<int> finalBounds = Rectangle<int>(50, 100, 200, 50);
-//    const float finalAlpha = 0.5f;
-//    const int animationDurationMilliseconds = 1000;
-//    const bool useProxyComponent = false;
-//    const double startSpeed = 0.0;
-//    const double endSpeed = 0.0;
-//    animator.animateComponent(this, finalBounds, finalAlpha, animationDurationMilliseconds, useProxyComponent , startSpeed, endSpeed);
-    
-}
-
 void PreferencesPane::resized()
 {
-//    const int leftBorder = 5;
-//    const int topBorder = 5; 
-    showOrHidePreferences.setBounds(borderSize, borderSize, getWidth() - 2*borderSize, preferencesTitleHeight);
+    AnimatedSidePanel::resized();
     
     const int sliderHeight = 20;
-//    const int rightBorder = 20;
-    const int loudnessBarSizeY = 2*borderSize + preferencesTitleHeight;
+    const int loudnessBarSizeY = 2*borderSize + titleHeight;
     const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
     loudnessBarSize.setBounds(borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
     

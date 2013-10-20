@@ -26,8 +26,8 @@
  ===============================================================================
  */
 
-#ifndef __SIDE_PANEL__
-#define __SIDE_PANEL__
+#ifndef __ANIMATED_SIDE_PANEL__
+#define __ANIMATED_SIDE_PANEL__
 
 #include "../MacrosAndJuceHeaders.h"
 
@@ -40,7 +40,7 @@ class AnimatedSidePanel  : public Component,
                            public ButtonListener
 {
 public:
-    AnimatedSidePanel ();
+    AnimatedSidePanel (String panelText);
     
     ~AnimatedSidePanel ();
 
@@ -53,17 +53,17 @@ public:
     /** The ButtonListener method. */
     void buttonClicked (Button* button);
     
-private:
-    
+protected:
     Colour backgroundColour;
     int titleHeight;
     int borderSize;
     int topRightHandleWidth;
     
+private:
     bool panelIsVisible;
     int xPositionWhenHidden;
     TextButton showOrHideButton;
 };
 
 
-#endif  // __SIDE_PANEL__
+#endif  // __ANIMATED_SIDE_PANEL__
