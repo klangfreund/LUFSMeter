@@ -71,43 +71,55 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     // TEMP:
     // Add a label that will display the current timecode and status..
-//    addAndMakeVisible (&infoLabel);
-//    infoLabel.setColour (Label::textColourId, Colours::green);
+    //    addAndMakeVisible (&infoLabel);
+    //    infoLabel.setColour (Label::textColourId, Colours::green);
     
     Colour momentaryLoudnessColour = Colours::darkgreen;
     Colour momentaryLoudnessSumColour = Colours::darkgreen.darker().darker();
     Colour integratedLoudnessColour = Colours::yellow.darker().darker();
     
+    
     // Add the meter bars
     momentaryLoudnessBarSum.setColour (momentaryLoudnessSumColour);
     addAndMakeVisible(&momentaryLoudnessBarSum);
     momentaryLoudnessBar.setColour (momentaryLoudnessColour);
-    addAndMakeVisible (&momentaryLoudnessBar);    
+    addAndMakeVisible (&momentaryLoudnessBar);
+    
     addAndMakeVisible (&shortTermLoudnessBar);
+    
     integratedLoudnessBar.setColour (integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessBar);
     
+    
     // Add the numeric values
+    momentaryLoudnessNumeric.setColour(momentaryLoudnessColour);
     addAndMakeVisible (&momentaryLoudnessNumeric);
     momentaryLoudnessNumeric.getLoudnessValueObject().referTo(momentaryLoudnessValue);
+    
     addAndMakeVisible (&shortTermLoudnessNumeric);
     shortTermLoudnessNumeric.getLoudnessValueObject().referTo(shortTermLoudnessValue);
+    
+    integratedLoudnessNumeric.setColour(integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessNumeric);
     integratedLoudnessNumeric.getLoudnessValueObject().referTo(integratedLoudnessValue);
+    
     
     // Add the captions
     const int fontHeight = 16;
     const Font fontForCaptions (fontHeight);
     const Justification justification (Justification::horizontallyCentred);
+    
     momentaryLoudnessCaption.setFont(fontForCaptions);
-    momentaryLoudnessCaption.setColour (Label::textColourId, Colours::green);
+    momentaryLoudnessCaption.setColour (Label::textColourId, momentaryLoudnessColour);
     // momentaryLoudnessCaption.setColour (Label::backgroundColourId, Colours::red);
     momentaryLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&momentaryLoudnessCaption);
+    
     shortTermLoudnessCaption.setFont(fontForCaptions);
     shortTermLoudnessCaption.setColour (Label::textColourId, Colours::green);
     shortTermLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&shortTermLoudnessCaption);
+    
     integratedLoudnessCaption.setFont(fontForCaptions);
     integratedLoudnessCaption.setColour (Label::textColourId, integratedLoudnessColour);
     integratedLoudnessCaption.setJustificationType(justification);

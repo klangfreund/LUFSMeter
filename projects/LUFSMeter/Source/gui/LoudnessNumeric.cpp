@@ -32,24 +32,25 @@
 
 //==============================================================================
 LoudnessNumeric::LoudnessNumeric ()
+ :  colour (Colours::green)
 {
-    levelValue.addListener(this);
+    loudnessValue.addListener(this);
 }
 
 LoudnessNumeric::~LoudnessNumeric ()
 {
-    levelValue.removeListener(this);
+    loudnessValue.removeListener(this);
 }
 
 Value & LoudnessNumeric::getLoudnessValueObject ()
 {
-    return levelValue;
+    return loudnessValue;
 }
 
 void LoudnessNumeric::valueChanged (Value & value)
 {
     const int numberOfDecimalPlaces = 1;
-    currentLevelText = String((float)levelValue.getValue(), numberOfDecimalPlaces);
+    currentLevelText = String((float)loudnessValue.getValue(), numberOfDecimalPlaces);
     
     if (currentLevelText != previousLevelText)
     {
@@ -60,14 +61,18 @@ void LoudnessNumeric::valueChanged (Value & value)
     }
 }
 
-//==============================================================================
+void LoudnessNumeric::setColour(const juce::Colour &newColour)
+{
+    colour = newColour;
+}
+
 void LoudnessNumeric::paint (Graphics& g)
 {   
     // Temp, for debugging:
     // g.fillAll(Colours::red);
     
     // Draw the value as text
-    g.setColour(Colours::green);
+    g.setColour(colour);
     float fontHeight = getHeight();
     const Font font (fontHeight);
     g.setFont(font);

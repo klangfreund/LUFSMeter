@@ -35,7 +35,8 @@
 
 
 //==============================================================================
-/**
+/** A GUI component, that shows a numerical value.
+ *  Used below the loudness bars in the LUFS Meter.
 */
 class LoudnessNumeric  : public Component,
                          public Value::Listener
@@ -48,14 +49,17 @@ public:
     Value & getLoudnessValueObject ();
     
     void valueChanged (Value & value);
+    
+    void setColour (const Colour & newColour);
 
     void paint (Graphics& g);
     
 private:
     
-    Value levelValue;
+    Value loudnessValue;
     String currentLevelText;
     String previousLevelText;
+    Colour colour;
 };
 
 
