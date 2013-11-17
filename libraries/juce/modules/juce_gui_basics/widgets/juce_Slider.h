@@ -762,6 +762,65 @@ public:
         textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
     };
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        slider drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        //==============================================================================
+        virtual void drawLinearSlider (Graphics&,
+                                       int x, int y, int width, int height,
+                                       float sliderPos,
+                                       float minSliderPos,
+                                       float maxSliderPos,
+                                       const Slider::SliderStyle,
+                                       Slider&) = 0;
+
+        virtual void drawLinearSliderBackground (Graphics&,
+                                                 int x, int y, int width, int height,
+                                                 float sliderPos,
+                                                 float minSliderPos,
+                                                 float maxSliderPos,
+                                                 const Slider::SliderStyle style,
+                                                 Slider&) = 0;
+
+        virtual void drawLinearSliderThumb (Graphics&,
+                                            int x, int y, int width, int height,
+                                            float sliderPos,
+                                            float minSliderPos,
+                                            float maxSliderPos,
+                                            const Slider::SliderStyle,
+                                            Slider&) = 0;
+
+        virtual int getSliderThumbRadius (Slider&) = 0;
+
+        virtual void drawRotarySlider (Graphics&,
+                                       int x, int y, int width, int height,
+                                       float sliderPosProportional,
+                                       float rotaryStartAngle,
+                                       float rotaryEndAngle,
+                                       Slider&) = 0;
+
+        virtual Button* createSliderButton (Slider&, bool isIncrement) = 0;
+        virtual Label* createSliderTextBox (Slider&) = 0;
+
+        virtual ImageEffectFilter* getSliderEffect (Slider&) = 0;
+
+        virtual Font getSliderPopupFont (Slider&) = 0;
+        virtual int getSliderPopupPlacement (Slider&) = 0;
+
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // These methods' parameters have changed: see the new method signatures.
+        virtual void createSliderButton (bool) {}
+        virtual void getSliderEffect() {}
+        virtual void getSliderPopupFont() {}
+        virtual void getSliderPopupPlacement() {}
+       #endif
+    };
+
 protected:
     //==============================================================================
     /** @internal */

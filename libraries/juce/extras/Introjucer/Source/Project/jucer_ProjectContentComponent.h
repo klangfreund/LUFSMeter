@@ -92,6 +92,9 @@ public:
 
     StringArray getExportersWhichCanLaunch() const;
 
+    static void getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
+                                                     OwnedArray<Project::Item>& selectedNodes);
+
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;
     void getAllCommands (Array <CommandID>& commands) override;
@@ -118,7 +121,7 @@ protected:
     ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
 
-    void documentAboutToClose (OpenDocumentManager::Document*) override;
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
     void showTranslationTool();
 

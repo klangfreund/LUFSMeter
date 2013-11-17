@@ -51,10 +51,18 @@ double OpenGLShaderProgram::getLanguageVersion()
    #endif
 }
 
-bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
+bool OpenGLShaderProgram::addShader (StringRef code, GLenum type)
 {
     GLuint shaderID = context.extensions.glCreateShader (type);
-    context.extensions.glShaderSource (shaderID, 1, (const GLchar**) &code, nullptr);
+
+   #if JUCE_STRING_UTF_TYPE == 8
+    const GLchar* c = code.text;
+   #else
+    String codeString (code.text);
+    const GLchar* c = codeString.toRawUTF8();
+   #endif
+
+    context.extensions.glShaderSource (shaderID, 1, &c, nullptr);
     context.extensions.glCompileShader (shaderID);
 
     GLint status = GL_FALSE;
@@ -67,7 +75,7 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained compile errors!
         // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);
@@ -83,6 +91,9 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
     return true;
 }
 
+bool OpenGLShaderProgram::addVertexShader (StringRef code)    { return addShader (code, GL_VERTEX_SHADER); }
+bool OpenGLShaderProgram::addFragmentShader (StringRef code)  { return addShader (code, GL_FRAGMENT_SHADER); }
+
 bool OpenGLShaderProgram::link() noexcept
 {
     context.extensions.glLinkProgram (programID);
@@ -97,7 +108,7 @@ bool OpenGLShaderProgram::link() noexcept
         context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infoLogLength, infoLog);
         errorLog = String (infoLog, (size_t) infoLogLength);
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained link errors!
         // Hopefully this compile log should help to explain what went wrong.
         DBG (errorLog);

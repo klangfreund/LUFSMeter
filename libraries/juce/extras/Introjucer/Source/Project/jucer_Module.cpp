@@ -131,21 +131,18 @@ static Array<File> getAllPossibleModulePaths (Project& project)
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->mayCompileOnCurrentOS())
+        for (int i = 0; i < project.getModules().getNumModules(); ++i)
         {
-            for (int i = 0; i < project.getModules().getNumModules(); ++i)
-            {
-                const String path (exporter->getPathForModuleString (project.getModules().getModuleID (i)));
+            const String path (exporter->getPathForModuleString (project.getModules().getModuleID (i)));
 
-                if (path.isNotEmpty())
-                    paths.addIfNotAlreadyThere (path);
-            }
-
-            String oldPath (exporter->getLegacyModulePath());
-
-            if (oldPath.isNotEmpty())
-                paths.addIfNotAlreadyThere (oldPath);
+            if (path.isNotEmpty())
+                paths.addIfNotAlreadyThere (path);
         }
+
+        String oldPath (exporter->getLegacyModulePath());
+
+        if (oldPath.isNotEmpty())
+            paths.addIfNotAlreadyThere (oldPath);
     }
 
     Array<File> files;
@@ -333,9 +330,19 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     exporter.addToExtraSearchPaths (exporter.getModuleFolderRelativeToProject (getID(), projectSaver).getParentDirectory());
 
+    const String extraDefs (moduleInfo.getPreprocessorDefs().trim());
+
+    if (extraDefs.isNotEmpty())
+        exporter.getExporterPreprocessorDefs() = exporter.getExporterPreprocessorDefsString() + "\n" + extraDefs;
+
     {
         Array<File> compiled;
-        findAndAddCompiledCode (exporter, projectSaver, moduleInfo.getFolder(), compiled);
+
+        const File localModuleFolder = project.getModules().shouldCopyModuleFilesLocally (getID()).getValue()
+                                          ? projectSaver.getLocalModuleFolder (getID())
+                                          : moduleInfo.getFolder();
+
+        findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
             addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
@@ -519,33 +526,6 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
     }
 }
 
-void LibraryModule::getLocalCompiledFiles (const File& localModuleFolder, Array<File>& result) const
-{
-    const var compileArray (moduleInfo.moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
-
-    if (const Array<var>* const files = compileArray.getArray())
-    {
-        for (int i = 0; i < files->size(); ++i)
-        {
-            const var& file = files->getReference(i);
-            const String filename (file ["file"].toString());
-
-            if (filename.isNotEmpty()
-                  #if JUCE_MAC
-                   && exporterTargetMatches ("xcode", file ["target"].toString())
-                  #elif JUCE_WINDOWS
-                   && exporterTargetMatches ("msvc",  file ["target"].toString())
-                  #elif JUCE_LINUX
-                   && exporterTargetMatches ("linux", file ["target"].toString())
-                  #endif
-                )
-            {
-                result.add (localModuleFolder.getChildFile (filename));
-            }
-        }
-    }
-}
-
 static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
 {
     const int slash = path.indexOfChar (File::separator);
@@ -636,11 +616,11 @@ Value EnabledModuleList::shouldShowAllModuleFilesInProject (const String& module
                 .getPropertyAsValue (Ids::showAllCode, getUndoManager());
 }
 
-File EnabledModuleList::getModuleInfoFile (const String& moduleID)
+File EnabledModuleList::findLocalModuleInfoFile (const String& moduleID, bool useExportersForOtherOSes)
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (exporter->mayCompileOnCurrentOS())
+        if (useExportersForOtherOSes || exporter->mayCompileOnCurrentOS())
         {
             const String path (exporter->getPathForModuleString (moduleID));
 
@@ -648,28 +628,41 @@ File EnabledModuleList::getModuleInfoFile (const String& moduleID)
             {
                 const File moduleFolder (project.resolveFilename (path));
 
-                File f (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
+                if (moduleFolder.exists())
+                {
+                    File f (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
 
-                f = moduleFolder.getChildFile (moduleID)
-                                .getChildFile (ModuleDescription::getManifestFileName());
+                    f = moduleFolder.getChildFile (moduleID)
+                                    .getChildFile (ModuleDescription::getManifestFileName());
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
 
-                f = moduleFolder.getChildFile ("modules")
-                                .getChildFile (moduleID)
-                                .getChildFile (ModuleDescription::getManifestFileName());
+                    f = moduleFolder.getChildFile ("modules")
+                                    .getChildFile (moduleID)
+                                    .getChildFile (ModuleDescription::getManifestFileName());
 
-                if (f.exists())
-                    return f;
+                    if (f.exists())
+                        return f;
+                }
             }
         }
     }
 
     return File::nonexistent;
+}
+
+File EnabledModuleList::getModuleInfoFile (const String& moduleID)
+{
+    const File f (findLocalModuleInfoFile (moduleID, false));
+
+    if (f != File::nonexistent)
+        return f;
+
+    return findLocalModuleInfoFile (moduleID, true);
 }
 
 File EnabledModuleList::getModuleFolder (const String& moduleID)
@@ -694,7 +687,7 @@ void EnabledModuleList::sortAlphabetically()
     state.sort (sorter, getUndoManager(), false);
 }
 
-Value EnabledModuleList::shouldCopyModuleFilesLocally (const String& moduleID)
+Value EnabledModuleList::shouldCopyModuleFilesLocally (const String& moduleID) const
 {
     return state.getChildWithProperty (Ids::ID, moduleID)
                 .getPropertyAsValue (Ids::useLocalCopy, getUndoManager());
@@ -719,18 +712,18 @@ void EnabledModuleList::addModule (const File& moduleManifestFile, bool copyLoca
             shouldShowAllModuleFilesInProject (moduleID) = true;
             shouldCopyModuleFilesLocally (moduleID) = copyLocally;
 
-            String path (moduleManifestFile.getParentDirectory().getParentDirectory()
-                            .getRelativePathFrom (project.getProjectFolder()));
+            RelativePath path (moduleManifestFile.getParentDirectory().getParentDirectory(),
+                               project.getProjectFolder(), RelativePath::projectFolder);
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
-                exporter->getPathForModuleValue (moduleID) = path;
+                exporter->getPathForModuleValue (moduleID) = path.toUnixStyle();
         }
     }
 }
 
-void EnabledModuleList::removeModule (const String& moduleID)
+void EnabledModuleList::removeModule (String moduleID) // must be pass-by-value, and not a const ref!
 {
-    for (int i = 0; i < state.getNumChildren(); ++i)
+    for (int i = state.getNumChildren(); --i >= 0;)
         if (state.getChild(i) [Ids::ID] == moduleID)
             state.removeChild (i, getUndoManager());
 
@@ -792,7 +785,7 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
     getDependencies (project, moduleID, dependencies);
 
     for (int i = 0; i < dependencies.size(); ++i)
-        if ((! project.getModules().isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
+        if ((! isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
             extraDepsNeeded.add (dependencies[i]);
 
     return extraDepsNeeded;
@@ -802,15 +795,21 @@ bool EnabledModuleList::areMostModulesCopiedLocally() const
 {
     int numYes = 0, numNo = 0;
 
-    for (int i = project.getModules().getNumModules(); --i >= 0;)
+    for (int i = getNumModules(); --i >= 0;)
     {
-        if (project.getModules().shouldCopyModuleFilesLocally (project.getModules().getModuleID (i)).getValue())
+        if (shouldCopyModuleFilesLocally (getModuleID (i)).getValue())
             ++numYes;
         else
             ++numNo;
     }
 
     return numYes > numNo;
+}
+
+void EnabledModuleList::setLocalCopyModeForAllModules (bool copyLocally)
+{
+    for (int i = getNumModules(); --i >= 0;)
+        shouldCopyModuleFilesLocally (project.getModules().getModuleID (i)) = copyLocally;
 }
 
 File EnabledModuleList::findDefaultModulesFolder (Project& project)

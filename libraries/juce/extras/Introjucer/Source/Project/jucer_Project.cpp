@@ -603,7 +603,6 @@ void Project::Item::setFile (const File& file)
 
 void Project::Item::setFile (const RelativePath& file)
 {
-    jassert (file.getRoot() == RelativePath::projectFolder);
     jassert (isFile());
     state.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
     state.setProperty (Ids::name, file.getFileName(), getUndoManager());
@@ -794,7 +793,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
 
     if (file.isDirectory())
     {
-        Item group (addNewSubGroup (file.getFileNameWithoutExtension(), insertIndex));
+        Item group (addNewSubGroup (file.getFileName(), insertIndex));
 
         for (DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories); iter.next();)
             if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())

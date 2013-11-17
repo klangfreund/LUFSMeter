@@ -265,7 +265,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcep
 
 String MemoryBlock::toString() const
 {
-    return String (CharPointer_UTF8 (data), size);
+    return String::fromUTF8 (data, (int) size);
 }
 
 //==============================================================================
@@ -382,7 +382,7 @@ static const char base64DecodingTable[] =
 
 bool MemoryBlock::fromBase64Encoding (StringRef s)
 {
-    String::CharPointerType dot (CharacterFunctions::find (s.text, CharPointer_ASCII (".")));
+    String::CharPointerType dot (CharacterFunctions::find (s.text, (juce_wchar) '.'));
 
     if (dot.isEmpty())
         return false;

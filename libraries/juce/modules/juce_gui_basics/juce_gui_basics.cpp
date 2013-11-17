@@ -35,6 +35,8 @@
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
+#define NS_FORMAT_FUNCTION(F,A) // To avoid spurious warnings from GCC
+
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_gui_basics.h"
 
@@ -198,6 +200,9 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "layout/juce_TabbedComponent.cpp"
 #include "layout/juce_Viewport.cpp"
 #include "lookandfeel/juce_LookAndFeel.cpp"
+#include "lookandfeel/juce_LookAndFeel_V2.cpp"
+#include "lookandfeel/juce_LookAndFeel_V1.cpp"
+#include "lookandfeel/juce_LookAndFeel_V3.cpp"
 #include "menus/juce_MenuBarComponent.cpp"
 #include "menus/juce_MenuBarModel.cpp"
 #include "menus/juce_PopupMenu.cpp"
