@@ -83,16 +83,14 @@ public:
     void getHighlightArea (RectangleList<float>& area, float x, int y, int lineH, float characterWidth) const
     {
         if (highlightColumnStart < highlightColumnEnd)
-            area.addWithoutMerging (Rectangle<float> (x + highlightColumnStart * characterWidth, (float) y,
-                                                      (highlightColumnEnd - highlightColumnStart) * characterWidth, (float) lineH));
+            area.add (Rectangle<float> (x + highlightColumnStart * characterWidth - 1.0f, y - 0.5f,
+                                        (highlightColumnEnd - highlightColumnStart) * characterWidth + 1.5f, lineH + 1.0f));
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
                const float rightClip, const float x, const int y,
                const int lineH, const float characterWidth) const
     {
-        Colour lastColour (0x00000001);
-
         AttributedString as;
         as.setJustification (Justification::centredLeft);
 
@@ -285,7 +283,7 @@ private:
 class CodeEditorComponent::GutterComponent  : public Component
 {
 public:
-    GutterComponent() : lastNumLines (0) {}
+    GutterComponent() : firstLine (0), lastNumLines (0) {}
 
     void paint (Graphics& g) override
     {
@@ -315,18 +313,20 @@ public:
         ga.draw (g);
     }
 
-    void documentChanged (CodeDocument& doc)
+    void documentChanged (CodeDocument& doc, int newFirstLine)
     {
         const int newNumLines = doc.getNumLines();
-        if (newNumLines != lastNumLines)
+
+        if (newNumLines != lastNumLines || firstLine != newFirstLine)
         {
+            firstLine = newFirstLine;
             lastNumLines = newNumLines;
             repaint();
         }
     }
 
 private:
-    int lastNumLines;
+    int firstLine, lastNumLines;
 };
 
 
@@ -540,7 +540,7 @@ void CodeEditorComponent::rebuildLineTokens()
                  verticalScrollBar.getX(), lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
 
     if (gutter != nullptr)
-        gutter->documentChanged (document);
+        gutter->documentChanged (document, firstLineOnScreen);
 }
 
 void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)

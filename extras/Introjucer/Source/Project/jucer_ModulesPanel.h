@@ -33,7 +33,9 @@ public:
         : project (p),
           modulesValueTree (p.getModules().state),
           addWebModuleButton ("Download and add a module..."),
-          updateModuleButton ("Install updates to modules...")
+          updateModuleButton ("Install updates to modules..."),
+          setCopyModeButton  ("Set copy-mode for all modules..."),
+          copyPathButton ("Set paths for all modules...")
     {
         table.getHeader().addColumn ("Module", nameCol, 180, 100, 400, TableHeaderComponent::notSortable);
         table.getHeader().addColumn ("Installed Version", versionCol, 100, 100, 100, TableHeaderComponent::notSortable);
@@ -49,9 +51,15 @@ public:
 
         addAndMakeVisible (&addWebModuleButton);
         addAndMakeVisible (&updateModuleButton);
+        addAndMakeVisible (&setCopyModeButton);
+        addAndMakeVisible (&copyPathButton);
         addWebModuleButton.addListener (this);
         updateModuleButton.addListener (this);
         updateModuleButton.setEnabled (false);
+        setCopyModeButton.addListener (this);
+        setCopyModeButton.setTriggeredOnMouseDown (true);
+        copyPathButton.addListener (this);
+        copyPathButton.setTriggeredOnMouseDown (true);
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -72,9 +80,15 @@ public:
         table.setBounds (r.removeFromTop (table.getRowPosition (getNumRows() - 1, true).getBottom() + 20));
 
         Rectangle<int> buttonRow (r.removeFromTop (32).removeFromBottom (28));
-        addWebModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 2)));
+        addWebModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
         buttonRow.removeFromLeft (8);
-        updateModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 2)));
+        updateModuleButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
+        buttonRow.removeFromLeft (8);
+
+        buttonRow = r.removeFromTop (34).removeFromBottom (28);
+        setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
+        buttonRow.removeFromLeft (8);
+        copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
     }
 
     int getNumRows() override
@@ -89,7 +103,7 @@ public:
         g.fillRect (0, 0, width, height - 1);
     }
 
-    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override
+    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/) override
     {
         String text;
         const String moduleID (project.getModules().getModuleID (rowNumber));
@@ -170,10 +184,10 @@ public:
 
     void buttonClicked (Button* b)
     {
-        if (b == &addWebModuleButton)
-            showAddModuleMenu();
-        else if (b == &updateModuleButton)
-            showUpdateModulesMenu();
+        if (b == &addWebModuleButton)       showAddModuleMenu();
+        else if (b == &updateModuleButton)  showUpdateModulesMenu();
+        else if (b == &setCopyModeButton)   showCopyModeMenu();
+        else if (b == &copyPathButton)      showSetPathsMenu();
     }
 
 private:
@@ -189,7 +203,7 @@ private:
     Project& project;
     ValueTree modulesValueTree;
     TableListBox table;
-    TextButton addWebModuleButton, updateModuleButton;
+    TextButton addWebModuleButton, updateModuleButton, setCopyModeButton, copyPathButton;
     ScopedPointer<ModuleList> listFromWebsite;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
@@ -308,6 +322,56 @@ private:
         if (res > 0 && listFromWebsite != nullptr)
             if (const ModuleDescription* md = listFromWebsite->getModuleWithID (mods[res - 1]))
                 DownloadAndInstallThread::addModuleFromWebsite (project, *md);
+    }
+
+    void showCopyModeMenu()
+    {
+        PopupMenu m;
+        m.addItem (1, "Set all modules to copy locally");
+        m.addItem (2, "Set all modules to not copy locally");
+
+        int res = m.showAt (&setCopyModeButton);
+
+        if (res != 0)
+            project.getModules().setLocalCopyModeForAllModules (res == 1);
+    }
+
+    void showSetPathsMenu()
+    {
+        EnabledModuleList& moduleList = project.getModules();
+
+        const String moduleToCopy (moduleList.getModuleID (table.getSelectedRow()));
+
+        if (moduleToCopy.isNotEmpty())
+        {
+            PopupMenu m;
+            m.addItem (1, "Copy the paths from the module '" + moduleToCopy + "' to all other modules");
+
+            int res = m.showAt (&copyPathButton);
+
+            if (res != 0)
+            {
+                for (Project::ExporterIterator exporter (project); exporter.next();)
+                {
+                    for (int i = 0; i < moduleList.getNumModules(); ++i)
+                    {
+                        String modID = moduleList.getModuleID (i);
+
+                        if (modID != moduleToCopy)
+                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                    }
+                }
+            }
+
+            table.repaint();
+        }
+        else
+        {
+            PopupMenu m;
+            m.addItem (1, "Copy the paths from the selected module to all other modules", false);
+
+            m.showAt (&copyPathButton);
+        }
     }
 
     struct WebsiteUpdateFetchThread  : private Thread,

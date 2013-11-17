@@ -45,6 +45,7 @@ struct ModuleDescription
     String getDescription() const       { return moduleInfo [Ids::description].toString(); }
     String getLicense() const           { return moduleInfo [Ids::license].toString(); }
     String getHeaderName() const        { return moduleInfo [Ids::include].toString(); }
+    String getPreprocessorDefs() const  { return moduleInfo [Ids::defines].toString(); }
 
     File getFolder() const              { jassert (manifestFile != File::nonexistent); return manifestFile.getParentDirectory(); }
 
@@ -94,7 +95,6 @@ public:
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
-    void getLocalCompiledFiles (const File& localModuleFolder, Array<File>& files) const;
     void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
 
     ModuleDescription moduleInfo;
@@ -122,8 +122,8 @@ public:
 
     bool isModuleEnabled (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
-    Value shouldCopyModuleFilesLocally (const String& moduleID);
-    void removeModule (const String& moduleID);
+    Value shouldCopyModuleFilesLocally (const String& moduleID) const;
+    void removeModule (String moduleID);
     bool isAudioPluginModuleMissing() const;
 
     ModuleDescription getModuleInfo (const String& moduleID);
@@ -144,6 +144,7 @@ public:
     String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
     bool areMostModulesCopiedLocally() const;
+    void setLocalCopyModeForAllModules (bool copyLocally);
     void sortAlphabetically();
 
     static File findDefaultModulesFolder (Project&);
@@ -153,6 +154,8 @@ public:
 
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
+
+    File findLocalModuleInfoFile (const String& moduleID, bool useExportersForOtherOSes);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };

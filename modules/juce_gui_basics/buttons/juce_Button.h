@@ -37,10 +37,7 @@
     @see TextButton, DrawableButton, ToggleButton
 */
 class JUCE_API  Button  : public Component,
-                          public SettableTooltipClient,
-                          public ApplicationCommandManagerListener,
-                          public ValueListener,
-                          private KeyListener
+                          public SettableTooltipClient
 {
 protected:
     //==============================================================================
@@ -355,6 +352,33 @@ public:
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
 
+    //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        button-drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        virtual void drawButtonBackground (Graphics&, Button& button, const Colour& backgroundColour,
+                                           bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual Font getTextButtonFont (TextButton& button) = 0;
+
+        /** Draws the text for a TextButton. */
+        virtual void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        /** Draws the contents of a standard ToggleButton. */
+        virtual void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual void changeToggleButtonWidthToFitText (ToggleButton&) = 0;
+
+        virtual void drawTickBox (Graphics&, Component&, float x, float y, float w, float h,
+                                  bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) = 0;
+
+        virtual void drawDrawableButton (Graphics&, DrawableButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+    };
+
 protected:
     //==============================================================================
     /** This method is called when the button has been clicked.
@@ -419,10 +443,6 @@ protected:
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
-    bool keyPressed (const KeyPress&, Component*) override;
-    /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component*) override;
-    /** @internal */
     using Component::keyStateChanged;
     /** @internal */
     void paint (Graphics&) override;
@@ -436,12 +456,6 @@ protected:
     void focusLost (FocusChangeType) override;
     /** @internal */
     void enablementChanged() override;
-    /** @internal */
-    void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) override;
-    /** @internal */
-    void applicationCommandListChanged() override;
-    /** @internal */
-    void valueChanged (Value&) override;
 
 private:
     //==============================================================================
@@ -450,10 +464,10 @@ private:
     String text;
     ListenerList<Listener> buttonListeners;
 
-    class RepeatTimer;
-    friend class RepeatTimer;
-    friend struct ContainerDeletePolicy<RepeatTimer>;
-    ScopedPointer<RepeatTimer> repeatTimer;
+    class CallbackHelper;
+    friend class CallbackHelper;
+    friend struct ContainerDeletePolicy<CallbackHelper>;
+    ScopedPointer<CallbackHelper> callbackHelper;
     uint32 buttonPressTime, lastRepeatTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
@@ -471,7 +485,8 @@ private:
     bool generateTooltip;
 
     void repeatTimerCallback();
-    RepeatTimer& getRepeatTimer();
+    bool keyStateChangedCallback();
+    void applicationCommandListChangeCallback();
 
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);

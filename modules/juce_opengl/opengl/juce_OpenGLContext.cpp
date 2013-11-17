@@ -261,8 +261,13 @@ public:
     {
         Graphics g (llgc);
 
-       #if JUCE_ENABLE_REPAINT_DEBUGGING
-        g.saveState();
+      #if JUCE_ENABLE_REPAINT_DEBUGGING
+       #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE
+        if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
+       #endif
+        {
+            g.saveState();
+        }
        #endif
 
         JUCE_TRY
@@ -271,16 +276,21 @@ public:
         }
         JUCE_CATCH_EXCEPTION
 
-       #if JUCE_ENABLE_REPAINT_DEBUGGING
-        // enabling this code will fill all areas that get repainted with a colour overlay, to show
-        // clearly when things are being repainted.
-        g.restoreState();
+      #if JUCE_ENABLE_REPAINT_DEBUGGING
+       #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE
+        if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
+       #endif
+        {
+            // enabling this code will fill all areas that get repainted with a colour overlay, to show
+            // clearly when things are being repainted.
+            g.restoreState();
 
-        static Random rng;
-        g.fillAll (Colour ((uint8) rng.nextInt (255),
-                           (uint8) rng.nextInt (255),
-                           (uint8) rng.nextInt (255),
-                           (uint8) 0x50));
+            static Random rng;
+            g.fillAll (Colour ((uint8) rng.nextInt (255),
+                               (uint8) rng.nextInt (255),
+                               (uint8) rng.nextInt (255),
+                               (uint8) 0x50));
+        }
        #endif
     }
 
@@ -404,7 +414,12 @@ void OpenGLContext::NativeContext::renderCallback()
     isInsideGLCallback = true;
 
     if (CachedImage* const c = CachedImage::get (component))
+    {
+        if (c->context.continuousRepaint)
+            c->context.triggerRepaint();
+
         c->renderFrame();
+    }
 
     isInsideGLCallback = false;
 }
@@ -714,22 +729,23 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 {
     jassert (name != nullptr);
 
-    CachedImage* const c = getCachedImage();
-
-    // This method must only be called from an openGL rendering callback.
-    jassert (c != nullptr && nativeContext != nullptr);
-    jassert (getCurrentContext() != nullptr);
-
-    const int index = c->associatedObjectNames.indexOf (name);
-
-    if (index >= 0)
+    if (CachedImage* const c = getCachedImage())
     {
-        c->associatedObjects.set (index, newObject);
-    }
-    else
-    {
-        c->associatedObjectNames.add (name);
-        c->associatedObjects.add (newObject);
+        // This method must only be called from an openGL rendering callback.
+        jassert (nativeContext != nullptr);
+        jassert (getCurrentContext() != nullptr);
+
+        const int index = c->associatedObjectNames.indexOf (name);
+
+        if (index >= 0)
+        {
+            c->associatedObjects.set (index, newObject);
+        }
+        else
+        {
+            c->associatedObjectNames.add (name);
+            c->associatedObjects.add (newObject);
+        }
     }
 }
 

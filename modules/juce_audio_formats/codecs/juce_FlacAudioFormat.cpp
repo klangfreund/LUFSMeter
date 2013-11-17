@@ -380,7 +380,7 @@ public:
             samplesToWrite = const_cast<const int**> (channels.getData());
         }
 
-        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (size_t) numSamples) != 0;
+        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (unsigned) numSamples) != 0;
     }
 
     bool writeData (const void* const data, const int size) const
@@ -536,7 +536,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray FlacAudioFormat::getQualityOptions()
 {
-    const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
+    static const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
     return StringArray (options);
 }
 

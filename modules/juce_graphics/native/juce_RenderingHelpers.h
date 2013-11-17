@@ -142,7 +142,7 @@ class GlyphCache  : private DeletedAtShutdown
 public:
     GlyphCache()
     {
-        addNewGlyphSlots (120);
+        reset();
     }
 
     ~GlyphCache()
@@ -207,6 +207,15 @@ public:
         glyph->draw (target, pos);
     }
 
+    void reset()
+    {
+        const ScopedWriteLock swl (lock);
+        glyphs.clear();
+        addNewGlyphSlots (120);
+        hits.set (0);
+        misses.set (0);
+    }
+
 private:
     friend struct ContainerDeletePolicy<CachedGlyphType>;
     OwnedArray<CachedGlyphType> glyphs;
@@ -215,6 +224,8 @@ private:
 
     void addNewGlyphSlots (int num)
     {
+        glyphs.ensureStorageAllocated (glyphs.size() + num);
+
         while (--num >= 0)
             glyphs.add (new CachedGlyphType());
     }
@@ -272,12 +283,11 @@ public:
         glyph = glyphNumber;
 
         const float fontHeight = font.getHeight();
-        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
-                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                  #if JUCE_MAC || JUCE_IOS
-                                                                    .translated (0.0f, -0.5f)
-                                                                  #endif
-                                                    );
+        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber, AffineTransform::scale (fontHeight * font.getHorizontalScale(),
+                                                                                         fontHeight));
+
+        if (edgeTable != nullptr)
+            edgeTable->multiplyLevels (1.5f);
     }
 
     Font font;
@@ -2260,6 +2270,14 @@ public:
             renderImage (sourceImage, trans, nullptr);
     }
 
+    static bool isOnlyTranslationAllowingError (const AffineTransform& t)
+    {
+        return (std::abs (t.mat01) < 0.002)
+            && (std::abs (t.mat10) < 0.002)
+            && (std::abs (t.mat00 - 1.0f) < 0.002)
+            && (std::abs (t.mat11 - 1.0f) < 0.002);
+    }
+
     void renderImage (const Image& sourceImage, const AffineTransform& trans,
                       const BaseRegionType* const tiledFillClipRegion)
     {
@@ -2267,7 +2285,7 @@ public:
 
         const int alpha = fillType.colour.getAlpha();
 
-        if (t.isOnlyTranslation())
+        if (isOnlyTranslationAllowingError (t))
         {
             // If our translation doesn't involve any distortion, just use a simple blit..
             int tx = (int) (t.getTranslationX() * 256.0f);
@@ -2419,6 +2437,13 @@ public:
         }
     }
 
+    typedef GlyphCache<CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+
+    static void clearGlyphCache()
+    {
+        GlyphCacheType::getInstance().reset();
+    }
+
     //==============================================================================
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
@@ -2426,8 +2451,6 @@ public:
         {
             if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                typedef GlyphCache <CachedGlyphEdgeTable <SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
-
                 GlyphCacheType& cache = GlyphCacheType::getInstance();
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());

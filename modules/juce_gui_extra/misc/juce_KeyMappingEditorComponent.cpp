@@ -232,7 +232,7 @@ public:
     void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
-        g.setColour (findColour (KeyMappingEditorComponent::textColourId));
+        g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
@@ -271,10 +271,10 @@ public:
         : owner (kec), commandID (command)
     {}
 
-    String getUniqueName() const         { return String ((int) commandID) + "_id"; }
-    bool mightContainSubItems()          { return false; }
-    int getItemHeight() const            { return 20; }
-    Component* createItemComponent()     { return new ItemComponent (owner, commandID); }
+    String getUniqueName() const override         { return String ((int) commandID) + "_id"; }
+    bool mightContainSubItems() override          { return false; }
+    int getItemHeight() const override            { return 20; }
+    Component* createItemComponent() override     { return new ItemComponent (owner, commandID); }
 
 private:
     KeyMappingEditorComponent& owner;
@@ -292,17 +292,16 @@ public:
         : owner (kec), categoryName (name)
     {}
 
-    String getUniqueName() const                { return categoryName + "_cat"; }
-    bool mightContainSubItems()                 { return true; }
-    int getItemHeight() const                   { return 28; }
+    String getUniqueName() const override       { return categoryName + "_cat"; }
+    bool mightContainSubItems() override        { return true; }
+    int getItemHeight() const override          { return 22; }
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setFont (Font (height * 0.6f, Font::bold));
+        g.setFont (Font (height * 0.7f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawText (TRANS (categoryName), 2, 0, width - 2, height,
-                    Justification::centredLeft, true);
+        g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -413,6 +412,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
     tree.setRootItem (treeItem);
+    tree.setIndentSize (12);
 }
 
 KeyMappingEditorComponent::~KeyMappingEditorComponent()
