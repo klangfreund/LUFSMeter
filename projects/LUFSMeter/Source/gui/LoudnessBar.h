@@ -60,6 +60,8 @@ public:
     
     /** The value listener method. */
     void valueChanged (Value & value);
+    
+    void setColour (const Colour & newColour);
 
     void paint (Graphics& g);
     
@@ -77,6 +79,8 @@ private:
     
     float stretch;
     float offset;
+    
+    Colour colour;
     
     Value loudnessValue;
     Value minLoudness;

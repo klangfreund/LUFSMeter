@@ -34,7 +34,8 @@
 PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
                                   const Value& loudnessBarMinValue,
                                   const Value& loudnessBarMaxValue)
-  :  AnimatedSidePanel("Preferences")
+  :  AnimatedSidePanel("Preferences"),
+     showIntegratedLoudnessLabel( String::empty, "I")
 {
     const bool isReadOnly = false;
     const int textEntryBoxWidth = 0;
@@ -56,6 +57,14 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     loudnessBarRange.setPopupDisplayEnabled(true, this);
     loudnessBarRange.setTextValueSuffix(" LUFS");
     addAndMakeVisible(&loudnessBarRange);
+    
+    //showIntegratedLoudnessHistory.setButtonText ("I");
+    showIntegratedLoudnessHistory.setWantsKeyboardFocus (false);
+    addAndMakeVisible(&showIntegratedLoudnessHistory);
+    showIntegratedLoudnessLabel.setColour(Label::textColourId, Colours::lightgrey);
+    showIntegratedLoudnessLabel.setJustificationType(Justification::centred);
+    addAndMakeVisible(&showIntegratedLoudnessLabel);
+    //showIntegratedLoudnessLabel.attachToComponent(&showIntegratedLoudnessHistory, false);
 }
 
 PreferencesPane::~PreferencesPane ()
@@ -69,8 +78,12 @@ void PreferencesPane::resized()
     const int sliderHeight = 20;
     const int loudnessBarSizeY = 2*borderSize + titleHeight;
     const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
-    loudnessBarSize.setBounds(borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
+    loudnessBarSize.setBounds (borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
     
     const int loudnessBarRangeY = loudnessBarSizeY + sliderHeight + borderSize;
-    loudnessBarRange.setBounds(borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
+    loudnessBarRange.setBounds (borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
+    
+    const int toggleButtonsY = loudnessBarRangeY + sliderHeight + borderSize;
+    showIntegratedLoudnessHistory.setBounds (borderSize, toggleButtonsY, 20, 20);
+    showIntegratedLoudnessLabel.setBounds(borderSize, toggleButtonsY + 20, 20, 20);
 }

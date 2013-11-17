@@ -34,7 +34,8 @@
 LoudnessBar::LoudnessBar (const Value & loudnessValueToReferTo,
                           const Value & minValueToReferTo,
                           const Value & maxValueToReferTo)
-  : currentLoudness (minValueToReferTo.getValue()),
+:   colour (Colours::green),
+    currentLoudness (minValueToReferTo.getValue()),
     previousLoudness (minValueToReferTo.getValue())
 {
     loudnessValue.referTo(loudnessValueToReferTo);
@@ -95,6 +96,11 @@ void LoudnessBar::valueChanged (Value & value)
     }
 }
 
+void LoudnessBar::setColour (const Colour & newColour)
+{
+    colour = newColour;
+}
+
 //==============================================================================
 void LoudnessBar::paint (Graphics& g)
 {
@@ -109,7 +115,7 @@ void LoudnessBar::paint (Graphics& g)
 //    g.fillRoundedRectangle(x, y, width, height, cornerSize);
     
     float barHeightInPercent = stretch*currentLoudness + offset;
-    g.setColour(Colours::green);
+    g.setColour(colour);
     const float topLeftX = 0.0f;
     float topLeftY = (1.0f - barHeightInPercent) * height;
     float bottomY = height;

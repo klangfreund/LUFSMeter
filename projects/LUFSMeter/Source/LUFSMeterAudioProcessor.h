@@ -113,7 +113,9 @@ public:
     //==============================================================================
     float getShortTermLoudness();
     
-    const Array<float>& getMomentaryLoudness();
+    const Array<float>& getMomentaryLoudnessForIndividualChannels();
+    
+    float getMomentaryLoudness();
     
     float getIntegratedLoudness();
 

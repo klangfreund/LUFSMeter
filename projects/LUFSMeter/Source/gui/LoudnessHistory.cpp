@@ -36,6 +36,7 @@ LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
                                   const Value & maxLoudnessToReferTo)
   : currentLevelValue (var(0.0f)),
 //    timeRange (240),
+    colour (Colours::green),
     specifiedTimeRange (20), // seconds
     lineThickness (2.0f),
 //    desiredNumberOfPixelsBetweenTwoPoints (3.0f),
@@ -68,6 +69,11 @@ LoudnessHistory::~LoudnessHistory ()
 Value & LoudnessHistory::getLevelValueObject ()
 {
     return currentLevelValue;
+}
+
+void LoudnessHistory::setColour (const Colour & newColour)
+{
+    colour = newColour;
 }
 
 void LoudnessHistory::timerCallback()
@@ -208,7 +214,7 @@ void LoudnessHistory::paint (Graphics& g)
 {
     
     // Draw the graph.
-    g.setColour(Colours::green);
+    g.setColour (colour);
     float currentX = getWidth();
     float currentY = *mostRecentYPosition;
     float nextX;

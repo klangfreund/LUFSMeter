@@ -51,7 +51,7 @@
 #endif
  */
 #ifndef  JucePlugin_MaxNumInputChannels
-#define JucePlugin_MaxNumInputChannels    12
+#define JucePlugin_MaxNumInputChannels    2
 #endif
 
 #ifndef  JucePlugin_MaxNumOutputChannels

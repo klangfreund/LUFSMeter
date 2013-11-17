@@ -414,8 +414,14 @@ const Array<float>& Ebu128LoudnessMeter::getShortTermLoudnessForIndividualChanne
     // calculate the short term loudness
     for (int k=0; k != shortTermLoudness.size(); ++k)
     {
-        // This refers to equation (2) in ITU-R BS.1770-2
-        float kthChannelShortTermLoudness = float(-0.691 + 10.* std::log10(*averageOfTheLast3s[k]));
+        float kthChannelShortTermLoudness = minimalReturnValue;
+        
+        if (*averageOfTheLast3s[k] > 0.0f)
+        {
+            // This refers to equation (2) in ITU-R BS.1770-2
+            kthChannelShortTermLoudness = jmax (float(-0.691 + 10.* std::log10(*averageOfTheLast3s[k])), minimalReturnValue);
+        }
+        
         shortTermLoudness.set(k, kthChannelShortTermLoudness);
     }
     
@@ -431,7 +437,7 @@ float Ebu128LoudnessMeter::getShortTermLoudness()
         weightedSum += channelWeighting[k] * *averageOfTheLast3s[k];
     }
     
-    if (weightedSum > 0.0f)
+    if (weightedSum > 0.0)
     {
         // This refers to equation (2) in ITU-R BS.1770-2
         return jmax(float(-0.691 + 10.* std::log10(weightedSum)), minimalReturnValue);
@@ -444,26 +450,46 @@ float Ebu128LoudnessMeter::getShortTermLoudness()
     }
 }
 
-const Array<float>& Ebu128LoudnessMeter::getMomentaryLoudness()
+const Array<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChannels()
 {
-    float kthChannelMomentaryLoudness;
     
     // calculate the momentary loudness
     for (int k=0; k != momentaryLoudness.size(); ++k)
     {
+        float kthChannelMomentaryLoudness = minimalReturnValue;
+        
         if (*averageOfTheLast400ms[k] > 0.0f)
         {
             // This refers to equation (2) in ITU-R BS.1770-2
-            kthChannelMomentaryLoudness = jmax (float (-0.691 + 10.* std::log10(*averageOfTheLast400ms[k])), minimalReturnValue);
+            kthChannelMomentaryLoudness = jmax (float (-0.691 + 10. * std::log10(*averageOfTheLast400ms[k])), minimalReturnValue);
         }
-        else
-        {
-            kthChannelMomentaryLoudness = minimalReturnValue;
-        }
+
         momentaryLoudness.set(k, kthChannelMomentaryLoudness);
     }
     
     return momentaryLoudness;
+}
+
+float Ebu128LoudnessMeter::getMomentaryLoudness()
+{
+    // calculate the short term loudness
+    double weightedSum = 0.0;
+    for (int k=0; k != averageOfTheLast400ms.size(); ++k)
+    {
+        weightedSum += channelWeighting[k] * *averageOfTheLast400ms[k];
+    }
+    
+    if (weightedSum > 0.0)
+    {
+        // This refers to equation (2) in ITU-R BS.1770-2
+        return jmax (float (-0.691 + 10. * std::log10(weightedSum)), minimalReturnValue);
+    }
+    else
+    {
+        // Since returning a value of -nan most probably would lead to
+        // a malfunction, return a minimal return value.
+        return minimalReturnValue;
+    }
 }
 
 float Ebu128LoudnessMeter::getIntegratedLoudness()

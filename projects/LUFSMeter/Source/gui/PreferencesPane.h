@@ -51,7 +51,11 @@ public:
     
 private:
     Slider loudnessBarSize;
-    LoudnessBarRangeSlider loudnessBarRange;   
+    LoudnessBarRangeSlider loudnessBarRange;
+    ToggleButton showIntegratedLoudnessHistory;
+    Label showIntegratedLoudnessLabel;
+    ToggleButton showShortTimeLoudnessHistory;
+    ToggleButton showMomentaryLoudnessHistory;
 };
 
 

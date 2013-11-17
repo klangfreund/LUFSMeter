@@ -33,6 +33,7 @@
 //==============================================================================
 MultiChannelLoudnessBar::MultiChannelLoudnessBar (const Value & minLoudnessValueToReferTo,
                                                   const Value & maxLoudnessValueToReferTo)
+ :  colour (Colours::green)
 {
     minLoudness.referTo(minLoudnessValueToReferTo);
     minLoudness.addListener(this);
@@ -78,6 +79,11 @@ void MultiChannelLoudnessBar::valueChanged (Value & value)
     }
 }
 
+void MultiChannelLoudnessBar::setColour(const juce::Colour &newColour)
+{
+    colour = newColour;
+}
+
 //==============================================================================
 void MultiChannelLoudnessBar::resized ()
 {
@@ -88,7 +94,7 @@ void MultiChannelLoudnessBar::paint (Graphics& g)
 {
     const float height = float (getHeight());
     
-    g.setColour(Colours::green);
+    g.setColour (colour);
     
     float topLeftX = 0.0f;
     for (int channel = 0; channel < currentMultiChannelLoudness.size(); ++channel)

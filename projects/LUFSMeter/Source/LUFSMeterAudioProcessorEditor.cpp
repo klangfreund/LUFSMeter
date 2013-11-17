@@ -45,7 +45,10 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
                            getProcessor()->loudnessBarMaxValue),
     momentaryLoudnessBar (getProcessor()->loudnessBarMinValue,
                           getProcessor()->loudnessBarMaxValue),
-    shortTermLoudnessBar (shortTermLoudnessValue, 
+    momentaryLoudnessBarSum (momentaryLoudnessValue,
+                             getProcessor()->loudnessBarMinValue,
+                             getProcessor()->loudnessBarMaxValue),
+    shortTermLoudnessBar (shortTermLoudnessValue,
                           getProcessor()->loudnessBarMinValue, 
                           getProcessor()->loudnessBarMaxValue),
     integratedLoudnessBar (integratedLoudnessValue, 
@@ -54,6 +57,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     momentaryLoudnessCaption (String::empty, "M"),
     shortTermLoudnessCaption (String::empty, "S"),
     integratedLoudnessCaption (String::empty, "I"),
+    momentaryLoudnessHistory (momentaryLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     shortTermLoudnessHistory (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     integratedLoudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     preferencesPane(getProcessor()->loudnessBarWidth,
@@ -70,9 +74,17 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
 //    addAndMakeVisible (&infoLabel);
 //    infoLabel.setColour (Label::textColourId, Colours::green);
     
+    Colour momentaryLoudnessColour = Colours::darkgreen;
+    Colour momentaryLoudnessSumColour = Colours::darkgreen.darker().darker();
+    Colour integratedLoudnessColour = Colours::yellow.darker().darker();
+    
     // Add the meter bars
+    momentaryLoudnessBarSum.setColour (momentaryLoudnessSumColour);
+    addAndMakeVisible(&momentaryLoudnessBarSum);
+    momentaryLoudnessBar.setColour (momentaryLoudnessColour);
     addAndMakeVisible (&momentaryLoudnessBar);    
     addAndMakeVisible (&shortTermLoudnessBar);
+    integratedLoudnessBar.setColour (integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessBar);
     
     // Add the numeric values
@@ -97,12 +109,15 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     shortTermLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&shortTermLoudnessCaption);
     integratedLoudnessCaption.setFont(fontForCaptions);
-    integratedLoudnessCaption.setColour (Label::textColourId, Colours::green);
+    integratedLoudnessCaption.setColour (Label::textColourId, integratedLoudnessColour);
     integratedLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&integratedLoudnessCaption);
     
     // Add the loudness history graph.
+    momentaryLoudnessHistory.setColour(momentaryLoudnessSumColour);
+    addAndMakeVisible (&momentaryLoudnessHistory);
     addAndMakeVisible (&shortTermLoudnessHistory);
+    integratedLoudnessHistory.setColour (integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessHistory);
     
     // Add the reset button
@@ -129,6 +144,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // Listen to the loudnessBarWidth
     getProcessor()->loudnessBarWidth.addListener (this);
     
+    momentaryLoudnessHistory.reset();
     shortTermLoudnessHistory.reset();
     integratedLoudnessHistory.reset();
     
@@ -182,15 +198,13 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
     
     // momentary loudness values
     // -------------------------
-    float momentaryLoudnessOfFirstChannel = (getProcessor()->getMomentaryLoudness()).getFirst();
-    jassert(momentaryLoudnessOfFirstChannel > -400)
-    momentaryLoudnessValue.setValue (momentaryLoudnessOfFirstChannel);
+    momentaryLoudnessValue.setValue (getProcessor()->getMomentaryLoudness());
 
-    momentaryLoudnessBar.setLoudness (getProcessor()->getMomentaryLoudness());
+    momentaryLoudnessBar.setLoudness (getProcessor()->getMomentaryLoudnessForIndividualChannels());
     
     /*
     // source:
-    const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudness();
+    const Array<float>& momentaryLoudnessFromEbu128LM = getProcessor()->getMomentaryLoudnessForIndividualChannels();
     // destination:
     Array<var> momentaryLoudness;
     
@@ -221,6 +235,7 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
     if (button == &resetButton)
     {
         getProcessor()->reset();
+        momentaryLoudnessHistory.reset();
         shortTermLoudnessHistory.reset();
         integratedLoudnessHistory.reset();
     }
@@ -274,6 +289,10 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     // Momentary Loudness
     const int momentaryLoudnessBarX = getWidth() - spaceBetweenBars 
                                                  - loudnessBarWidth;
+    momentaryLoudnessBarSum.setBounds(momentaryLoudnessBarX,
+                                      distanceBetweenLoudnessBarAndTop,
+                                      loudnessBarWidth,
+                                      heightOfLoudnessBar);
     momentaryLoudnessBar.setBounds(momentaryLoudnessBarX,
                                    distanceBetweenLoudnessBarAndTop,
                                    loudnessBarWidth,
@@ -328,6 +347,10 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     backgroundVerticalLinesAndCaption.setBounds(0, distanceBetweenLoudnessBarAndTop, jmax(backgroundGridCaptionX, 0), loudnessBarBottomPosition + 32 - distanceBetweenLoudnessBarAndTop);
     
     // Loudness history
+    momentaryLoudnessHistory.setBounds(0,
+                                       distanceBetweenLoudnessBarAndTop,
+                                       jmax(backgroundGridCaptionX, 0),
+                                       heightOfLoudnessBar);
     shortTermLoudnessHistory.setBounds(0,
                                        distanceBetweenLoudnessBarAndTop,
                                        jmax(backgroundGridCaptionX, 0),

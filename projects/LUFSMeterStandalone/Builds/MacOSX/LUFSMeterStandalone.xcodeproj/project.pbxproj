@@ -2542,7 +2542,7 @@
 		CBAAAEDF71C284365B744D73 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0500;
 			};
 			buildConfigurationList = EA34BD88D8E8D29FB7DCCF39 /* Build configuration list for PBXProject "LUFSMeterStandalone" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2652,7 +2652,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = LUFSMeterStandalone;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;

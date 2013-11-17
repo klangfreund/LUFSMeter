@@ -98,8 +98,9 @@ private:
     BackgroundGridCaption backgroundGridCaption;
     BackgroundVerticalLinesAndCaption backgroundVerticalLinesAndCaption;
     
-    /* Level meters. */
+    /* Level meter bars. */
     MultiChannelLoudnessBar momentaryLoudnessBar;
+    LoudnessBar momentaryLoudnessBarSum;
     LoudnessBar shortTermLoudnessBar;
     LoudnessBar integratedLoudnessBar;
     
@@ -114,6 +115,7 @@ private:
     Label integratedLoudnessCaption;
     
     /** Level history graph. */
+    LoudnessHistory momentaryLoudnessHistory;
     LoudnessHistory shortTermLoudnessHistory;
     LoudnessHistory integratedLoudnessHistory;
     

@@ -51,6 +51,8 @@ public:
     ~LoudnessHistory ();
     
     Value & getLevelValueObject ();
+    
+    void setColour (const Colour & newColour);
 
     void timerCallback();
     void resized();
@@ -80,6 +82,8 @@ private:
     
     float stretch;
     float offset;
+    
+    Colour colour;
     
     /** The time interval that is displayed.
      Measured in seconds.

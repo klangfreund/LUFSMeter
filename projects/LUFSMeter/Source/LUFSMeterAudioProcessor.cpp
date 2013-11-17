@@ -280,7 +280,12 @@ float LUFSMeterAudioProcessor::getShortTermLoudness()
     return ebu128LoudnessMeter.getShortTermLoudness();
 }
 
-const Array<float>& LUFSMeterAudioProcessor::getMomentaryLoudness()
+const Array<float>& LUFSMeterAudioProcessor::getMomentaryLoudnessForIndividualChannels()
+{
+    return ebu128LoudnessMeter.getMomentaryLoudnessForIndividualChannels();
+}
+
+float LUFSMeterAudioProcessor::getMomentaryLoudness()
 {
     return ebu128LoudnessMeter.getMomentaryLoudness();
 }

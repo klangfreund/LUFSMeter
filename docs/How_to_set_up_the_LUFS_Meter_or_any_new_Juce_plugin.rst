@@ -36,7 +36,7 @@ Original source: http://rawmaterialsoftware.com/viewtopic.php?f=8&t=9546&p=56679
     - Navigate to the /Applications/Xcode.app/Contents/Developer folder.
     - Create an Extras directory if said directory does not exist.
     - If a CoreAudio directory or symlink exists (with full path 
-      /Applications/Xcode.app/Contents/Developer/Extras/CoreAudio,
+      /Applications/Xcode.app/Contents/Developer/Extras/CoreAudio),
       remove it (back it up first, though!).
     - Create a symlink via 
       sudo ln -sv /Library/Developer/CoreAudio /Applications/Xcode.app/Contents/Developer/Extras/

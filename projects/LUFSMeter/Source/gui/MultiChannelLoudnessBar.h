@@ -58,6 +58,8 @@ public:
     void setLoudness (const Array<float>& multiChannelLoudness);
     
     void valueChanged (Value & value);
+    
+    void setColour (const Colour & newColour);
 
     void resized ();
     void paint (Graphics& g);
@@ -77,6 +79,8 @@ private:
     float stretch;
     float offset;
     float widthOfIndividualChannel;
+    
+    Colour colour;
     
     Array<float> currentMultiChannelLoudness;
 //    Value loudnessValue;
