@@ -383,12 +383,31 @@ void ProjectExporter::createDefaultModulePaths()
             for (int i = project.getModules().getNumModules(); --i >= 0;)
             {
                 String modID (project.getModules().getModuleID(i));
-
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
-            break;
+            return;
         }
+    }
+
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+    {
+        if (exporter->canLaunchProject())
+        {
+            for (int i = project.getModules().getNumModules(); --i >= 0;)
+            {
+                String modID (project.getModules().getModuleID(i));
+                getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
+            }
+
+            return;
+        }
+    }
+
+    for (int i = project.getModules().getNumModules(); --i >= 0;)
+    {
+        String modID (project.getModules().getModuleID(i));
+        getPathForModuleValue (modID) = "../../juce";
     }
 }
 
@@ -595,8 +614,8 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
 
-    const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
-    const int optimisationLevelValues[] = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
+    static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
+    const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
     props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
                                             StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
                "The optimisation level for this configuration");

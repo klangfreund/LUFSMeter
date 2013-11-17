@@ -110,7 +110,6 @@ namespace juce
 {
 
 #include "containers/juce_AbstractFifo.cpp"
-#include "containers/juce_DynamicObject.cpp"
 #include "containers/juce_NamedValueSet.cpp"
 #include "containers/juce_PropertySet.cpp"
 #include "containers/juce_Variant.cpp"
@@ -120,7 +119,9 @@ namespace juce
 #include "files/juce_FileOutputStream.cpp"
 #include "files/juce_FileSearchPath.cpp"
 #include "files/juce_TemporaryFile.cpp"
-#include "json/juce_JSON.cpp"
+#include "javascript/juce_JSON.cpp"
+#include "javascript/juce_Javascript.cpp"
+#include "containers/juce_DynamicObject.cpp"
 #include "logging/juce_FileLogger.cpp"
 #include "logging/juce_Logger.cpp"
 #include "maths/juce_BigInteger.cpp"
@@ -198,6 +199,7 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_LINUX
+#include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_linux_Files.cpp"
 #include "native/juce_linux_Network.cpp"
 #include "native/juce_linux_SystemStats.cpp"
@@ -205,6 +207,7 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_ANDROID
+#include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_android_Files.cpp"
 #include "native/juce_android_Misc.cpp"
 #include "native/juce_android_Network.cpp"

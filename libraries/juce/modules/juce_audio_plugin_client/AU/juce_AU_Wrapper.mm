@@ -89,7 +89,6 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
-#include "../utility/juce_PluginHostType.h"
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 
 //==============================================================================
@@ -112,12 +111,12 @@ class JuceAUBaseClass   : public AUMIDIEffectBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : AUMIDIEffectBase (comp, false) {}
 
-    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) override
+    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame)
     {
         return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
     }
 
-    OSStatus SysEx (const UInt8* inData, UInt32 inLength) override
+    OSStatus SysEx (const UInt8* inData, UInt32 inLength)
     {
         return AUMIDIBase::SysEx (inData, inLength);
     }
@@ -645,7 +644,7 @@ public:
     // (these two slightly different versions are because the definition changed between 10.4 and 10.5)
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&) { return noErr; }
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID*, UInt32, const MusicDeviceNoteParams&) { return noErr; }
-    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32) override   { return noErr; }
+    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)   { return noErr; }
 
     //==============================================================================
     ComponentResult Initialize() override
@@ -872,14 +871,15 @@ public:
                         ++numPackets;
                     }
 
-                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (MIDIPacket::data);
-                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (MIDIPacket::data);
+                    MIDIPacket* p;
+                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
+                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
 
                     HeapBlock<MIDIPacketList> packetList;
                     packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
                     packetList->numPackets = numPackets;
 
-                    MIDIPacket* p = packetList->packet;
+                    p = packetList->packet;
 
                     for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
                     {

@@ -52,7 +52,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 1)
-            project.getModules().removeModule (moduleID);
+            deleteItem();
     }
 
     Project& project;
@@ -304,7 +304,7 @@ public:
         return false;
     }
 
-    void filesDropped (const StringArray& files, int insertIndex) override
+    void filesDropped (const StringArray& files, int /*insertIndex*/) override
     {
         Array<ModuleDescription> modules;
 

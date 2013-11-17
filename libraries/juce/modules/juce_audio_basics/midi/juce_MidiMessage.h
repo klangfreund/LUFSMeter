@@ -114,12 +114,12 @@ public:
     /** Returns a pointer to the raw midi data.
         @see getRawDataSize
     */
-    const uint8* getRawData() const noexcept                    { return data; }
+    const uint8* getRawData() const noexcept            { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
 
     /** Returns the number of bytes of data in the message.
         @see getRawData
     */
-    int getRawDataSize() const noexcept                         { return size; }
+    int getRawDataSize() const noexcept                 { return size; }
 
     //==============================================================================
     /** Returns the timestamp associated with this message.
@@ -138,18 +138,18 @@ public:
 
         @see setTimeStamp, addToTimeStamp
     */
-    double getTimeStamp() const noexcept                        { return timeStamp; }
+    double getTimeStamp() const noexcept                { return timeStamp; }
 
     /** Changes the message's associated timestamp.
         The units for the timestamp will be application-specific - see the notes for getTimeStamp().
         @see addToTimeStamp, getTimeStamp
     */
-    void setTimeStamp (double newTimestamp) noexcept      { timeStamp = newTimestamp; }
+    void setTimeStamp (double newTimestamp) noexcept    { timeStamp = newTimestamp; }
 
     /** Adds a value to the message's timestamp.
         The units for the timestamp will be application-specific.
     */
-    void addToTimeStamp (double delta) noexcept           { timeStamp += delta; }
+    void addToTimeStamp (double delta) noexcept         { timeStamp += delta; }
 
     //==============================================================================
     /** Returns the midi channel associated with the message.
@@ -889,35 +889,32 @@ public:
     */
     static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
 
-    /** Returns the standard name of a GM instrument.
+    /** Returns the standard name of a GM instrument, or nullptr if unknown for this index.
 
         @param midiInstrumentNumber     the program number 0 to 127
         @see getProgramChangeNumber
     */
-    static String getGMInstrumentName (int midiInstrumentNumber);
+    static const char* getGMInstrumentName (int midiInstrumentNumber);
 
-    /** Returns the name of a bank of GM instruments.
-
+    /** Returns the name of a bank of GM instruments, or nullptr if unknown for this bank number.
         @param midiBankNumber   the bank, 0 to 15
     */
-    static String getGMInstrumentBankName (int midiBankNumber);
+    static const char* getGMInstrumentBankName (int midiBankNumber);
 
-    /** Returns the standard name of a channel 10 percussion sound.
-
+    /** Returns the standard name of a channel 10 percussion sound, or nullptr if unknown for this note number.
         @param midiNoteNumber   the key number, 35 to 81
     */
-    static String getRhythmInstrumentName (int midiNoteNumber);
+    static const char* getRhythmInstrumentName (int midiNoteNumber);
 
-    /** Returns the name of a controller type number.
-
+    /** Returns the name of a controller type number, or nullptr if unknown for this controller number.
         @see getControllerNumber
     */
-    static String getControllerName (int controllerNumber);
+    static const char* getControllerName (int controllerNumber);
 
 private:
     //==============================================================================
     double timeStamp;
-    uint8* data;
+    HeapBlock<uint8> allocatedData;
     int size;
 
    #ifndef DOXYGEN
@@ -928,9 +925,8 @@ private:
     } preallocatedData;
    #endif
 
-    void freeData() noexcept;
-    void setToUseInternalData() noexcept;
-    bool usesAllocatedData() const noexcept;
+    inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
+    uint8* allocateSpace (int);
 };
 
 #endif   // JUCE_MIDIMESSAGE_H_INCLUDED
