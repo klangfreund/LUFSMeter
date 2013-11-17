@@ -71,10 +71,13 @@ following lines describe how they have been set up.**
 1.5 Select 'XCode (MacOSX) on the left side. The 'Local JUCE folder'
     should be automatically set to '../../libraries/juce/modules'.
     If not, set it.
-1.3 Hit the 'Save Project and Open in XCode...', compile this basic
+1.6 Hit the 'Save Project and Open in XCode...', compile this basic
     plugin and ensure there are no errors. On success, the plugin
     is copied to your local plugin folder
     ~/Library/Audio/Plug-Ins/Components.
+1.7 Validate the plugin with::
+    auval -64 -v aufx Lufs Klan  (for the 64 bit version)
+    auval -v aufx Lufs Klan  (for the 32 bit version)
 
 
 

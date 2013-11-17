@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.Klangfreund.LUFSMeter</string>
+    <string>com.klangfreund.lufsmeter</string>
     <key>CFBundleName</key>
     <string>LUFSMeter</string>
     <key>CFBundlePackageType</key>
@@ -27,9 +27,9 @@
     <array>
       <dict>
         <key>name</key>
-        <string>Klangfreund: LUFSMeter</string>
+        <string>Klangfreund: LUFS Meter</string>
         <key>description</key>
-        <string>LUFSMeter</string>
+        <string>Measures loudness according to EBU R128.</string>
         <key>factoryFunction</key>
         <string>LUFSMeterAUFactory</string>
         <key>manufacturer</key>

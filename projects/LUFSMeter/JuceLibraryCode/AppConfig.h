@@ -23,77 +23,14 @@
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics             1
-#define JUCE_MODULE_AVAILABLE_juce_audio_devices            1
-#define JUCE_MODULE_AVAILABLE_juce_audio_formats            1
 #define JUCE_MODULE_AVAILABLE_juce_audio_plugin_client      1
 #define JUCE_MODULE_AVAILABLE_juce_audio_processors         1
 #define JUCE_MODULE_AVAILABLE_juce_core                     1
-#define JUCE_MODULE_AVAILABLE_juce_cryptography             1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures          1
 #define JUCE_MODULE_AVAILABLE_juce_events                   1
 #define JUCE_MODULE_AVAILABLE_juce_graphics                 1
 #define JUCE_MODULE_AVAILABLE_juce_gui_basics               1
 #define JUCE_MODULE_AVAILABLE_juce_gui_extra                1
-#define JUCE_MODULE_AVAILABLE_juce_opengl                   1
-#define JUCE_MODULE_AVAILABLE_juce_video                    1
-
-//==============================================================================
-// juce_audio_devices flags:
-
-#ifndef    JUCE_ASIO
- //#define JUCE_ASIO
-#endif
-
-#ifndef    JUCE_WASAPI
- //#define JUCE_WASAPI
-#endif
-
-#ifndef    JUCE_DIRECTSOUND
- //#define JUCE_DIRECTSOUND
-#endif
-
-#ifndef    JUCE_ALSA
- //#define JUCE_ALSA
-#endif
-
-#ifndef    JUCE_JACK
- //#define JUCE_JACK
-#endif
-
-#ifndef    JUCE_USE_ANDROID_OPENSLES
- //#define JUCE_USE_ANDROID_OPENSLES
-#endif
-
-#ifndef    JUCE_USE_CDREADER
- //#define JUCE_USE_CDREADER
-#endif
-
-#ifndef    JUCE_USE_CDBURNER
- //#define JUCE_USE_CDBURNER
-#endif
-
-//==============================================================================
-// juce_audio_formats flags:
-
-#ifndef    JUCE_USE_FLAC
- //#define JUCE_USE_FLAC
-#endif
-
-#ifndef    JUCE_USE_OGGVORBIS
- //#define JUCE_USE_OGGVORBIS
-#endif
-
-#ifndef    JUCE_USE_MP3AUDIOFORMAT
- //#define JUCE_USE_MP3AUDIOFORMAT
-#endif
-
-#ifndef    JUCE_USE_LAME_AUDIO_FORMAT
- //#define JUCE_USE_LAME_AUDIO_FORMAT
-#endif
-
-#ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
- //#define JUCE_USE_WINDOWS_MEDIA_FORMAT
-#endif
 
 //==============================================================================
 // juce_audio_processors flags:
@@ -123,6 +60,10 @@
 
 #ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
  //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#endif
+
+#ifndef    JUCE_INCLUDE_ZLIB_CODE
+ //#define JUCE_INCLUDE_ZLIB_CODE
 #endif
 
 //==============================================================================
@@ -162,25 +103,6 @@
  //#define JUCE_WEB_BROWSER
 #endif
 
-//==============================================================================
-// juce_video flags:
-
-#ifndef    JUCE_DIRECTSHOW
- //#define JUCE_DIRECTSHOW
-#endif
-
-#ifndef    JUCE_MEDIAFOUNDATION
- //#define JUCE_MEDIAFOUNDATION
-#endif
-
-#ifndef    JUCE_QUICKTIME
- #define   JUCE_QUICKTIME 0
-#endif
-
-#ifndef    JUCE_USE_CAMERA
- //#define JUCE_USE_CAMERA
-#endif
-
 
 //==============================================================================
 // Audio plugin settings..
@@ -198,10 +120,10 @@
  #define JucePlugin_Build_AAX              0
 #endif
 #ifndef  JucePlugin_Name
- #define JucePlugin_Name                   "LUFSMeter"
+ #define JucePlugin_Name                   "LUFS Meter"
 #endif
 #ifndef  JucePlugin_Desc
- #define JucePlugin_Desc                   "LUFSMeter"
+ #define JucePlugin_Desc                   "Measures loudness according to EBU R128."
 #endif
 #ifndef  JucePlugin_Manufacturer
  #define JucePlugin_Manufacturer           "Klangfreund"
@@ -267,7 +189,7 @@
  #define JucePlugin_AUManufacturerCode     JucePlugin_ManufacturerCode
 #endif
 #ifndef  JucePlugin_CFBundleIdentifier
- #define JucePlugin_CFBundleIdentifier     com.Klangfreund.LUFSMeter
+ #define JucePlugin_CFBundleIdentifier     com.klangfreund.lufsmeter
 #endif
 #ifndef  JucePlugin_RTASCategory
  #define JucePlugin_RTASCategory           ePlugInCategory_None
@@ -285,7 +207,7 @@
  #define JucePlugin_RTASDisableMultiMono   0
 #endif
 #ifndef  JucePlugin_AAXIdentifier
- #define JucePlugin_AAXIdentifier          com.yourcompany.LUFSMeter
+ #define JucePlugin_AAXIdentifier          com.klangfreund.lufsmeter
 #endif
 #ifndef  JucePlugin_AAXManufacturerCode
  #define JucePlugin_AAXManufacturerCode    JucePlugin_ManufacturerCode
