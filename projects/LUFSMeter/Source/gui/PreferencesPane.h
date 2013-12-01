@@ -43,7 +43,10 @@ class PreferencesPane  : public AnimatedSidePanel
 public:
     PreferencesPane (const Value& loudnessBarWidth,
                      const Value& loudnessBarMinValue,
-                     const Value& loudnessBarMaxValue);
+                     const Value& loudnessBarMaxValue,
+                     const Value& showIntegratedLoudnessHistoryValue,
+                     const Value& showShortTermLoudnessHistoryValue,
+                     const Value& showMomentaryLoudnessHistoryValue);
     
     ~PreferencesPane ();
     
@@ -52,10 +55,11 @@ public:
 private:
     Slider loudnessBarSize;
     LoudnessBarRangeSlider loudnessBarRange;
-    ToggleButton showIntegratedLoudnessHistory;
-    Label showIntegratedLoudnessLabel;
-    ToggleButton showShortTimeLoudnessHistory;
-    ToggleButton showMomentaryLoudnessHistory;
+    //ToggleButton showIntegratedLoudnessHistory;
+    GroupComponent loudnessHistoryGroup;
+    TextButton showIntegratedLoudnessHistory;
+    TextButton showShortTimeLoudnessHistory;
+    TextButton showMomentaryLoudnessHistory;
 };
 
 

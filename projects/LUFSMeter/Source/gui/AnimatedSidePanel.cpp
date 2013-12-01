@@ -55,8 +55,8 @@ void AnimatedSidePanel::paint (Graphics& g)
 {
     
     // Draw the background
-    // ===================
-    const int roundedCornerRadius = (titleHeight + 2 * borderSize) / 2;
+    // -------------------
+    const int roundedCornerRadius = borderSize + 3;
     g.setColour(backgroundColour);
     
     // A Path is used because drawing multiple overlapping shapes with a

@@ -158,6 +158,10 @@ public:
      */
     Value loudnessBarMaxValue;
     
+    Value showIntegratedLoudnessHistory;
+    Value showShortTermLoudnessHistory;
+    Value showMomentaryLoudnessHistory;
+    
     Value numberOfInputChannels;
     
     // The actual loudness metering algorithm

@@ -62,8 +62,13 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     integratedLoudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     preferencesPane(getProcessor()->loudnessBarWidth,
                     getProcessor()->loudnessBarMinValue,
-                    getProcessor()->loudnessBarMaxValue)
+                    getProcessor()->loudnessBarMaxValue,
+                    getProcessor()->showIntegratedLoudnessHistory,
+                    getProcessor()->showShortTermLoudnessHistory,
+                    getProcessor()->showMomentaryLoudnessHistory)
 {
+    LookAndFeel::setDefaultLookAndFeel(&lookAndFeelV3);
+    
     // Add the background
     addAndMakeVisible (&backgroundGrid);
     addAndMakeVisible (&backgroundGridCaption);
@@ -125,12 +130,19 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     integratedLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&integratedLoudnessCaption);
     
-    // Add the loudness history graph.
+    
+    // Add the loudness history graphs
     momentaryLoudnessHistory.setColour(momentaryLoudnessSumColour);
-    addAndMakeVisible (&momentaryLoudnessHistory);
-    addAndMakeVisible (&shortTermLoudnessHistory);
+    momentaryLoudnessHistory.setVisible (bool(getProcessor()->showMomentaryLoudnessHistory.getValue()));
+    addChildComponent(&momentaryLoudnessHistory);
+
+    shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
+    addChildComponent(&shortTermLoudnessHistory);
+
     integratedLoudnessHistory.setColour (integratedLoudnessColour);
-    addAndMakeVisible (&integratedLoudnessHistory);
+    integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));
+    addChildComponent(&integratedLoudnessHistory);
+    
     
     // Add the reset button
     resetButton.addListener(this);
@@ -153,8 +165,11 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     setSize (ownerFilter->lastUIWidth,
              ownerFilter->lastUIHeight);
     
-    // Listen to the loudnessBarWidth
+    // Listen to some Values
     getProcessor()->loudnessBarWidth.addListener (this);
+    getProcessor()->showIntegratedLoudnessHistory.addListener (this);
+    getProcessor()->showShortTermLoudnessHistory.addListener (this);
+    getProcessor()->showMomentaryLoudnessHistory.addListener (this);
     
     momentaryLoudnessHistory.reset();
     shortTermLoudnessHistory.reset();
@@ -258,6 +273,21 @@ void LUFSMeterAudioProcessorEditor::valueChanged (Value & value)
     if (value == getProcessor()->loudnessBarWidth)
     {
         resizeGuiComponents();
+    }
+    
+    if (value == getProcessor()->showIntegratedLoudnessHistory)
+    {
+        integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));
+    }
+    
+    if (value == getProcessor()->showShortTermLoudnessHistory)
+    {
+        shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
+    }
+    
+    if (value == getProcessor()->showMomentaryLoudnessHistory)
+    {
+        momentaryLoudnessHistory.setVisible (bool(getProcessor()->showMomentaryLoudnessHistory.getValue()));
     }
 }
 

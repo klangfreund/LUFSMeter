@@ -36,12 +36,15 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 //==============================================================================
 LUFSMeterAudioProcessor::LUFSMeterAudioProcessor()
 :
-    // Set up some default values..
+    // Set up some default values:
     lastUIWidth (600),
     lastUIHeight (300),
     loudnessBarWidth (var(50)),
     loudnessBarMinValue (var(-41)),
     loudnessBarMaxValue (var(-14)),
+    showIntegratedLoudnessHistory (var(true)),
+    showShortTermLoudnessHistory (var(true)),
+    showMomentaryLoudnessHistory (var(true)),
     numberOfInputChannels (var(2))
 {
 }
@@ -241,6 +244,9 @@ void LUFSMeterAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("loudnessBarWidth", int(loudnessBarWidth.getValue()));
     xml.setAttribute ("loudnessBarMinValue", int(loudnessBarMinValue.getValue()));
     xml.setAttribute ("loudnessBarMaxValue", int(loudnessBarMaxValue.getValue()));
+    xml.setAttribute("showIntegratedLoudnessHistory", bool(showIntegratedLoudnessHistory.getValue()));
+    xml.setAttribute("showShortTermLoudnessHistory", bool(showShortTermLoudnessHistory.getValue()));
+    xml.setAttribute("showMomentaryLoudnessHistory", bool(showMomentaryLoudnessHistory.getValue()));
     
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -265,6 +271,9 @@ void LUFSMeterAudioProcessor::setStateInformation (const void* data, int sizeInB
             loudnessBarWidth.setValue (var(xmlState->getIntAttribute("loudnessBarWidth")));
             loudnessBarMinValue.setValue (var(xmlState->getIntAttribute("loudnessBarMinValue")));
             loudnessBarMaxValue.setValue (var(xmlState->getIntAttribute("loudnessBarMaxValue")));
+            showIntegratedLoudnessHistory.setValue(var(xmlState->getBoolAttribute("showIntegratedLoudnessHistory")));
+            showShortTermLoudnessHistory.setValue(var(xmlState->getBoolAttribute("showShortTermLoudnessHistory")));
+            showMomentaryLoudnessHistory.setValue(var(xmlState->getBoolAttribute("showMomentaryLoudnessHistory")));
         }
     }
 }

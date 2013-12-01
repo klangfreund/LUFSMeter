@@ -82,6 +82,8 @@ private:
     
     AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;
     
+    LookAndFeel_V3 lookAndFeelV3;
+    
     /** Shared values. */
     Value momentaryLoudnessValue;
     // There is no momentaryLoudnessValues here, because the Value object is
