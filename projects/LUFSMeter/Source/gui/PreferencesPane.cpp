@@ -42,7 +42,6 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     showIntegratedLoudnessHistory ("I"),
     showShortTimeLoudnessHistory ("S"),
     showMomentaryLoudnessHistory ("M")
-     //showIntegratedLoudnessLabel( String::empty, "I")
 {
     const bool isReadOnly = false;
     const int textEntryBoxWidth = 0;
@@ -54,6 +53,7 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     loudnessBarSize.setPopupDisplayEnabled(true, this);
     loudnessBarSize.setTextValueSuffix(" pixels");
     loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
+    loudnessBarSize.setColour(Slider::trackColourId, Colours::black);
     addAndMakeVisible (&loudnessBarSize);
 
     loudnessBarRange.setRange (-100, 0.0, 1);
@@ -63,32 +63,44 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     loudnessBarRange.setTextBoxStyle (Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarRange.setPopupDisplayEnabled (true, this);
     loudnessBarRange.setTextValueSuffix (" LUFS");
+    loudnessBarRange.setColour(Slider::trackColourId, Colours::black);
     addAndMakeVisible (&loudnessBarRange);
     
-    DrawableText textNormal;
-    textNormal.setText("I");
-    textNormal.setFontHeight(100);
-    textNormal.setJustification(Justification::centred);
-    DrawableText textDown (textNormal);
-    textDown.setAlpha(0.5);
     
-    //loudnessHistoryGroup.setColour(GroupComponent::outlineColourId, Colours::black);
-    //loudnessHistoryGroup.setColour(GroupComponent::textColourId, Colours::black);
+    Colour loudnessHistoryGroupColour = Colours::black; //Colour (200, 200, 200);
+    loudnessHistoryGroup.setColour(GroupComponent::outlineColourId, loudnessHistoryGroupColour);
+    loudnessHistoryGroup.setColour(GroupComponent::textColourId, loudnessHistoryGroupColour);
     addAndMakeVisible (&loudnessHistoryGroup);
     
+    Colour buttonOnColour = Colours::black;
+    Colour textColourOn = Colours::lightgrey;
+    Colour buttonOffColour = Colours::grey;
+    Colour textColourOff = Colours::black;
     showIntegratedLoudnessHistory.setClickingTogglesState (true);
     showIntegratedLoudnessHistory.getToggleStateValue().referTo (showIntegratedLoudnessHistoryValue);
     showIntegratedLoudnessHistory.setWantsKeyboardFocus (false);
+    showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showIntegratedLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showIntegratedLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showIntegratedLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showIntegratedLoudnessHistory);
     
     showShortTimeLoudnessHistory.setClickingTogglesState (true);
     showShortTimeLoudnessHistory.getToggleStateValue().referTo (showShortTermLoudnessHistoryValue);
     showShortTimeLoudnessHistory.setWantsKeyboardFocus (false);
+    showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showShortTimeLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showShortTimeLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showShortTimeLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showShortTimeLoudnessHistory);
     
     showMomentaryLoudnessHistory.setClickingTogglesState (true);
     showMomentaryLoudnessHistory.getToggleStateValue().referTo (showMomentaryLoudnessHistoryValue);
     showMomentaryLoudnessHistory.setWantsKeyboardFocus (false);
+    showMomentaryLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showMomentaryLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showMomentaryLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showMomentaryLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showMomentaryLoudnessHistory);
     
 //    showIntegratedLoudnessLabel.setColour(Label::textColourId, Colours::lightgrey);
