@@ -107,5 +107,28 @@
         <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="c:\SDKs\vstsdk2.4">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug 32bit" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="LUFSMeter"/>
+        <CONFIGURATION name="Release 32bit" winWarningLevel="4" generateManifest="1"
+                       winArchitecture="32-bit" isDebug="0" optimisation="2" targetName="LUFSMeter"/>
+        <CONFIGURATION name="Debug 64bit" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="LUFSMeter"/>
+        <CONFIGURATION name="Release 64bit" winWarningLevel="4" generateManifest="1"
+                       winArchitecture="x64" isDebug="0" optimisation="2" targetName="LUFSMeter"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../libraries/juce/modules"/>
+      </MODULEPATHS>
+    </VS2013>
   </EXPORTFORMATS>
 </JUCERPROJECT>

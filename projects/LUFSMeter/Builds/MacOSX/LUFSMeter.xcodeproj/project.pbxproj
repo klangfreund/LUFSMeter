@@ -1895,7 +1895,7 @@
 				7CCBF45465D9C658C716BA4E,
 				F67D23095A2B1C36E88AC697 ); name = Source; sourceTree = "<group>"; };
 		A3D3D981FAFCA7CAA9731328 = { isa = XCBuildConfiguration; buildSettings = {
-				HEADER_SEARCH_PATHS = (../../../../libraries/vstsdk2.4, ../../JuceLibraryCode, ../../../../libraries/juce/modules, "$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("../../../../libraries/vstsdk2.4", "../../JuceLibraryCode", "../../../../libraries/juce/modules", "$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
@@ -1921,7 +1921,7 @@
 				"DEBUG=1",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		358E30C642232F1A473753C7 = { isa = XCBuildConfiguration; buildSettings = {
-				HEADER_SEARCH_PATHS = (../../../../libraries/vstsdk2.4, ../../JuceLibraryCode, ../../../../libraries/juce/modules, "$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("../../../../libraries/vstsdk2.4", "../../JuceLibraryCode", "../../../../libraries/juce/modules", "$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility", "$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase", "$(inherited)");
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
