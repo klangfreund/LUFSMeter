@@ -56,6 +56,13 @@
  #define Component CarbonDummyCompName
 #endif
 
+/*
+    Got an include error here?
+
+    You probably need to install Apple's AU classes - see the
+    juce website for more info on how to get them:
+    http://www.juce.com/forum/topic/aus-xcode
+*/
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #undef Point
@@ -938,9 +945,10 @@ public:
                                      (juce::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
-       #endif
-
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
@@ -948,8 +956,10 @@ public:
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
-       #endif
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     //==============================================================================
@@ -1362,7 +1372,7 @@ private:
             JUCE_AUTORELEASEPOOL
             {
                 jassert (ed != nullptr);
-                addAndMakeVisible (&editor);
+                addAndMakeVisible (editor);
                 setOpaque (true);
                 setVisible (true);
                 setBroughtToFrontOnMouseClick (true);

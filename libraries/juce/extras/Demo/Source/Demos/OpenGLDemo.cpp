@@ -82,6 +82,14 @@ struct OpenGLDemoClasses
             }
         }
 
+        void disable (OpenGLContext& openGLContext)
+        {
+            if (position != nullptr)       openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)         openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)   openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
+            if (texureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (texureCoordIn->attributeID);
+        }
+
         ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, texureCoordIn;
 
     private:
@@ -145,8 +153,8 @@ struct OpenGLDemoClasses
                 vertexBuffer.bind();
 
                 attributes.enable (openGLContext);
-
                 glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+                attributes.disable (openGLContext);
             }
         }
 
@@ -332,34 +340,34 @@ struct OpenGLDemoClasses
               tabbedComp (TabbedButtonBar::TabsAtLeft),
               showBackgroundToggle ("Draw 2D graphics in background")
         {
-            addAndMakeVisible (&statusLabel);
+            addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
             statusLabel.setColour (Label::textColourId, Colours::black);
             statusLabel.setFont (Font (14.0f));
 
-            addAndMakeVisible (&sizeSlider);
+            addAndMakeVisible (sizeSlider);
             sizeSlider.setRange (0.0, 1.0, 0.001);
             sizeSlider.addListener (this);
 
-            addAndMakeVisible (&zoomLabel);
+            addAndMakeVisible (zoomLabel);
             zoomLabel.setText ("Zoom:", dontSendNotification);
             zoomLabel.attachToComponent (&sizeSlider, true);
 
-            addAndMakeVisible (&speedSlider);
+            addAndMakeVisible (speedSlider);
             speedSlider.setRange (0.0, 0.5, 0.001);
             speedSlider.addListener (this);
             speedSlider.setSkewFactor (0.5f);
 
-            addAndMakeVisible (&speedLabel);
+            addAndMakeVisible (speedLabel);
             speedLabel.setText ("Speed:", dontSendNotification);
             speedLabel.attachToComponent (&speedSlider, true);
 
-            addAndMakeVisible (&showBackgroundToggle);
+            addAndMakeVisible (showBackgroundToggle);
             showBackgroundToggle.addListener (this);
 
             Colour editorBackground (Colours::white.withAlpha (0.6f));
 
-            addAndMakeVisible (&tabbedComp);
+            addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
             tabbedComp.setColour (TabbedButtonBar::tabTextColourId, Colours::grey);
             tabbedComp.addTab ("Vertex", editorBackground, &vertexEditorComp, false);
@@ -376,11 +384,11 @@ struct OpenGLDemoClasses
             textures.add (new BuiltInTexture ("JUCE logo", BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
             textures.add (new DynamicTexture());
 
-            addAndMakeVisible (&textureBox);
+            addAndMakeVisible (textureBox);
             textureBox.addListener (this);
             updateTexturesList();
 
-            addAndMakeVisible (&presetBox);
+            addAndMakeVisible (presetBox);
             presetBox.addListener (this);
 
             Array<ShaderPreset> presets (getPresets());
@@ -389,11 +397,11 @@ struct OpenGLDemoClasses
             for (int i = 0; i < presets.size(); ++i)
                 presetBox.addItem (presets[i].name, i + 1);
 
-            addAndMakeVisible (&presetLabel);
+            addAndMakeVisible (presetLabel);
             presetLabel.setText ("Shader Preset:", dontSendNotification);
             presetLabel.attachToComponent (&presetBox, true);
 
-            addAndMakeVisible (&textureLabel);
+            addAndMakeVisible (textureLabel);
             textureLabel.setText ("Texture:", dontSendNotification);
             textureLabel.attachToComponent (&textureBox, true);
         }
@@ -650,24 +658,20 @@ struct OpenGLDemoClasses
 
             shader->use();
 
-            // Setup our projection uniform
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->projectionMatrix)
-                openGLContext.extensions.glUniformMatrix4fv (uni->uniformID, 1, 0, getProjectionMatrix().mat);
+            if (uniforms->projectionMatrix != nullptr)
+                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
-            // And the matrix for our model view
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->viewMatrix)
-                openGLContext.extensions.glUniformMatrix4fv (uni->uniformID, 1, 0, getViewMatrix().mat);
+            if (uniforms->viewMatrix != nullptr)
+                uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->texture)
-                openGLContext.extensions.glUniform1i (uni->uniformID, 0);
+            if (uniforms->texture != nullptr)
+                uniforms->texture->set ((GLint) 0);
 
-            // Set the direction of our light source
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->lightPosition)
-                openGLContext.extensions.glUniform4f (uni->uniformID, -15.0f, 10.0f, 15.0f, 0.0f);
+            if (uniforms->lightPosition != nullptr)
+                uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
 
-            // Set our bouncing number
-            if (OpenGLShaderProgram::Uniform* uni = uniforms->bouncingNumber)
-                openGLContext.extensions.glUniform1f (uni->uniformID, bouncingNumber.getValue());
+            if (uniforms->bouncingNumber != nullptr)
+                uniforms->bouncingNumber->set (bouncingNumber.getValue());
 
             shape->draw (openGLContext, *attributes);
 
@@ -675,7 +679,7 @@ struct OpenGLDemoClasses
             openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
             openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            if (! isMouseButtonDown())
+            if (! controlsOverlay->isMouseButtonDown())
                 rotation += (float) rotationSpeed;
         }
 

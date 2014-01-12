@@ -169,7 +169,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 
         if (shouldBeOn)
         {
-            turnOffOtherButtonsInGroup (dontSendNotification);
+            turnOffOtherButtonsInGroup (notification);
 
             if (deletionWatcher == nullptr)
                 return;
@@ -186,7 +186,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
             // async callbacks aren't possible here
             jassert (notification != sendNotificationAsync);
 
-            sendClickMessage (ModifierKeys());
+            sendClickMessage (ModifierKeys::getCurrentModifiers());
 
             if (deletionWatcher == nullptr)
                 return;
@@ -194,6 +194,8 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 
         if (notification != dontSendNotification)
             sendStateMessage();
+        else
+            buttonStateChanged();
     }
 }
 
