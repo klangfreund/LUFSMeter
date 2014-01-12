@@ -1,38 +1,27 @@
 <!--- author: Samuel Gaehwiler (klangfreund.com) !-->
 
-This file is the issue tracker as well as the roadmap for the LUFS Meter.
+
+Description of this file
+========================
+
+This file is the issue tracker as well as a short term roadmap for the LUFS Meter.
+In order of priority.
 
 
 Open issues / Roadmap
 =====================
 
-In order of priority.
+Use JUCE_LIVE_CONSTANT to be able to tweak the colours used (only for developers)
+---------------------------------------------------------------------------------
 
-
-
-Rework the preference pane into a self containing object
---------------------------------------------------------
-
-How to connect the sliders etc. to the main listener?
-
-
-Add I, S and M to the loudness history
---------------------------------------
-
-Create corresponding checkboxes on the preferences.
-
+Estimated time needed: 2h
+Time needed: 
 
 Add vectorgraphics to the GUI
 -----------------------------
 
 Implement some default plugin presets
 -------------------------------------
-
-
-
-
-Multi-Channel Meter for the Momentary Loudness
-----------------------------------------------
 
 Implement Loudness Range
 ------------------------
@@ -71,18 +60,6 @@ Linux
 -----
 
 - Compile the LUFS Meter for Linux
-
-
-
-
-Closed issues
-=============
-
-Store the plugin parameters in a valuetree object
--------------------------------------------------
-
-A valuetree is not well suited since it stores instances of var.
-A var can't have listeners. Values can.
 
 
 general improvements
