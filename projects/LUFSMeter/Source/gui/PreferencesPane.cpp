@@ -49,7 +49,6 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     
     loudnessBarSize.setRange (5.0, 300.0, 1);
     loudnessBarSize.getValueObject().referTo(loudnessBarWidth);
-    loudnessBarSize.setColour(Slider::thumbColourId, Colours::black);
     loudnessBarSize.setPopupDisplayEnabled(true, this);
     loudnessBarSize.setTextValueSuffix(" pixels");
     loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
@@ -59,48 +58,26 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     loudnessBarRange.setRange (-100, 0.0, 1);
     loudnessBarRange.getMinValueObject().referTo (loudnessBarMinValue);
     loudnessBarRange.getMaxValueObject().referTo (loudnessBarMaxValue);
-    loudnessBarRange.setColour (Slider::thumbColourId, Colours::black);
     loudnessBarRange.setTextBoxStyle (Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarRange.setPopupDisplayEnabled (true, this);
     loudnessBarRange.setTextValueSuffix (" LUFS");
-    loudnessBarRange.setColour(Slider::trackColourId, Colours::black);
     addAndMakeVisible (&loudnessBarRange);
     
-    
-    Colour loudnessHistoryGroupColour = Colours::black; //Colour (200, 200, 200);
-    loudnessHistoryGroup.setColour(GroupComponent::outlineColourId, loudnessHistoryGroupColour);
-    loudnessHistoryGroup.setColour(GroupComponent::textColourId, loudnessHistoryGroupColour);
     addAndMakeVisible (&loudnessHistoryGroup);
     
-    Colour buttonOnColour = Colours::black;
-    Colour textColourOn = Colours::lightgrey;
-    Colour buttonOffColour = Colours::grey;
-    Colour textColourOff = Colours::black;
     showIntegratedLoudnessHistory.setClickingTogglesState (true);
     showIntegratedLoudnessHistory.getToggleStateValue().referTo (showIntegratedLoudnessHistoryValue);
     showIntegratedLoudnessHistory.setWantsKeyboardFocus (false);
-    showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
-    showIntegratedLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
-    showIntegratedLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
-    showIntegratedLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showIntegratedLoudnessHistory);
     
     showShortTimeLoudnessHistory.setClickingTogglesState (true);
     showShortTimeLoudnessHistory.getToggleStateValue().referTo (showShortTermLoudnessHistoryValue);
     showShortTimeLoudnessHistory.setWantsKeyboardFocus (false);
-    showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
-    showShortTimeLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
-    showShortTimeLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
-    showShortTimeLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showShortTimeLoudnessHistory);
     
     showMomentaryLoudnessHistory.setClickingTogglesState (true);
     showMomentaryLoudnessHistory.getToggleStateValue().referTo (showMomentaryLoudnessHistoryValue);
     showMomentaryLoudnessHistory.setWantsKeyboardFocus (false);
-    showMomentaryLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
-    showMomentaryLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
-    showMomentaryLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
-    showMomentaryLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
     loudnessHistoryGroup.addAndMakeVisible (&showMomentaryLoudnessHistory);
     
 //    showIntegratedLoudnessLabel.setColour(Label::textColourId, Colours::lightgrey);
@@ -111,6 +88,36 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
 
 PreferencesPane::~PreferencesPane ()
 {
+}
+
+void PreferencesPane::paint (Graphics &g)
+{
+    AnimatedSidePanel::paint(g);
+    
+    loudnessBarSize.setColour(Slider::thumbColourId, JUCE_LIVE_CONSTANT (Colours::black));
+    loudnessBarRange.setColour (Slider::thumbColourId, JUCE_LIVE_CONSTANT (Colours::black));
+    loudnessBarRange.setColour(Slider::trackColourId, JUCE_LIVE_CONSTANT (Colours::black));
+    
+    Colour loudnessHistoryGroupColour = JUCE_LIVE_CONSTANT (Colour (0xff00ad00)); //Colour (200, 200, 200);
+    loudnessHistoryGroup.setColour(GroupComponent::outlineColourId, loudnessHistoryGroupColour);
+    loudnessHistoryGroup.setColour(GroupComponent::textColourId, loudnessHistoryGroupColour);
+
+    Colour textColourOn = JUCE_LIVE_CONSTANT (Colours::black);
+    Colour buttonOnColour = JUCE_LIVE_CONSTANT (Colour (0xffc9c9c9));
+    Colour textColourOff = JUCE_LIVE_CONSTANT (Colour (0xff9a9a9a));
+    Colour buttonOffColour = JUCE_LIVE_CONSTANT (Colour (0xff383838));
+    showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showIntegratedLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showIntegratedLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showIntegratedLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
+    showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showShortTimeLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showShortTimeLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showShortTimeLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
+    showMomentaryLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showMomentaryLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showMomentaryLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showMomentaryLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
 }
 
 void PreferencesPane::resized()

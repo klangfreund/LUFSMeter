@@ -50,6 +50,8 @@ public:
     
     ~PreferencesPane ();
     
+    void paint (Graphics &g);
+    
     void resized();
     
 private:
