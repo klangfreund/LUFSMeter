@@ -50,6 +50,7 @@ namespace Ids
     DECLARE_ID (targetFolder);
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (vstFolder);
+    DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
     DECLARE_ID (flags);
@@ -73,6 +74,9 @@ namespace Ids
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (cppLibType);
+    DECLARE_ID (codeSigningIdentity);
+    DECLARE_ID (fastMath);
+    DECLARE_ID (linkTimeOptimisation);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);

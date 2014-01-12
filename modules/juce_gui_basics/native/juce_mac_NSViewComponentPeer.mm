@@ -378,6 +378,16 @@ public:
         return fullScreen;
     }
 
+    bool isKioskMode() const override
+    {
+       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+        if (hasNativeTitleBar() && ([window styleMask] & NSFullScreenWindowMask) != 0)
+            return true;
+       #endif
+
+        return ComponentPeer::isKioskMode();
+    }
+
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
         NSRect frameRect = [view frame];
@@ -1452,7 +1462,7 @@ private:
             if (target != nullptr)
                 [(NSView*) self interpretKeyEvents: [NSArray arrayWithObject: ev]];
             else
-                owner->stringBeingComposed = String::empty;
+                owner->stringBeingComposed.clear();
 
             if ((! owner->textWasInserted) && (owner == nullptr || ! owner->redirectKeyDown (ev)))
             {
@@ -1490,7 +1500,7 @@ private:
                 }
             }
 
-            owner->stringBeingComposed = String::empty;
+            owner->stringBeingComposed.clear();
         }
     }
 
@@ -1525,7 +1535,7 @@ private:
                     owner->textWasInserted = true;
                 }
 
-                owner->stringBeingComposed = String::empty;
+                owner->stringBeingComposed.clear();
             }
         }
     }

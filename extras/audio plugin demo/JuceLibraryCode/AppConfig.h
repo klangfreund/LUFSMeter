@@ -100,6 +100,10 @@
  #define   JUCE_PLUGINHOST_VST 0
 #endif
 
+#ifndef    JUCE_PLUGINHOST_VST3
+ //#define JUCE_PLUGINHOST_VST3
+#endif
+
 #ifndef    JUCE_PLUGINHOST_AU
  #define   JUCE_PLUGINHOST_AU 0
 #endif
@@ -164,12 +168,19 @@
  //#define JUCE_WEB_BROWSER
 #endif
 
+#ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
+ //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR
+#endif
+
 
 //==============================================================================
 // Audio plugin settings..
 
 #ifndef  JucePlugin_Build_VST
  #define JucePlugin_Build_VST              1
+#endif
+#ifndef  JucePlugin_Build_VST3
+ #define JucePlugin_Build_VST3             0
 #endif
 #ifndef  JucePlugin_Build_AU
  #define JucePlugin_Build_AU               1
