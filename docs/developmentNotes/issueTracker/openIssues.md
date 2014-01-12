@@ -11,11 +11,8 @@ In order of priority.
 Open issues / Roadmap
 =====================
 
-Use JUCE_LIVE_CONSTANT to be able to tweak the colours used (only for developers)
----------------------------------------------------------------------------------
 
-Estimated time needed: 2h
-Time needed: 
+
 
 Add vectorgraphics to the GUI
 -----------------------------
