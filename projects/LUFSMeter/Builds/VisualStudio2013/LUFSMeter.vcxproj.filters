@@ -286,6 +286,9 @@
     <ClCompile Include="..\..\Source\gui\LoudnessHistory.cpp">
       <Filter>LUFSMeter\Source\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\gui\LoudnessHistoryGroup.cpp">
+      <Filter>LUFSMeter\Source\gui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\gui\LoudnessNumeric.cpp">
       <Filter>LUFSMeter\Source\gui</Filter>
     </ClCompile>
@@ -392,6 +395,9 @@
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
@@ -1207,6 +1213,12 @@
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.cpp">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.cpp">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.cpp">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClCompile>
@@ -1217,6 +1229,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
@@ -1339,6 +1354,9 @@
       <Filter>LUFSMeter\Source\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\gui\LoudnessHistory.h">
+      <Filter>LUFSMeter\Source\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\gui\LoudnessHistoryGroup.h">
       <Filter>LUFSMeter\Source\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\gui\LoudnessNumeric.h">
@@ -1486,6 +1504,9 @@
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h">
@@ -2436,6 +2457,12 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.h">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.h">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\documents\juce_FileBasedDocument.h">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClInclude>
@@ -2458,6 +2485,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">

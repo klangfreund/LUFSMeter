@@ -85,7 +85,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2013_78A5020=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -126,7 +126,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2013_78A5020=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -169,7 +169,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2013_78A5020=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -208,7 +208,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;c:\SDKs\vstsdk2.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2013_78A5020=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.3.0;JUCE_APP_VERSION_HEX=0x300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -248,6 +248,7 @@
     <ClCompile Include="..\..\Source\gui\LoudnessBar.cpp"/>
     <ClCompile Include="..\..\Source\gui\LoudnessBarRangeSlider.cpp"/>
     <ClCompile Include="..\..\Source\gui\LoudnessHistory.cpp"/>
+    <ClCompile Include="..\..\Source\gui\LoudnessHistoryGroup.cpp"/>
     <ClCompile Include="..\..\Source\gui\LoudnessNumeric.cpp"/>
     <ClCompile Include="..\..\Source\gui\MultiChannelLoudnessBar.cpp"/>
     <ClCompile Include="..\..\Source\gui\PreferencesPane.cpp"/>
@@ -329,6 +330,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
@@ -1096,6 +1100,12 @@
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1106,6 +1116,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
@@ -1178,6 +1191,7 @@
     <ClInclude Include="..\..\Source\gui\LoudnessBar.h"/>
     <ClInclude Include="..\..\Source\gui\LoudnessBarRangeSlider.h"/>
     <ClInclude Include="..\..\Source\gui\LoudnessHistory.h"/>
+    <ClInclude Include="..\..\Source\gui\LoudnessHistoryGroup.h"/>
     <ClInclude Include="..\..\Source\gui\LoudnessNumeric.h"/>
     <ClInclude Include="..\..\Source\gui\MultiChannelLoudnessBar.h"/>
     <ClInclude Include="..\..\Source\gui\PreferencesPane.h"/>
@@ -1227,6 +1241,7 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\scanning\juce_KnownPluginList.h"/>
@@ -1543,6 +1558,8 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CodeTokeniser.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h"/>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.h"/>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\documents\juce_FileBasedDocument.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\embedding\juce_NSViewComponent.h"/>
@@ -1551,6 +1568,7 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h"/>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_PreferencesPanel.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\misc\juce_SplashScreen.h"/>

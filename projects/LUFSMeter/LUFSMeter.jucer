@@ -49,6 +49,10 @@
               file="Source/gui/LoudnessHistory.cpp"/>
         <FILE id="xaee4f" name="LoudnessHistory.h" compile="0" resource="0"
               file="Source/gui/LoudnessHistory.h"/>
+        <FILE id="qJwk8h" name="LoudnessHistoryGroup.cpp" compile="1" resource="0"
+              file="Source/gui/LoudnessHistoryGroup.cpp"/>
+        <FILE id="CNLFFq" name="LoudnessHistoryGroup.h" compile="0" resource="0"
+              file="Source/gui/LoudnessHistoryGroup.h"/>
         <FILE id="Oqs2or" name="LoudnessNumeric.cpp" compile="1" resource="0"
               file="Source/gui/LoudnessNumeric.cpp"/>
         <FILE id="gLWvwG" name="LoudnessNumeric.h" compile="0" resource="0"

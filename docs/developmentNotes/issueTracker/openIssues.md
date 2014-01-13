@@ -11,6 +11,10 @@ In order of priority.
 Open issues / Roadmap
 =====================
 
+One timer for all LoudnessHistories
+-----------------------------------
+
+Estimated time: 2h
 
 
 

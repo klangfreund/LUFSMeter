@@ -38,6 +38,10 @@
               file="../LUFSMeter/Source/gui/LoudnessHistory.cpp"/>
         <FILE id="lpwQs9" name="LoudnessHistory.h" compile="0" resource="0"
               file="../LUFSMeter/Source/gui/LoudnessHistory.h"/>
+        <FILE id="ILQtOP" name="LoudnessHistoryGroup.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessHistoryGroup.cpp"/>
+        <FILE id="Ry39q6" name="LoudnessHistoryGroup.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessHistoryGroup.h"/>
         <FILE id="PqSU7z" name="LoudnessNumeric.cpp" compile="1" resource="0"
               file="../LUFSMeter/Source/gui/LoudnessNumeric.cpp"/>
         <FILE id="iqN6cu" name="LoudnessNumeric.h" compile="0" resource="0"
