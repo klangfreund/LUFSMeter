@@ -132,16 +132,18 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     
     // Add the loudness history graphs
+    addAndMakeVisible(&loudnessHistoryGroup);
+    
     momentaryLoudnessHistory.setColour(momentaryLoudnessSumColour);
     momentaryLoudnessHistory.setVisible (bool(getProcessor()->showMomentaryLoudnessHistory.getValue()));
-    addChildComponent(&momentaryLoudnessHistory);
+    loudnessHistoryGroup.addChildComponent(&momentaryLoudnessHistory);
 
     shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
-    addChildComponent(&shortTermLoudnessHistory);
+    loudnessHistoryGroup.addChildComponent(&shortTermLoudnessHistory);
 
     integratedLoudnessHistory.setColour (integratedLoudnessColour);
     integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));
-    addChildComponent(&integratedLoudnessHistory);
+    loudnessHistoryGroup.addChildComponent(&integratedLoudnessHistory);
     
     
     // Add the reset button
@@ -389,18 +391,10 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     backgroundVerticalLinesAndCaption.setBounds(0, distanceBetweenLoudnessBarAndTop, jmax(backgroundGridCaptionX, 0), loudnessBarBottomPosition + 32 - distanceBetweenLoudnessBarAndTop);
     
     // Loudness history
-    momentaryLoudnessHistory.setBounds(0,
-                                       distanceBetweenLoudnessBarAndTop,
-                                       jmax(backgroundGridCaptionX, 0),
-                                       heightOfLoudnessBar);
-    shortTermLoudnessHistory.setBounds(0,
-                                       distanceBetweenLoudnessBarAndTop,
-                                       jmax(backgroundGridCaptionX, 0),
-                                       heightOfLoudnessBar);
-    integratedLoudnessHistory.setBounds(0,
-                              distanceBetweenLoudnessBarAndTop, 
-                              jmax(backgroundGridCaptionX, 0), 
-                              heightOfLoudnessBar);
+    loudnessHistoryGroup.setBounds(0,
+                                   distanceBetweenLoudnessBarAndTop,
+                                   jmax(backgroundGridCaptionX, 0),
+                                   heightOfLoudnessBar);
 }
 
 // quick-and-dirty function to format a timecode string

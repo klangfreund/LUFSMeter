@@ -29,3 +29,30 @@
  */
 
 #include "LoudnessHistoryGroup.h"
+
+LoudnessHistoryGroup::LoudnessHistoryGroup ()
+{
+}
+
+LoudnessHistoryGroup::~LoudnessHistoryGroup ()
+{
+}
+
+void LoudnessHistoryGroup::timerCallback ()
+{
+}
+
+void LoudnessHistoryGroup::resized ()
+{
+    // Resize all children to the size of this (parent) component.
+    for (int childIndex = 0; childIndex < getNumChildComponents(); ++childIndex)
+    {
+        Component* child = getChildComponent (childIndex);
+        child->setBounds(0, 0, getWidth(), getHeight());
+    }
+}
+
+void LoudnessHistoryGroup::paint (juce::Graphics &g)
+{
+    // Children get automatically repainted, when this is called.
+}

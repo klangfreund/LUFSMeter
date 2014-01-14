@@ -38,6 +38,7 @@
 #include "gui/LoudnessBar.h"
 #include "gui/LoudnessNumeric.h"
 #include "gui/LoudnessHistory.h"
+#include "gui/LoudnessHistoryGroup.h"
 #include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
 // TEMP
@@ -117,6 +118,7 @@ private:
     Label integratedLoudnessCaption;
     
     /** Level history graph. */
+    LoudnessHistoryGroup loudnessHistoryGroup;
     LoudnessHistory momentaryLoudnessHistory;
     LoudnessHistory shortTermLoudnessHistory;
     LoudnessHistory integratedLoudnessHistory;
