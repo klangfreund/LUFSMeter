@@ -29,6 +29,7 @@
  */
 
 #include "LoudnessHistoryGroup.h"
+#include "LoudnessHistory.h"
 
 LoudnessHistoryGroup::LoudnessHistoryGroup ()
 {
@@ -38,17 +39,44 @@ LoudnessHistoryGroup::~LoudnessHistoryGroup ()
 {
 }
 
-void LoudnessHistoryGroup::timerCallback ()
-{
-}
-
 void LoudnessHistoryGroup::resized ()
 {
-    // Resize all children to the size of this (parent) component.
+    if (getNumChildComponents() > 0)
+    {
+        int refreshIntervalInMilliseconds = 1000;
+        
+        // Resize all children to the size of this (parent) component.
+        for (int childIndex = 0; childIndex < getNumChildComponents(); ++childIndex)
+        {
+            Component* child = getChildComponent (childIndex);
+            child->setBounds(0, 0, getWidth(), getHeight());
+            
+            if (childIndex == 0)
+            {
+                LoudnessHistory* firstChild = dynamic_cast<LoudnessHistory*>(child);
+                
+                if (firstChild != nullptr)
+                {
+                    refreshIntervalInMilliseconds = firstChild->getDesiredRefreshIntervalInMilliseconds ();
+                }
+            }
+        }
+
+        startTimer(refreshIntervalInMilliseconds);
+    }
+}
+
+void LoudnessHistoryGroup::timerCallback ()
+{
+    // Call the timerCallback of the children
     for (int childIndex = 0; childIndex < getNumChildComponents(); ++childIndex)
     {
-        Component* child = getChildComponent (childIndex);
-        child->setBounds(0, 0, getWidth(), getHeight());
+        LoudnessHistory* child = dynamic_cast<LoudnessHistory*> (getChildComponent (childIndex));
+        
+        if (child != nullptr)
+        {
+            child->timerCallback();
+        }
     }
 }
 

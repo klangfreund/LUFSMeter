@@ -51,9 +51,9 @@ public:
     
     ~LoudnessHistoryGroup ();
     
-    void timerCallback ();
-    void resized ();
-    void paint (Graphics& g);
+    void timerCallback () override;
+    void resized () override;
+    void paint (Graphics& g) override;
     
 private:
     

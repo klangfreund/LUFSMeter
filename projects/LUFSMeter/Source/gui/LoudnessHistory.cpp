@@ -43,6 +43,7 @@ LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
     desiredNumberOfPixelsBetweenTwoPoints (6.0f),
     textBoxWidth (40),
     distanceBetweenLeftBorderAndText (3),
+    desiredRefreshIntervalInMilliseconds (1000),
     mostRecentYPosition (circularBufferForYPositions.begin()),
     distanceBetweenGraphAndBottom (32)
 {
@@ -74,6 +75,11 @@ Value & LoudnessHistory::getLevelValueObject ()
 void LoudnessHistory::setColour (const Colour & newColour)
 {
     colour = newColour;
+}
+
+int LoudnessHistory::getDesiredRefreshIntervalInMilliseconds ()
+{
+    return desiredRefreshIntervalInMilliseconds;
 }
 
 void LoudnessHistory::timerCallback()
@@ -204,10 +210,8 @@ void LoudnessHistory::resized()
     // Set the itator to the first value
     mostRecentYPosition = circularBufferForYPositions.end() - 1;
     
-    // Start the timer which will refresh the GUI elements.
-    const int refreshIntervalInMilliseconds = 1000*fullTimeRange/numberOfPoints;
-    startTimer(refreshIntervalInMilliseconds);
-        // Will set the new interval, starting right now.
+    // Calculate the time interval, at which the timerCallback() will be called by a instance of LoudnessHistoryGroup.
+    desiredRefreshIntervalInMilliseconds = 1000*fullTimeRange/numberOfPoints;
 }
 
 void LoudnessHistory::paint (Graphics& g)

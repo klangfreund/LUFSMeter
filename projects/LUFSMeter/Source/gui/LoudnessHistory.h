@@ -40,7 +40,6 @@
    A graph that shows the course of a value over time for a given time interval.
 */
 class LoudnessHistory  : public Component,
-                         public Timer,
                          public Value::Listener
 {
 public:
@@ -54,9 +53,11 @@ public:
     
     void setColour (const Colour & newColour);
 
-    void timerCallback();
-    void resized();
-    void paint (Graphics& g);
+    int getDesiredRefreshIntervalInMilliseconds ();
+    void timerCallback ();
+    
+    void resized () override;
+    void paint (Graphics& g) override;
     
     void reset ();
     
@@ -96,6 +97,8 @@ private:
     
     float fullTimeRange;
     float numberOfPixelsBetweenTwoPoints;
+    
+    int desiredRefreshIntervalInMilliseconds;
     
     /** A circular buffer to hold the past level values.
      
