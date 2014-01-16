@@ -40,3 +40,11 @@ Use JUCE_LIVE_CONSTANT to be able to tweak the colours used (only for developers
 
 Estimated time needed: 2h
 Time needed: 3465s 
+
+
+One timer for all LoudnessHistories
+-----------------------------------
+
+Estimated time: 2h
+Time: 9318s
+
