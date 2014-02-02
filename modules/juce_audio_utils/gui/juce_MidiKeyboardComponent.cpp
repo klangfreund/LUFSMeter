@@ -260,6 +260,12 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
     return x;
 }
 
+int MidiKeyboardComponent::getNoteAtPosition (Point<int> p)
+{
+    float v;
+    return xyToNote (p, v);
+}
+
 const uint8 MidiKeyboardComponent::whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 const uint8 MidiKeyboardComponent::blackNotes[] = { 1, 3, 6, 8, 10 };
 
@@ -382,12 +388,12 @@ void MidiKeyboardComponent::paint (Graphics& g)
     else
         y2 = 5.0f;
 
-    g.setGradientFill (ColourGradient (Colours::black.withAlpha (0.3f), x1, y1,
-                                       Colours::transparentBlack, x2, y2, false));
-
     int x, w;
     getKeyPos (rangeEnd, x, w);
     x += w;
+
+    const Colour shadowCol (findColour (shadowColourId));
+    g.setGradientFill (ColourGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
 
     switch (orientation)
     {
