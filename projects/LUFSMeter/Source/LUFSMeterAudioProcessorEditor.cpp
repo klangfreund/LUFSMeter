@@ -303,7 +303,7 @@ LUFSMeterAudioProcessor* LUFSMeterAudioProcessorEditor::getProcessor() const
 void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
 {
     // Distances
-    const int loudnessBarWidth = getProcessor()->loudnessBarWidth.getValue();
+    const int loudnessBarWidth = int(getProcessor()->loudnessBarWidth.getValue()) * -1;
     const int spaceBetweenBars = jmin (loudnessBarWidth/5, 10);
         // This distance is also used for the border on the right side.
     const int heightOfNumericValues = loudnessBarWidth/3;

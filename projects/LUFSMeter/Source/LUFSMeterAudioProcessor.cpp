@@ -39,7 +39,7 @@ LUFSMeterAudioProcessor::LUFSMeterAudioProcessor()
     // Set up some default values:
     lastUIWidth (600),
     lastUIHeight (300),
-    loudnessBarWidth (var(50)),
+    loudnessBarWidth (var(-50)),
     loudnessBarMinValue (var(-41)),
     loudnessBarMaxValue (var(-14)),
     showIntegratedLoudnessHistory (var(true)),

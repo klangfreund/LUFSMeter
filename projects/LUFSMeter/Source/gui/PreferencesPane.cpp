@@ -47,15 +47,15 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     const int textEntryBoxWidth = 0;
     const int textEntryBoxHeight = 0;
     
-    loudnessBarSize.setRange (5.0, 300.0, 1);
+    loudnessBarSize.setRange (-300.0, -5.0, 1.0); // This value multiplied by -1 results in the used with
+        // for each loudness bar. Negative values have been chosen to invert the behaviour of the slider
+        // (left side: big bars, right side: small bars).
     loudnessBarSize.getValueObject().referTo(loudnessBarWidth);
-    loudnessBarSize.setPopupDisplayEnabled(true, this);
-    loudnessBarSize.setTextValueSuffix(" pixels");
     loudnessBarSize.setTextBoxStyle(Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
     loudnessBarSize.setColour(Slider::trackColourId, Colours::black);
     addAndMakeVisible (&loudnessBarSize);
 
-    loudnessBarRange.setRange (-100, 0.0, 1);
+    loudnessBarRange.setRange (-100, 0.0, 1.0);
     loudnessBarRange.getMinValueObject().referTo (loudnessBarMinValue);
     loudnessBarRange.getMaxValueObject().referTo (loudnessBarMaxValue);
     loudnessBarRange.setTextBoxStyle (Slider::NoTextBox, isReadOnly, textEntryBoxWidth, textEntryBoxHeight);
