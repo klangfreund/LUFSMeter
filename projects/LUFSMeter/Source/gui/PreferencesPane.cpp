@@ -43,6 +43,33 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     showShortTimeLoudnessHistory ("S"),
     showMomentaryLoudnessHistory ("M")
 {
+    // Get the icons from the embedded zip.
+    // ------------------------------------
+    // Source: JuceDemo WidgetsDemo.cpp:616
+    StringArray iconNames;
+    OwnedArray<Drawable> iconsFromZipFile;
+    
+    const bool dontKeepInternalCopyOfData = false;
+    MemoryInputStream iconsFileStream (BinaryData::icons_zip, BinaryData::icons_zipSize, dontKeepInternalCopyOfData);
+    const bool dontDeleteStreamWhenDestroyed = false;
+    ZipFile icons (&iconsFileStream, dontDeleteStreamWhenDestroyed);
+            
+    for (int i = 0; i < icons.getNumEntries(); ++i)
+    {
+        ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
+        
+        if (svgFileStream != 0)
+        {
+            iconNames.add (icons.getEntry(i)->filename);
+            iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
+        }
+    }
+
+    Drawable* image = iconsFromZipFile [iconNames.indexOf ("edit-paste.svg")]->createCopy();
+    loudnessBarSizeLeftIcon = dynamic_cast <DrawableComposite*> (image);
+    addAndMakeVisible (loudnessBarSizeLeftIcon);
+    
+    
     const bool isReadOnly = false;
     const int textEntryBoxWidth = 0;
     const int textEntryBoxHeight = 0;
@@ -103,7 +130,7 @@ void PreferencesPane::paint (Graphics &g)
     loudnessHistoryGroup.setColour(GroupComponent::textColourId, loudnessHistoryGroupColour);
 
     Colour textColourOn = JUCE_LIVE_CONSTANT (Colours::black);
-    Colour buttonOnColour = JUCE_LIVE_CONSTANT (Colour (0xffc9c9c9));
+    Colour buttonOnColour = JUCE_LIVE_CONSTANT (Colour (0xffffff00));
     Colour textColourOff = JUCE_LIVE_CONSTANT (Colour (0xff9a9a9a));
     Colour buttonOffColour = JUCE_LIVE_CONSTANT (Colour (0xff383838));
     showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
@@ -124,12 +151,14 @@ void PreferencesPane::resized()
 {
     AnimatedSidePanel::resized();
     
-    const int sliderHeight = 20;
-    const int loudnessBarSizeY = 2*borderSize + titleHeight;
+    const int sliderHeight = 24;
+    const int loudnessBarY = 2*borderSize + titleHeight;
     const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
-    loudnessBarSize.setBounds (borderSize, loudnessBarSizeY, sliderWidth, sliderHeight);
+    loudnessBarSize.setBounds (borderSize + 24, loudnessBarY, sliderWidth - 24, sliderHeight);
     
-    const int loudnessBarRangeY = loudnessBarSizeY + sliderHeight + borderSize;
+    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, 24, 24), RectanglePlacement::centred);
+    
+    const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize;
     loudnessBarRange.setBounds (borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
     
     loudnessHistoryGroup.setBounds(borderSize, loudnessBarRangeY + sliderHeight + borderSize, sliderWidth, 15 + 24 + 10);

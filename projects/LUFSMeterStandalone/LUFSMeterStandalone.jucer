@@ -4,6 +4,9 @@
               bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.1.0"
               companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1" includeBinaryInAppConfig="1">
   <MAINGROUP id="AO7N4d" name="LUFSMeterStandalone">
+    <GROUP id="{C46D7E40-97CB-E992-3185-DCE11F82F561}" name="Resources">
+      <FILE id="MukQGX" name="icons.zip" compile="0" resource="1" file="../LUFSMeter/Resources/icons.zip"/>
+    </GROUP>
     <GROUP id="{54DB0834-C391-BB20-D2E8-10BA7ED68A39}" name="Source LUFSMeter Plugin">
       <FILE id="HKkacv" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
             file="../LUFSMeter/Source/Ebu128LoudnessMeter.cpp"/>

@@ -5,6 +5,9 @@
     <Filter Include="LUFSMeterStandalone">
       <UniqueIdentifier>{15F41B6A-80CD-FC9E-61F8-F0D4A29CA4EF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LUFSMeterStandalone\Resources">
+      <UniqueIdentifier>{26C01A8D-9A17-FAF5-B778-2083B4EF1CD2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="LUFSMeterStandalone\Source LUFSMeter Plugin">
       <UniqueIdentifier>{5E727CE0-BB85-BAF6-B265-8936888D4A01}</UniqueIdentifier>
     </Filter>
@@ -655,6 +658,9 @@
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_File.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_FileFilter.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_FileInputStream.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
@@ -665,6 +671,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_TemporaryFile.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_core\network\juce_IPAddress.cpp">
@@ -1276,9 +1285,6 @@
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileFilter.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileListComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
@@ -1292,9 +1298,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\commands\juce_ApplicationCommandInfo.cpp">
@@ -1437,6 +1440,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_gui_extra\native\juce_win32_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>Juce Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_audio_basics\juce_audio_basics.cpp">
       <Filter>Juce Library Code</Filter>
@@ -1725,6 +1731,12 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3Common.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3Headers.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
@@ -1968,6 +1980,9 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_File.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_FileFilter.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_FileInputStream.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
@@ -1981,6 +1996,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_TemporaryFile.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\files\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_core\network\juce_IPAddress.h">
@@ -2628,9 +2646,6 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileFilter.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_FileListComponent.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
@@ -2647,9 +2662,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_gui_basics\commands\juce_ApplicationCommandID.h">
@@ -2754,11 +2766,17 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>Juce Library Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>Juce Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>Juce Library Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\LUFSMeter\Resources\icons.zip">
+      <Filter>LUFSMeterStandalone\Resources</Filter>
+    </None>
     <None Include="..\..\..\..\libraries\juce\modules\juce_audio_basics\juce_module_info">
       <Filter>Juce Modules\juce_audio_basics</Filter>
     </None>
