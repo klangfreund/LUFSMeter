@@ -65,51 +65,5 @@
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../LUFSMeter/Source/gui/PreferencesPane.cpp"
-            timestampString = "413570180.242872"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
-            landmarkName = "PreferencesPane::PreferencesPane (const Value&amp; loudnessBarWidth, const Value&amp; loudnessBarMinValue, const Value&amp; loudnessBarMaxValue, const Value&amp; showIntegratedLoudnessHistoryValue, const Value&amp; showShortTermLoudnessHistoryValue, const Value&amp; showMomentaryLoudnessHistoryValue)"
-            landmarkType = "5">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PreferencesPane::PreferencesPane(juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;)"
-                  moduleName = "LUFSMeterStandalone"
-                  urlString = "file:///Users/sam/data/docs/projects_dev/LUFSMeter/projects/LUFSMeter/Source/gui/PreferencesPane.cpp"
-                  timestampString = "413570469.995279"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "57"
-                  endingLineNumber = "57"
-                  offsetFromSymbolStart = "667">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PreferencesPane::PreferencesPane(juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;, juce::Value const&amp;)"
-                  moduleName = "LUFSMeterStandalone"
-                  urlString = "file:///Users/sam/data/docs/projects_dev/LUFSMeter/projects/LUFSMeter/Source/gui/PreferencesPane.cpp"
-                  timestampString = "413570469.995492"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "57"
-                  endingLineNumber = "57"
-                  offsetFromSymbolStart = "1168">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

@@ -55,11 +55,14 @@ public:
     void resized();
     
 private:
-    Slider loudnessBarSize;
     ScopedPointer<DrawableComposite> loudnessBarSizeLeftIcon;
+    Slider loudnessBarSize;
     ScopedPointer<DrawableComposite> loudnessBarSizeRightIcon;
+    
+    ScopedPointer<DrawableComposite> loudnessBarRangeLeftIcon;
     LoudnessBarRangeSlider loudnessBarRange;
-    //ToggleButton showIntegratedLoudnessHistory;
+    ScopedPointer<DrawableComposite> loudnessBarRangeRightIcon;
+    
     GroupComponent loudnessHistoryGroup;
     TextButton showIntegratedLoudnessHistory;
     TextButton showShortTimeLoudnessHistory;

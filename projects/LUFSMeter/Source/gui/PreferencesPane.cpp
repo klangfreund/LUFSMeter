@@ -53,7 +53,7 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     MemoryInputStream iconsFileStream (BinaryData::icons_zip, BinaryData::icons_zipSize, dontKeepInternalCopyOfData);
     const bool dontDeleteStreamWhenDestroyed = false;
     ZipFile icons (&iconsFileStream, dontDeleteStreamWhenDestroyed);
-            
+    
     for (int i = 0; i < icons.getNumEntries(); ++i)
     {
         ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
@@ -70,6 +70,10 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     addAndMakeVisible (loudnessBarSizeLeftIcon);
     loudnessBarSizeRightIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("barsNarrow.svg")]->createCopy());
     addAndMakeVisible (loudnessBarSizeRightIcon);
+    loudnessBarRangeLeftIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("rangeLow.svg")]->createCopy());
+    addAndMakeVisible (loudnessBarRangeLeftIcon);
+    loudnessBarRangeRightIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("rangeHigh.svg")]->createCopy());
+    addAndMakeVisible (loudnessBarRangeRightIcon);
     
     
     const bool isReadOnly = false;
@@ -127,7 +131,7 @@ void PreferencesPane::paint (Graphics &g)
     loudnessBarRange.setColour (Slider::thumbColourId, JUCE_LIVE_CONSTANT (Colours::black));
     loudnessBarRange.setColour(Slider::trackColourId, JUCE_LIVE_CONSTANT (Colours::black));
     
-    Colour loudnessHistoryGroupColour = JUCE_LIVE_CONSTANT (Colour (0xff00ad00)); //Colour (200, 200, 200);
+    Colour loudnessHistoryGroupColour = JUCE_LIVE_CONSTANT (Colour (0xff000000)); // (Colour (0xff00ad00)); //Colour (0xff7f7f7f);
     loudnessHistoryGroup.setColour(GroupComponent::outlineColourId, loudnessHistoryGroupColour);
     loudnessHistoryGroup.setColour(GroupComponent::textColourId, loudnessHistoryGroupColour);
 
@@ -154,18 +158,27 @@ void PreferencesPane::resized()
     AnimatedSidePanel::resized();
     
     const int iconSize = 40;
-    const int iconSizeSlim = 0.4 * iconSize;
+    const int iconSizeSlim = 0.5 * iconSize;
     const int sliderHeight = iconSize;
     const int loudnessBarY = 2 * borderSize + titleHeight;
-    const int sliderWidth = getWidth() - 2 * borderSize - iconSize - iconSizeSlim - topRightHandleWidth;
-    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, iconSize, iconSize), RectanglePlacement::centred);
-    loudnessBarSize.setBounds (borderSize + iconSize, loudnessBarY, sliderWidth, sliderHeight);
-    loudnessBarSizeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSize + sliderWidth, loudnessBarY, iconSizeSlim, iconSize), RectanglePlacement::centred);
+    const int sizeSliderWidth = getWidth() - 2 * borderSize - iconSize - iconSizeSlim - topRightHandleWidth;
+    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, iconSize, iconSize),
+                                                RectanglePlacement::centred);
+    loudnessBarSize.setBounds (borderSize + iconSize, loudnessBarY, sizeSliderWidth, sliderHeight);
+    loudnessBarSizeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSize + sizeSliderWidth, loudnessBarY, iconSizeSlim, iconSize),
+                                                 RectanglePlacement::centred);
     
-    const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize;
-    loudnessBarRange.setBounds (borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);
-    
-    loudnessHistoryGroup.setBounds(borderSize, loudnessBarRangeY + sliderHeight + borderSize, sliderWidth, 15 + 24 + 10);
+    const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize + 10;
+    const int rangeSliderWidth = getWidth() - 2 * borderSize - 2 * iconSizeSlim - topRightHandleWidth;
+    loudnessBarRangeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarRangeY, iconSizeSlim, iconSize),
+                                                 RectanglePlacement::centred);
+    loudnessBarRange.setBounds (borderSize + iconSizeSlim, loudnessBarRangeY, rangeSliderWidth, sliderHeight);
+    loudnessBarRangeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSizeSlim + rangeSliderWidth, loudnessBarRangeY, iconSizeSlim, iconSize),
+                                                 RectanglePlacement::centred);
+    loudnessHistoryGroup.setBounds(borderSize,
+                                   loudnessBarRangeY + sliderHeight + borderSize + 10,
+                                   getWidth() - 2 * borderSize - topRightHandleWidth,
+                                   15 + 24 + 10);
     
     const int buttonSize = 24;
     const int spaceBetweenButtons = 6;
