@@ -30,13 +30,17 @@
 #ifndef __LUFSMETER_MACROS__
 #define __LUFSMETER_MACROS__
 
+#ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
+#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
+#endif
+
 #ifdef LUFSMETER_STANDALONE // This preprocessor definition is set as a
 // compiler argument (Open the LUFSMeterStandalone.jucer in the Introjucer
 // and go to the Config -> LUFSMeterStandalone) when this file is compiled for
 // the standalone version of the LUFS Meter.
-#include "../../LUFSMeterStandalone/JuceLibraryCode/JuceHeader.h"
+  #include "../../LUFSMeterStandalone/JuceLibraryCode/JuceHeader.h"
 #else
-#include "../JuceLibraryCode/JuceHeader.h"
+  #include "../JuceLibraryCode/JuceHeader.h"
 #endif
 
 #include <string.h> // Contains strrchr, which is used in DEB.

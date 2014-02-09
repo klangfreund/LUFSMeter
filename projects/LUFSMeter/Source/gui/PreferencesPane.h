@@ -57,6 +57,7 @@ public:
 private:
     Slider loudnessBarSize;
     ScopedPointer<DrawableComposite> loudnessBarSizeLeftIcon;
+    ScopedPointer<DrawableComposite> loudnessBarSizeRightIcon;
     LoudnessBarRangeSlider loudnessBarRange;
     //ToggleButton showIntegratedLoudnessHistory;
     GroupComponent loudnessHistoryGroup;

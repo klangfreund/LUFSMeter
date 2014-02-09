@@ -60,14 +60,16 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
         
         if (svgFileStream != 0)
         {
+            // DBG(icons.getEntry(i)->filename);
             iconNames.add (icons.getEntry(i)->filename);
             iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
         }
     }
 
-    Drawable* image = iconsFromZipFile [iconNames.indexOf ("edit-paste.svg")]->createCopy();
-    loudnessBarSizeLeftIcon = dynamic_cast <DrawableComposite*> (image);
+    loudnessBarSizeLeftIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("barsWide.svg")]->createCopy());
     addAndMakeVisible (loudnessBarSizeLeftIcon);
+    loudnessBarSizeRightIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("barsNarrow.svg")]->createCopy());
+    addAndMakeVisible (loudnessBarSizeRightIcon);
     
     
     const bool isReadOnly = false;
@@ -151,12 +153,14 @@ void PreferencesPane::resized()
 {
     AnimatedSidePanel::resized();
     
-    const int sliderHeight = 24;
-    const int loudnessBarY = 2*borderSize + titleHeight;
-    const int sliderWidth = getWidth() - 2*borderSize - topRightHandleWidth;
-    loudnessBarSize.setBounds (borderSize + 24, loudnessBarY, sliderWidth - 24, sliderHeight);
-    
-    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, 24, 24), RectanglePlacement::centred);
+    const int iconSize = 40;
+    const int iconSizeSlim = 0.4 * iconSize;
+    const int sliderHeight = iconSize;
+    const int loudnessBarY = 2 * borderSize + titleHeight;
+    const int sliderWidth = getWidth() - 2 * borderSize - iconSize - iconSizeSlim - topRightHandleWidth;
+    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, iconSize, iconSize), RectanglePlacement::centred);
+    loudnessBarSize.setBounds (borderSize + iconSize, loudnessBarY, sliderWidth, sliderHeight);
+    loudnessBarSizeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSize + sliderWidth, loudnessBarY, iconSizeSlim, iconSize), RectanglePlacement::centred);
     
     const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize;
     loudnessBarRange.setBounds (borderSize, loudnessBarRangeY, sliderWidth, sliderHeight);

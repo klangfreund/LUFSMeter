@@ -33,7 +33,7 @@
 AnimatedSidePanel::AnimatedSidePanel (String panelText)
   : //backgroundColour (Colours::lightgoldenrodyellow.withAlpha(0.5f)),
     backgroundColour (Colours::darkgreen.withAlpha(0.5f)),
-    titleHeight (20),
+    titleHeight (24),
     borderSize (3),
     topRightHandleWidth (titleHeight),
     panelIsVisible (false),
@@ -97,7 +97,7 @@ void AnimatedSidePanel::resized()
     // Remeber the position where this component has been initially placed.
     xPositionWhenHidden = getX();
     
-    showOrHideButton.setBounds(3, 3, getWidth() - 6, 20);
+    showOrHideButton.setBounds(3, 3, getWidth() - 6, titleHeight);
 }
 
 void AnimatedSidePanel::buttonClicked (Button* button)

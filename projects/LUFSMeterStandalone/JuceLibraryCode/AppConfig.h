@@ -276,7 +276,7 @@
 // juce_gui_basics flags:
 
 #ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
- //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING
 #endif
 
 #ifndef    JUCE_USE_XSHM
@@ -299,7 +299,7 @@
 #endif
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- #define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
+ //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 #endif
 
 
