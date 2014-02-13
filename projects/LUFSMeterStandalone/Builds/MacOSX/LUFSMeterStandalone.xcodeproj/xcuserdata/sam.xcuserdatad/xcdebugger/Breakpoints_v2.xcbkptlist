@@ -61,7 +61,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2147"
             endingLineNumber = "2147"
-            landmarkName = "Component::findColour (const int colourId, const bool inheritFromParent)"
+            landmarkName = "Component::sendLookAndFeelChange()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

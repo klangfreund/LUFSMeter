@@ -32,13 +32,16 @@
 //==============================================================================
 AnimatedSidePanel::AnimatedSidePanel (String panelText)
   : //backgroundColour (Colours::lightgoldenrodyellow.withAlpha(0.5f)),
-    backgroundColour (Colours::darkgreen.withAlpha(0.5f)),
+    backgroundColour (Colours::white.withAlpha(0.5f)),
     titleHeight (24),
     borderSize (3),
-    topRightHandleWidth (titleHeight),
+    widthWithoutHandle (380),
+    topRightHandleWidth (titleHeight + 2 * borderSize),
     panelIsVisible (false),
     xPositionWhenHidden (0)
 {
+    setSize (widthWithoutHandle + topRightHandleWidth, 200);
+    
     showOrHideButton.setButtonText(panelText);
     showOrHideButton.setColour(TextButton::buttonColourId, Colours::black);
     showOrHideButton.setColour(TextButton::textColourOffId, Colours::lightgrey);
@@ -49,6 +52,23 @@ AnimatedSidePanel::AnimatedSidePanel (String panelText)
 
 AnimatedSidePanel::~AnimatedSidePanel ()
 {
+}
+
+void AnimatedSidePanel::setBackgroundColour (const Colour& newBackgroundColour)
+{
+    backgroundColour = newBackgroundColour;
+    repaint();
+}
+
+int AnimatedSidePanel::getWidthWithoutHandle ()
+{
+    return getWidth() - topRightHandleWidth;
+}
+
+void AnimatedSidePanel::setTopLeftPosition (const int x, const int y)
+{
+    Component::setTopLeftPosition(x, y);
+    xPositionWhenHidden = x;
 }
 
 void AnimatedSidePanel::paint (Graphics& g)
@@ -94,9 +114,6 @@ bool AnimatedSidePanel::hitTest(int x, int y)
 
 void AnimatedSidePanel::resized()
 {
-    // Remeber the position where this component has been initially placed.
-    xPositionWhenHidden = getX();
-    
     showOrHideButton.setBounds(3, 3, getWidth() - 6, titleHeight);
 }
 
@@ -104,22 +121,22 @@ void AnimatedSidePanel::buttonClicked (Button* button)
 {
     if (button == &showOrHideButton)
     {
-        int movingPanelXPosition;
+        int finalXPosition;
         
         if (!panelIsVisible)
         {
-            movingPanelXPosition = xPositionWhenHidden + 380;
+            finalXPosition = xPositionWhenHidden + 380;
             panelIsVisible = true;
         }
         else
         {
-            movingPanelXPosition = xPositionWhenHidden;
+            finalXPosition = xPositionWhenHidden;
             panelIsVisible = false;
         }
         
         ComponentAnimator& animator = Desktop::getInstance().getAnimator();
         
-        const Rectangle<int> finalBounds = Rectangle<int>(movingPanelXPosition,
+        const Rectangle<int> finalBounds = Rectangle<int>(finalXPosition,
                                                           getY(),
                                                           getWidth(),
                                                           getHeight());

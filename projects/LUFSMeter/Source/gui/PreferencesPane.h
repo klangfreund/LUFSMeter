@@ -61,7 +61,6 @@ private:
     
     ScopedPointer<DrawableComposite> loudnessBarRangeLeftIcon;
     LoudnessBarRangeSlider loudnessBarRange;
-    ScopedPointer<DrawableComposite> loudnessBarRangeRightIcon;
     
     GroupComponent loudnessHistoryGroup;
     TextButton showIntegratedLoudnessHistory;

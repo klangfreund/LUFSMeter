@@ -155,12 +155,12 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     // Add the preferences pane
     addAndMakeVisible (&preferencesPane);
-    preferencesPane.setBounds(-380, 50, 400, 200);
+    preferencesPane.setTopLeftPosition(- preferencesPane.getWidthWithoutHandle(), 50);
     
     // Add the triangular resizer component for the bottom-right of the UI.
     addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
     
-    resizeLimits.setSizeLimits (150, 150, 800, 400);
+    resizeLimits.setMinimumSize(150, 150);
     
     // Set our component's initial size to be the last one that was stored in 
     // the filter's settings.

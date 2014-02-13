@@ -43,20 +43,28 @@ public:
     AnimatedSidePanel (String panelText);
     
     ~AnimatedSidePanel ();
+    
+    void setBackgroundColour (const Colour& newBackgroundColour);
+    
+    int getWidthWithoutHandle ();
+    
+    void setTopLeftPosition (const int x, const int y);
 
-    void paint (Graphics& g);
+    virtual void paint (Graphics& g) override;
     
     virtual bool hitTest(int x, int y) override;
     
-    void resized();
+    virtual void resized() override;
     
     /** The ButtonListener method. */
-    void buttonClicked (Button* button);
+    virtual void buttonClicked (Button* button) override;
     
 protected:
     Colour backgroundColour;
     int titleHeight;
     int borderSize;
+    int widthWithoutHandle;
+    int initialWidth;
     int topRightHandleWidth;
     
 private:

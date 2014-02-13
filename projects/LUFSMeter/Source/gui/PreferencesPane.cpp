@@ -70,10 +70,10 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     addAndMakeVisible (loudnessBarSizeLeftIcon);
     loudnessBarSizeRightIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("barsNarrow.svg")]->createCopy());
     addAndMakeVisible (loudnessBarSizeRightIcon);
-    loudnessBarRangeLeftIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("rangeLow.svg")]->createCopy());
+    loudnessBarRangeLeftIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("rangeArrow.svg")]->createCopy());
     addAndMakeVisible (loudnessBarRangeLeftIcon);
-    loudnessBarRangeRightIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("rangeHigh.svg")]->createCopy());
-    addAndMakeVisible (loudnessBarRangeRightIcon);
+    
+    resized();
     
     
     const bool isReadOnly = false;
@@ -125,6 +125,8 @@ PreferencesPane::~PreferencesPane ()
 
 void PreferencesPane::paint (Graphics &g)
 {
+    setBackgroundColour (JUCE_LIVE_CONSTANT (Colours::white.withAlpha(0.5f)));
+    
     AnimatedSidePanel::paint(g);
     
     loudnessBarSize.setColour(Slider::thumbColourId, JUCE_LIVE_CONSTANT (Colours::black));
@@ -162,21 +164,23 @@ void PreferencesPane::resized()
     const int sliderHeight = iconSize;
     const int loudnessBarY = 2 * borderSize + titleHeight;
     const int sizeSliderWidth = getWidth() - 2 * borderSize - iconSize - iconSizeSlim - topRightHandleWidth;
-    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarY, iconSize, iconSize),
+    const int loudnessBarSizeLeftIconX = borderSize;
+    loudnessBarSizeLeftIcon->setTransformToFit (Rectangle<float>(loudnessBarSizeLeftIconX, loudnessBarY, iconSize, iconSize),
                                                 RectanglePlacement::centred);
-    loudnessBarSize.setBounds (borderSize + iconSize, loudnessBarY, sizeSliderWidth, sliderHeight);
-    loudnessBarSizeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSize + sizeSliderWidth, loudnessBarY, iconSizeSlim, iconSize),
+    const int loudnessBarSizeX = loudnessBarSizeLeftIconX + iconSize;
+    loudnessBarSize.setBounds (loudnessBarSizeX, loudnessBarY, sizeSliderWidth, sliderHeight);
+    loudnessBarSizeRightIcon->setTransformToFit (Rectangle<float>(loudnessBarSizeX + sizeSliderWidth, loudnessBarY, iconSizeSlim, iconSize),
                                                  RectanglePlacement::centred);
     
-    const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize + 10;
-    const int rangeSliderWidth = getWidth() - 2 * borderSize - 2 * iconSizeSlim - topRightHandleWidth;
-    loudnessBarRangeLeftIcon->setTransformToFit (Rectangle<float>(borderSize, loudnessBarRangeY, iconSizeSlim, iconSize),
+    const int loudnessBarRangeY = loudnessBarY + sliderHeight + borderSize;
+    const int rangeSliderWidth = getWidth() - 2 * borderSize - iconSizeSlim - topRightHandleWidth;
+    const int loudnessBarRangeLeftIconX = borderSize;
+    loudnessBarRangeLeftIcon->setTransformToFit (Rectangle<float>(loudnessBarRangeLeftIconX, loudnessBarRangeY, iconSizeSlim, iconSize),
                                                  RectanglePlacement::centred);
-    loudnessBarRange.setBounds (borderSize + iconSizeSlim, loudnessBarRangeY, rangeSliderWidth, sliderHeight);
-    loudnessBarRangeRightIcon->setTransformToFit (Rectangle<float>(borderSize + iconSizeSlim + rangeSliderWidth, loudnessBarRangeY, iconSizeSlim, iconSize),
-                                                 RectanglePlacement::centred);
+    loudnessBarRange.setBounds (loudnessBarRangeLeftIconX + iconSizeSlim, loudnessBarRangeY, rangeSliderWidth, sliderHeight);
+
     loudnessHistoryGroup.setBounds(borderSize,
-                                   loudnessBarRangeY + sliderHeight + borderSize + 10,
+                                   loudnessBarRangeY + sliderHeight + borderSize,
                                    getWidth() - 2 * borderSize - topRightHandleWidth,
                                    15 + 24 + 10);
     

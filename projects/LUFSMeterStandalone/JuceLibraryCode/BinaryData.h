@@ -10,7 +10,7 @@
 namespace BinaryData
 {
     extern const char*   icons_zip;
-    const int            icons_zipSize = 10397;
+    const int            icons_zipSize = 9233;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
