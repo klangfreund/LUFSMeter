@@ -9,8 +9,13 @@
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="LUFSMeterAU"
               pluginAUViewClass="LUFSMeterAU_V1" pluginRTASCategory="" aaxIdentifier="com.klangfreund.lufsmeter"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0"
-              companyName="Klangfreund" includeBinaryInAppConfig="1">
+              companyName="Klangfreund" includeBinaryInAppConfig="1" buildVST3="0"
+              buildRTAS="0" buildAAX="0" pluginManufacturerWebsite="www.yourcompany.com"
+              pluginManufacturerEmail="support@yourcompany.com">
   <MAINGROUP id="V1nBQh" name="LUFSMeter">
+    <GROUP id="{5911D4B8-831C-F08F-0713-55C5B38BE96B}" name="Resources">
+      <FILE id="fiSHqD" name="icons.zip" compile="0" resource="1" file="Resources/icons.zip"/>
+    </GROUP>
     <GROUP id="{EED3BB12-8D68-A9C7-3D1E-7DF6D01B440D}" name="Source">
       <FILE id="W8fcGY" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
             file="Source/Ebu128LoudnessMeter.cpp"/>
