@@ -37,8 +37,7 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
                                   const Value& showIntegratedLoudnessHistoryValue,
                                   const Value& showShortTermLoudnessHistoryValue,
                                   const Value& showMomentaryLoudnessHistoryValue)
-  : AnimatedSidePanel("Preferences"),
-    loudnessHistoryGroup (String::empty, "History Graph"),
+  : loudnessHistoryGroup (String::empty, "History Graph"),
     showIntegratedLoudnessHistory ("I"),
     showShortTimeLoudnessHistory ("S"),
     showMomentaryLoudnessHistory ("M")
@@ -65,6 +64,9 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
             iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
         }
     }
+    
+    ScopedPointer<DrawableComposite> wrench = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("wrenchByIonicons.svg")]->createCopy());
+    AnimatedSidePanel::setCaptionAndIcon("Preferences", wrench);
 
     loudnessBarSizeLeftIcon = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("barsWide.svg")]->createCopy());
     addAndMakeVisible (loudnessBarSizeLeftIcon);
@@ -112,11 +114,6 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     showMomentaryLoudnessHistory.getToggleStateValue().referTo (showMomentaryLoudnessHistoryValue);
     showMomentaryLoudnessHistory.setWantsKeyboardFocus (false);
     loudnessHistoryGroup.addAndMakeVisible (&showMomentaryLoudnessHistory);
-    
-//    showIntegratedLoudnessLabel.setColour(Label::textColourId, Colours::lightgrey);
-//    showIntegratedLoudnessLabel.setJustificationType(Justification::centred);
-//    addAndMakeVisible(&showIntegratedLoudnessLabel);
-    //showIntegratedLoudnessLabel.attachToComponent(&showIntegratedLoudnessHistory, false);
 }
 
 PreferencesPane::~PreferencesPane ()
@@ -193,5 +190,4 @@ void PreferencesPane::resized()
     showShortTimeLoudnessHistory.setBounds(buttonX, buttonY, buttonSize, buttonSize);
     buttonX += buttonSize + borderSize + 6;
     showMomentaryLoudnessHistory.setBounds(buttonX, buttonY, buttonSize, buttonSize);
-    //showIntegratedLoudnessLabel.setBounds(borderSize, toggleButtonsY + 20, 20, 20);
 }

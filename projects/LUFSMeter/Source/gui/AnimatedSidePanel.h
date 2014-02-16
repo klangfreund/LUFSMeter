@@ -40,13 +40,15 @@ class AnimatedSidePanel  : public Component,
                            public ButtonListener
 {
 public:
-    AnimatedSidePanel (String panelText);
+    AnimatedSidePanel ();
     
     ~AnimatedSidePanel ();
     
-    void setBackgroundColour (const Colour& newBackgroundColour);
-    
     int getWidthWithoutHandle ();
+ 
+    void setCaptionAndIcon (const String& caption, DrawableComposite* icon);
+    
+    void setBackgroundColour (const Colour& newBackgroundColour);
     
     void setTopLeftPosition (const int x, const int y);
 
@@ -71,6 +73,16 @@ private:
     bool panelIsVisible;
     int xPositionWhenHidden;
     DrawableButton showOrHideButton;
+    
+    /** The caption that will be shown overlayed onto the showOrHideButton,
+     * as a child of showOrHideButton. It is set up such that it will bypass
+     * clicks to its parent.
+     *
+     * This is actually a hack, since I could't figure out how to composite
+     * a DrawableText and a DrawableComposite (the icon) into one DrawabeComposite
+     * to be shown by the DrawableButton.
+     */
+    Label showOrHideButtonLabel;
 };
 
 
