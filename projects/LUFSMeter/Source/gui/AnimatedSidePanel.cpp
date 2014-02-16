@@ -36,9 +36,10 @@ AnimatedSidePanel::AnimatedSidePanel (String panelText)
     titleHeight (24),
     borderSize (3),
     widthWithoutHandle (380),
-    topRightHandleWidth (titleHeight + 2 * borderSize),
+    topRightHandleWidth (titleHeight + borderSize),
     panelIsVisible (false),
-    xPositionWhenHidden (0)
+    xPositionWhenHidden (0),
+    showOrHideButton ("showOrHideButton", DrawableButton::ImageOnButtonBackground)
 {
     setSize (widthWithoutHandle + topRightHandleWidth, 200);
     
@@ -48,6 +49,35 @@ AnimatedSidePanel::AnimatedSidePanel (String panelText)
     showOrHideButton.setAlwaysOnTop (true);
     showOrHideButton.addListener(this);
     addAndMakeVisible(&showOrHideButton);
+    
+    // START TEST
+    // Get the icons from the embedded zip.
+    // ------------------------------------
+    // Source: JuceDemo WidgetsDemo.cpp:616
+    StringArray iconNames;
+    OwnedArray<Drawable> iconsFromZipFile;
+    
+    const bool dontKeepInternalCopyOfData = false;
+    MemoryInputStream iconsFileStream (BinaryData::icons_zip, BinaryData::icons_zipSize, dontKeepInternalCopyOfData);
+    const bool dontDeleteStreamWhenDestroyed = false;
+    ZipFile icons (&iconsFileStream, dontDeleteStreamWhenDestroyed);
+    
+    for (int i = 0; i < icons.getNumEntries(); ++i)
+    {
+        ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
+        
+        if (svgFileStream != 0)
+        {
+            // DBG(icons.getEntry(i)->filename);
+            iconNames.add (icons.getEntry(i)->filename);
+            iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
+        }
+    }
+    
+    ScopedPointer<DrawableComposite> wrench = dynamic_cast <DrawableComposite*> (iconsFromZipFile [iconNames.indexOf ("wrenchByIonicons.svg")]->createCopy());
+    showOrHideButton.setImages(wrench);
+    showOrHideButton.getCurrentImage()->setTransformToFit(Rectangle<float>(widthWithoutHandle + 0.5*borderSize, 1.5* borderSize, titleHeight - 3*borderSize, titleHeight - 3*borderSize), RectanglePlacement::xRight);
+    // END TEST
 }
 
 AnimatedSidePanel::~AnimatedSidePanel ()

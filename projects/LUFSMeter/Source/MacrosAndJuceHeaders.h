@@ -31,7 +31,7 @@
 #define __LUFSMETER_MACROS__
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
-#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
+#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
 #endif
 
 #ifdef LUFSMETER_STANDALONE // This preprocessor definition is set as a

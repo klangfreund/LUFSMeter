@@ -70,7 +70,7 @@ protected:
 private:
     bool panelIsVisible;
     int xPositionWhenHidden;
-    TextButton showOrHideButton;
+    DrawableButton showOrHideButton;
 };
 
 
