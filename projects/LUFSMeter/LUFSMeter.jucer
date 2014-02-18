@@ -139,5 +139,24 @@
         <MODULEPATH id="juce_audio_basics" path="../../libraries/juce/modules"/>
       </MODULEPATHS>
     </VS2013>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="LUFSMeter"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="2"
+                       targetName="LUFSMeter"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../libraries/juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../libraries/juce/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
 </JUCERPROJECT>
