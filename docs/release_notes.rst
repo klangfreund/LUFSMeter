@@ -4,10 +4,11 @@
 Release Notes
 *************
 
+
 LUFS Meter 0.4
 --------------
 
-2014 02 16
+2014 02 21
 
 * Reworked the preferences pane.
 
@@ -38,7 +39,7 @@ LUFS Meter 0.3
 LUFS Meter 0.2
 --------------
 
-2012 08 17
+2012 09 04
 
 * Refined core algorithm for the integrated loudness measurement.
 
@@ -53,9 +54,10 @@ LUFS Meter 0.2
 LUFS Meter 0.1
 --------------
 
-2012 06 25
+2012 06 15
 
 Initial Release
 
 * Momentary, Short Term and Integrated loudness measurement, according to
-  EBU R128.
+  ITU BS.1770 and EBU R128.
+
