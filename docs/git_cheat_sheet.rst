@@ -51,3 +51,18 @@ http://stackoverflow.com/questions/3739393/git-subtree-merge-strategy-possible-w
 
 If there are build errors after the upgrade to the latest JUCE revision, it might
 be solved by recreating the XCode project file with the Introjucer.
+
+
+
+General git usage
+=================
+
+
+Log tagged commits only
+-----------------------
+
+::
+    git log --no-walk --tags --decorate
+
+Source: http://stackoverflow.com/questions/21569406/how-does-one-git-log-tagged-commits-only
+

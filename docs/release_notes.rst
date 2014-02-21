@@ -1,12 +1,42 @@
 .. author: Samuel Gaehwiler
 
-************************
-LUFS Meter Release Notes
-************************
+*************
+Release Notes
+*************
+
+LUFS Meter 0.4
+--------------
+
+2014 02 16
+
+* Reworked the preferences pane.
+
+* Icons added to the preferences pane (vector graphics).
+
+* Redrawing of the loudness history graphs is done simultaneously
+  (one triggering timer instead of one timer for each graph).
 
 
-Version 0.2
------------
+LUFS Meter 0.3
+--------------
+
+2013 12 12
+
+* Show and hide history graphs for the integrated, the short term and the
+  momentary loudness.
+
+* Different colours for the integrated, the short term and the
+  momentary loudness.
+
+* The momentary loudness bar displays the value for each channel as well as
+  the combined (the specified value of the momentary loudness according to 
+  ITU BS.1770) momentary loudness.
+
+* Reworked standalone-version with a native title bar and a native menu.
+
+
+LUFS Meter 0.2
+--------------
 
 2012 08 17
 
@@ -20,8 +50,8 @@ Version 0.2
 * The range of the bars and the history graph can be set.
 
 
-Version 0.1
------------
+LUFS Meter 0.1
+--------------
 
 2012 06 25
 
