@@ -185,17 +185,20 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     // the audio output. We want the audio output to be exactly the same
     // as the input!
     bufferForMeasurement = buffer; // This copies the audio to another memory
-        // location using memcpy.
+                                   // location using memcpy.
     
     // STEP 1: K-weighted filter.
     // -----------------------------
     
     // Apply the pre-filter.
+    // Used to account for the acoustic effects of the head.
     // This is the first part of the so called K-weighted filtering.
     preFilter.processBlock(bufferForMeasurement);
     
-    // Apply the RLB filter.
+    // Apply the RLB filter (a simple highpass filter).
     // This is the second part of the so called K-weighted filtering.
+    // Its name is in accordance to ITU-R BS.1770-2
+    // (In ITU-R BS.1770-3 it's called 'a simple highpass filter').
     revisedLowFrequencyBCurveFilter.processBlock(bufferForMeasurement);
     
     // TEMP

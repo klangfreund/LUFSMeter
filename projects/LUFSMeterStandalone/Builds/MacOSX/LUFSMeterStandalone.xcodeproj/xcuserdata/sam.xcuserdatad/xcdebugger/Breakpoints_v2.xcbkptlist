@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../LUFSMeter/Source/Ebu128LoudnessMeter.cpp"
-            timestampString = "406341143.359123"
+            timestampString = "414788209.619207"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "477"
-            endingLineNumber = "477"
+            startingLineNumber = "480"
+            endingLineNumber = "480"
             landmarkName = "Ebu128LoudnessMeter::getMomentaryLoudness()"
             landmarkType = "5">
             <Locations>
