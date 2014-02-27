@@ -124,16 +124,27 @@ private:
      The downside of this method is that the displayed measurement
      has an accuracy jitter of max. e.g. 1/20 s. I guess this isn't
      an issue since GUI elements are refreshed asynchron anyway.
-     Just to be clear, the accuracy of the measurement isn't harmed.
+     Just to be clear, the accuracy of the measurement isn't effected.
      But if you ask for a measurement at time t, it will be the
      accurate measurement at time t - dt, where dt \in e.g. [0, 1/20s].
      */
-    OwnedArray< OwnedArray<double> > bin;
+    OwnedArray <OwnedArray<double>> bin;
     
     int currentBin;
     int numberOfSamplesInTheCurrentBin;
     
+    /*
+     The average of the filtered and squared samples of the last
+     3 seconds.
+     A value for each channel.
+     */
     OwnedArray<double> averageOfTheLast3s;
+    
+    /*
+     The average of the filtered and squared samples of the last
+     400 milliseconds.
+     A value for each channel.
+     */
     OwnedArray<double> averageOfTheLast400ms;
     
     Array<double> channelWeighting;

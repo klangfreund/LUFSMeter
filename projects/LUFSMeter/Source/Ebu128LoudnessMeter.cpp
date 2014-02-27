@@ -29,7 +29,7 @@
 
 #include "Ebu128LoudnessMeter.h"
 
-// constants initialisation
+// static member constants
 const double Ebu128LoudnessMeter::absoluteThreshold = -70.0;
 const float Ebu128LoudnessMeter::minimalReturnValue = -300.0f;
 
@@ -62,10 +62,10 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
 {
     
     
-    // If this class is used wrong and processBlock
+    // If this class is used without caution and processBlock
     // is called before prepareToPlay, divisions by zero
     // might occure. E.g. if numberOfSamplesInAllBins = 0.
-    
+    //
     // To prevent this, prepareToPlay is called here with
     // some arbitrary arguments.
     prepareToPlay(44100.0, 2, 512, 20);
@@ -147,12 +147,12 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
         OwnedArray<double>* binsForTheKthChannel = new OwnedArray<double>;
         for (int i=0; i<numberOfBins; ++i)
         {
-            binsForTheKthChannel->add(new double);
+            binsForTheKthChannel->add(new double(0));
         }
         bin.add(binsForTheKthChannel);
         
-        averageOfTheLast3s.add(new double);
-        averageOfTheLast400ms.add(new double);
+        averageOfTheLast3s.add(new double(0));
+        averageOfTheLast400ms.add(new double(0));
     }
     
     // Initialize the channel weighting.
@@ -320,9 +320,9 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                 
                 // INTEGRATED LOUDNESS
                 // ===================
-                // For the integrated loudness measurement, every 100ms
-                // we have to observe a gating window of length 400ms.
-                // We call this window 'gating black', according to BS.1770-2
+                // For the integrated loudness measurement we have to observe a
+                // gating window of length 400ms every 100ms.
+                // We call this window 'gating block', according to BS.1770-2
                 if (numberOfBinsSinceLastGateMeasurement == numberOfBinsToCover100ms)
                 {
                     numberOfBinsSinceLastGateMeasurement = 0;
@@ -365,11 +365,16 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     }
                     
                     
-                    // Recalculate the gated loudness.
+                    // Determine the integrated loudness.
+                    //
+                    // It's here instead inside of the getIntegratedLoudness() function
+                    // because here it's only calculated 10 times a second.
+                    // getIntegratedLoudness() is called at the refreshrate of the GUI,
+                    // which is higher (e.g. 20 times a second).
                     const int binToStart = ceil((relativeThreshold - lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
                     if (binToStart < histogramOfBlockLoudness.size())
                     {
-                        double loudnessOfCurrentBin = lowestBlockLoudnessToConsider + (binToStart + 0.5)*histogramLoudnessStepSize;
+                        const double loudnessOfCurrentBin = lowestBlockLoudnessToConsider + (binToStart + 0.5)*histogramLoudnessStepSize;
                         double weightedSumOfCurrentBin = pow(10.0, (loudnessOfCurrentBin + 0.691)/10.0);
                         int nrOfBlocks = 0;
                         double sumForIntegratedLoudness = 0.0;
