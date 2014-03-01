@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../LUFSMeter/Source/Ebu128LoudnessMeter.cpp"
-            timestampString = "414788209.619207"
+            timestampString = "415370886.866453"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "480"
-            endingLineNumber = "480">
+            startingLineNumber = "547"
+            endingLineNumber = "547">
             <Locations>
                <Location
                   shouldBeEnabled = "No"

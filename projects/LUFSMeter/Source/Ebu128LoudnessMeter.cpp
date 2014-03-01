@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -30,8 +30,15 @@
 #include "Ebu128LoudnessMeter.h"
 
 // static member constants
-const double Ebu128LoudnessMeter::absoluteThreshold = -70.0;
+// -----------------------
 const float Ebu128LoudnessMeter::minimalReturnValue = -300.0f;
+const double Ebu128LoudnessMeter::absoluteThreshold = -70.0;
+// Specifications for the histograms.
+// You might want to change them to e.g. achieve a higher resolution.
+const double Ebu128LoudnessMeter::lowestBlockLoudnessToConsider = -80.0; // LUFS
+const double Ebu128LoudnessMeter::highestBlockLoudnessToConsider = 10.0; // LUFS
+const double Ebu128LoudnessMeter::histogramLoudnessStepSize = 0.1; // LU
+const double Ebu128LoudnessMeter::histogramWeightedSumStepFactor = pow(10.0, histogramLoudnessStepSize/10.0);
 
 
 Ebu128LoudnessMeter::Ebu128LoudnessMeter()
@@ -48,19 +55,29 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
                                     1.0,               // b2
                                     -1.99004745483398, // a1
                                     0.99007225036621), // a2
+    numberOfBins (0),
+    numberOfSamplesPerBin (0),
+    numberOfSamplesInAllBins (0),
+    numberOfBinsToCover400ms (0),
+    numberOfSamplesIn400ms (0),
+    numberOfBinsToCover100ms (0),
+    numberOfBinsSinceLastGateMeasurementForI (0),
+    millisecondsSinceLastGateMeasurementForLRA (0),
 
+    numberOfBlocksToCalculateRelativeThreshold (0),
+    sumOfAllBlocksToCalculateRelativeThreshold(0.0),
     relativeThreshold (absoluteThreshold),
-    // Specifications for the histogram.
-    // You might want to change them to e.g. achieve a higher resolution.
-    lowestBlockLoudnessToConsider(-80.0), // LUFS
-    highestBlockLoudnessToConsider(10.0), // LUFS
-    histogramLoudnessStepSize(0.1), // LU
-    histogramWeightedSumStepFactor(pow(10.0, histogramLoudnessStepSize/10.0)),
-    // Memory allocation for the histogram
+    LRAnumberOfBlocksToCalculateRelativeThreshold (0),
+    LRAsumOfAllBlocksToCalculateRelativeThreshold(0.0),
+    LRArelativeThreshold (absoluteThreshold),
+    // Memory allocation for the histogram (for the integrated loudness)
     histogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0),
-    integratedLoudness (minimalReturnValue)
+    integratedLoudness (minimalReturnValue),
+    // Memory allocation for the histogram (LRA)
+    LRAhistogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0)
 {
-    
+    DEB("The longest possible measurement until a bufferoverflow = "
+        + String(INT_MAX / 10. / 3600. / 365.) + " years");
     
     // If this class is used without caution and processBlock
     // is called before prepareToPlay, divisions by zero
@@ -135,7 +152,8 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
     
     currentBin = 0;
     numberOfSamplesInTheCurrentBin = 0;
-    numberOfBinsSinceLastGateMeasurement = 0;
+    numberOfBinsSinceLastGateMeasurementForI = 0;
+    millisecondsSinceLastGateMeasurementForLRA = 0;
     
     // Initialize the bins and the measurement values.
     bin.clear();
@@ -202,7 +220,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     revisedLowFrequencyBCurveFilter.processBlock(bufferForMeasurement);
     
     // TEMP
-    // Copy back to buffer to listen if everything went well.
+    // Copy back to buffer to listen to the filtered audio.
     //   buffer = bufferForMeasurement;
     // END TEMP
     
@@ -323,14 +341,14 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                 // For the integrated loudness measurement we have to observe a
                 // gating window of length 400ms every 100ms.
                 // We call this window 'gating block', according to BS.1770-2
-                if (numberOfBinsSinceLastGateMeasurement == numberOfBinsToCover100ms)
+                if (numberOfBinsSinceLastGateMeasurementForI != numberOfBinsToCover100ms)
+                    ++numberOfBinsSinceLastGateMeasurementForI;
+                else
                 {
-                    numberOfBinsSinceLastGateMeasurement = 0;
+                    numberOfBinsSinceLastGateMeasurementForI = 0;
                     
-                    // Figure out if the current 400ms gated window
-                    // fulfills the equation
-                    //   l_j > /Gamma_a
-                    // ( see ITU-R BS.1770-2 equation (4) ).
+                    // Figure out if the current 400ms gated window (loudnessOfCurrentBlock =) l_j > /Gamma_a
+                    // ( see ITU-R BS.1770-3 equation (4) ).
                     
                     // Calculate the weighted sum of the current block,
                     // (in 120725_integrated_loudness_revisited.tif, I call
@@ -345,9 +363,10 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     // Calculate the j'th gating block loudness l_j
                     double loudnessOfCurrentBlock = -0.691 + 10.*std::log10(weightedSumOfCurrentBlock);
                     
-                    // Recalculate the relative threshold, if needed.
                     if (loudnessOfCurrentBlock > absoluteThreshold)
                     {
+                        // Recalculate the relative threshold.
+                        // -----------------------------------
                         ++numberOfBlocksToCalculateRelativeThreshold;
                         sumOfAllBlocksToCalculateRelativeThreshold += weightedSumOfCurrentBlock;
                         
@@ -366,11 +385,13 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                     
                     
                     // Determine the integrated loudness.
+                    // ----------------------------------
                     //
                     // It's here instead inside of the getIntegratedLoudness() function
                     // because here it's only calculated 10 times a second.
                     // getIntegratedLoudness() is called at the refreshrate of the GUI,
                     // which is higher (e.g. 20 times a second).
+
                     const int binToStart = ceil((relativeThreshold - lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
                     if (binToStart < histogramOfBlockLoudness.size())
                     {
@@ -399,10 +420,116 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                             integratedLoudness = minimalReturnValue;
                         }
                     }
-
+                    
+                    
+                    // Loudness range
+                    // ==============
+                    if (millisecondsSinceLastGateMeasurementForLRA != 1000)
+                        millisecondsSinceLastGateMeasurementForLRA += 100;
+                    else
+                    {
+                        millisecondsSinceLastGateMeasurementForLRA = 0;
+                        
+                        // Every second this section is reached.
+                        // This is very similar to the above code for the integrated loudness.
+                        // (But distinct enough to not put it into a single function/object.)
+                        
+                        // Figure out if the current 400ms gated window (loudnessOfCurrentBlock =) l_j > /Gamma_a
+                        // ( see ITU-R BS.1770-3 equation (4) ).
+                        
+                        // Calculate the weighted sum of the current block,
+                        // (in 120725_integrated_loudness_revisited.tif, I call
+                        // this s_j)
+                        // Using an analysis-window of 3 seconds, as specified in
+                        // EBU 3342-2011.
+                        double weightedSumOfCurrentBlock = 0.0;
+                        const int numberOfChannels = averageOfTheLast3s.size();
+                        for (int k=0; k != numberOfChannels; ++k)
+                        {
+                            weightedSumOfCurrentBlock += channelWeighting[k] * *averageOfTheLast3s[k];
+                        }
+                        
+                        // Calculate the j'th gating block loudness l_j
+                        double loudnessOfCurrentBlock = -0.691 + 10.*std::log10(weightedSumOfCurrentBlock);
+                        
+                        if (loudnessOfCurrentBlock > absoluteThreshold)
+                        {
+                            // Recalculate the relative threshold for LRA
+                            // ------------------------------------------
+                            ++LRAnumberOfBlocksToCalculateRelativeThreshold;
+                            LRAsumOfAllBlocksToCalculateRelativeThreshold += weightedSumOfCurrentBlock;
+                            
+                            // According to the definition of the relative
+                            // threshold in ITU-R BS.1770-2, page 6.
+                            // -20 LU as described in EBU 3342-2011.
+                            LRArelativeThreshold = -20.691 + 10.*std::log10(LRAsumOfAllBlocksToCalculateRelativeThreshold/LRAnumberOfBlocksToCalculateRelativeThreshold);
+                        }
+                        
+                        // Add the loudness of the current block to the histogram
+                        if (loudnessOfCurrentBlock > lowestBlockLoudnessToConsider &&
+                            loudnessOfCurrentBlock < highestBlockLoudnessToConsider)
+                        {
+                            const int binToAddItTo = floor((loudnessOfCurrentBlock-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
+                            LRAhistogramOfBlockLoudness[binToAddItTo] += 1;
+                        }
+                        
+                        // Determine the loudness range.
+                        // -----------------------------
+                        //
+                        // It's here instead inside of the getter functions
+                        // because here it's only calculated once a second.
+                        // The getter functions are called at the refreshrate of the GUI,
+                        // which is higher (e.g. 20 times a second).
+                        
+                        const int lowestBinIndexToConsider = ceil((LRArelativeThreshold - lowestBlockLoudnessToConsider)/histogramLoudnessStepSize);
+                        
+                        // Figure out the number of blocks above the LRArelativeThreshold
+                        // as well as the highest non empty bin.
+                        int numberOfBlocks = 0;
+                        int highestBinIndexToConsider = lowestBinIndexToConsider;
+                        
+                        for (int binIndex = lowestBinIndexToConsider; binIndex < LRAhistogramOfBlockLoudness.size(); ++binIndex)
+                        {
+                            if (LRAhistogramOfBlockLoudness[binIndex] != 0)
+                            {
+                                highestBinIndexToConsider = binIndex;
+                                numberOfBlocks += LRAhistogramOfBlockLoudness[binIndex];
+                            }
+                        }
+                        
+                        // Figure out the lower bound (start) of the loudness range.
+                        int LRAstartIndex = lowestBinIndexToConsider;
+                        int numberOfBlocksBelowLRAstartIndex = 0;
+                        
+                        while (numberOfBlocksBelowLRAstartIndex < 10./100. * numberOfBlocks)
+                        {
+                            numberOfBlocksBelowLRAstartIndex += LRAhistogramOfBlockLoudness[LRAstartIndex];
+                            ++LRAstartIndex;
+                        }
+                        DEB("numberOfBlocks = " + String(numberOfBlocks))
+                        DEB("numberOfBlocksBelowLRAstartIndex = " + String(numberOfBlocksBelowLRAstartIndex))
+                        
+                        const double LRAstart = lowestBlockLoudnessToConsider + (LRAstartIndex + 0.5)*histogramLoudnessStepSize;
+                        DEB("LRA starts at " + String(LRAstart))
+                        
+                        // Figure out the lower bound (start) of the loudness range.
+                        int LRAendIndex = highestBinIndexToConsider;
+                        int numberOfBlocksAboveLRAendIndex = 0;
+                        
+                        while (numberOfBlocksAboveLRAendIndex < 5/100 * numberOfBlocks)
+                        {
+                            numberOfBlocksAboveLRAendIndex += LRAhistogramOfBlockLoudness[LRAendIndex];
+                            --LRAendIndex;
+                        }
+                        ++LRAendIndex;  // Because the LRAstartIndex is closest above 10 percent,
+                                        // accordingly the LRAendIndex should be closest ABOVE 95 percent.
+                        
+                        const double LRAend = lowestBlockLoudnessToConsider + (LRAendIndex + 0.5)*histogramLoudnessStepSize;
+                        DEB("LRA ends at " + String(LRAend))
+                        
+                        DEB("LRA = " + String(LRAend - LRAstart))
+                    }
                 }
-                else
-                    ++numberOfBinsSinceLastGateMeasurement;
                 
                 // Move on to the next bin
                 currentBin = (currentBin + 1) % numberOfBins;
@@ -518,6 +645,7 @@ void Ebu128LoudnessMeter::reset()
         }
     }
     
+    
     // momentary and short term loudness.
     for (int k=0; k != momentaryLoudness.size(); ++k)
     {
@@ -525,15 +653,27 @@ void Ebu128LoudnessMeter::reset()
         shortTermLoudness.set(k, minimalReturnValue);
     }    
     
+    
     // integrated loudness
     numberOfBlocksToCalculateRelativeThreshold = 0;
     sumOfAllBlocksToCalculateRelativeThreshold = 0.0;
+    relativeThreshold = absoluteThreshold;
     
     for (int i=0; i<histogramOfBlockLoudness.size(); ++i)
     {
         histogramOfBlockLoudness[i] = 0;
     }
     
-    relativeThreshold = absoluteThreshold;
     integratedLoudness = minimalReturnValue;
+    
+    
+    // Loudness range
+    LRAnumberOfBlocksToCalculateRelativeThreshold = 0;
+    LRAsumOfAllBlocksToCalculateRelativeThreshold = 0.0;
+    LRArelativeThreshold = absoluteThreshold;
+    
+    for (int i=0; i<LRAhistogramOfBlockLoudness.size(); ++i)
+    {
+        LRAhistogramOfBlockLoudness[i] = 0;
+    }
 }

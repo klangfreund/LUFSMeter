@@ -11,14 +11,17 @@ In order of priority.
 Open issues / Roadmap
 =====================
 
-Add vectorgraphics to the GUI
------------------------------
+Implement Loudness Range
+------------------------
+
+Don't measure 100ms or 1s based on the expectedRequestRate
+----------------------------------------------------------
+
+Use a sample counter! 
+
 
 Implement some default plugin presets
 -------------------------------------
-
-Implement Loudness Range
-------------------------
 
 Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
 ------------------------------------------------------------------------------

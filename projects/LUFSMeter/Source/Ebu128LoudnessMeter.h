@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -103,7 +103,8 @@ private:
     int numberOfSamplesIn400ms;
     
     int numberOfBinsToCover100ms;
-    int numberOfBinsSinceLastGateMeasurement;
+    int numberOfBinsSinceLastGateMeasurementForI;
+    int millisecondsSinceLastGateMeasurementForLRA;
     
     /**
      After the samples are filtered and squared, they need to be
@@ -152,13 +153,6 @@ private:
     Array<float> shortTermLoudness;
     Array<float> momentaryLoudness;
     
-    /** A gated window needs to be bigger than this value to
-     contribute to the calculation of the relative threshold.
-     
-     absoluteThreshold = Gamma_a = -70 LUFS.
-     */
-    static const double absoluteThreshold;
-    
     /** If there is no signal at all, the methods getShortTermLoudness() and
      getMomentaryLoudness() would perform a log10(0) which would result in
      a value -nan. To avoid this, the return value of this methods will be
@@ -166,27 +160,38 @@ private:
      */
     static const float minimalReturnValue;
     
+    /** A gated window needs to be bigger than this value to
+     contribute to the calculation of the relative threshold.
+     
+     absoluteThreshold = Gamma_a = -70 LUFS.
+     */
+    static const double absoluteThreshold;
+    
     int numberOfBlocksToCalculateRelativeThreshold;
     double sumOfAllBlocksToCalculateRelativeThreshold;
     double relativeThreshold;
     
+    int LRAnumberOfBlocksToCalculateRelativeThreshold;
+    double LRAsumOfAllBlocksToCalculateRelativeThreshold;
+    double LRArelativeThreshold;
     
-    double lowestBlockLoudnessToConsider;
-    double highestBlockLoudnessToConsider;
+    
+    static const double lowestBlockLoudnessToConsider;
+    static const double highestBlockLoudnessToConsider;
     /** The difference in loudness between two adjacent bins in the histogram.
      Measured in LU;
      */
-    double histogramLoudnessStepSize;
+    static const double histogramLoudnessStepSize;
     
     /** Two adjacant bins in the histogram also correspond to two weighted
      sums. They are related by this factor.
      WeightedSum2 = WeightedSum1 * histogramWeightedSumStepFactor.
      */
-    double histogramWeightedSumStepFactor;
+    static const double histogramWeightedSumStepFactor;
     
-    /** Storage for the loudnesses of all blocks since the last reset.
+    /** Storage for the loudnesses of all 400ms blocks since the last reset.
      
-     Because the relative threshold varies, and all blocks with a loudness
+     Because the relative threshold varies and all blocks with a loudness
      bigger than the relative threshold are needed to calculate the gated
      loudness (integrated loudness), it is mandatory to keep track of all
      block loudnesses.
@@ -198,6 +203,16 @@ private:
      It is the return value of getIntegratedLoudness().
      */
     float integratedLoudness;
+    
+    /** Like histogramOfBlockLoudness, but for the measurement of the
+     loudness range.
+     
+     The histogramOfBlockLoudness can't be used simultaneous for the
+     loudness range, because the measurement blocks for the loudness
+     range need to be of length 3s. Vs 400ms.
+     */
+    vector<int> LRAhistogramOfBlockLoudness;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);
     
