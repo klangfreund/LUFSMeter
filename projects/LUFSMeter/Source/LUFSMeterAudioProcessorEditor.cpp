@@ -36,6 +36,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
   : AudioProcessorEditor (ownerFilter),
     momentaryLoudnessValue (var(-300.0)),
     shortTermLoudnessValue (var(-300.0)),
+    loudnessRangeValue(var(0.0)),
     integratedLoudnessValue (var(-300.0)),
     distanceBetweenLoudnessBarAndTop (10),
     distanceBetweenLoudnessBarAndBottom (32),
@@ -56,6 +57,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
                            getProcessor()->loudnessBarMaxValue),
     momentaryLoudnessCaption (String::empty, "M"),
     shortTermLoudnessCaption (String::empty, "S"),
+    loudnessRangeCaption (String::empty, "LRA"),
     integratedLoudnessCaption (String::empty, "I"),
     momentaryLoudnessHistory (momentaryLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     shortTermLoudnessHistory (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
@@ -81,6 +83,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     Colour momentaryLoudnessColour = Colours::darkgreen;
     Colour momentaryLoudnessSumColour = Colours::darkgreen.darker().darker();
+    Colour loudnessRangeColour = Colours::blue.darker();
     Colour integratedLoudnessColour = Colours::yellow.darker().darker();
     
     
@@ -104,6 +107,10 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&shortTermLoudnessNumeric);
     shortTermLoudnessNumeric.getLoudnessValueObject().referTo(shortTermLoudnessValue);
     
+    loudnessRangeNumeric.setColour(loudnessRangeColour);
+    addAndMakeVisible (&loudnessRangeNumeric);
+    loudnessRangeNumeric.getLoudnessValueObject().referTo(loudnessRangeValue);
+    
     integratedLoudnessNumeric.setColour(integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessNumeric);
     integratedLoudnessNumeric.getLoudnessValueObject().referTo(integratedLoudnessValue);
@@ -124,6 +131,11 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     shortTermLoudnessCaption.setColour (Label::textColourId, Colours::green);
     shortTermLoudnessCaption.setJustificationType(justification);
     addAndMakeVisible (&shortTermLoudnessCaption);
+
+    loudnessRangeCaption.setFont(fontForCaptions);
+    loudnessRangeCaption.setColour (Label::textColourId, loudnessRangeColour);
+    loudnessRangeCaption.setJustificationType(justification);
+    addAndMakeVisible (&loudnessRangeCaption);
     
     integratedLoudnessCaption.setFont(fontForCaptions);
     integratedLoudnessCaption.setColour (Label::textColourId, integratedLoudnessColour);
@@ -251,6 +263,12 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
     jassert(shortTermLoudness > -400)
     shortTermLoudnessValue.setValue(shortTermLoudness);
 
+    // loudness range values
+    // ---------------------
+    float loudnessRange = getProcessor()->getLoudnessRange();
+    jassert(loudnessRange > -400)
+    loudnessRangeValue.setValue(loudnessRange);
+    
     // integrated loudness values
     // --------------------------
     float integratedLoudness = getProcessor()->getIntegratedLoudness();
@@ -367,11 +385,27 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
                                        heightOfLoudnessCaptions);
     shortTermLoudnessCaption.setFont(fontForCaptions);
     
+    // Loudness Range
+    const int loudnessRangeBarX = shortTermLoudnessBarX - spaceBetweenBars - loudnessBarWidth;
+//    loudnessRangeBar.setBounds (loudnessRangeBarX,
+//                                distanceBetweenLoudnessBarAndTop,
+//                                loudnessBarWidth,
+//                                heightOfLoudnessBar);
+    loudnessRangeNumeric.setBounds (loudnessRangeBarX,
+                                    loudnessBarNumericTopPosition,
+                                    loudnessBarWidth,
+                                    heightOfNumericValues);
+    loudnessRangeCaption.setBounds (loudnessRangeBarX,
+                                    loudnessBarCaptionTopPosition,
+                                    loudnessBarWidth,
+                                    heightOfLoudnessCaptions);
+    loudnessRangeCaption.setFont(fontForCaptions);
+    
     // Integrated Loudness
-    const int integratedLoudnessBarX = shortTermLoudnessBarX - spaceBetweenBars - loudnessBarWidth;
-    integratedLoudnessBar.setBounds(integratedLoudnessBarX, 
-                                    distanceBetweenLoudnessBarAndTop, 
-                                    loudnessBarWidth, 
+    const int integratedLoudnessBarX = loudnessRangeBarX - spaceBetweenBars - loudnessBarWidth;
+    integratedLoudnessBar.setBounds(integratedLoudnessBarX,
+                                    distanceBetweenLoudnessBarAndTop,
+                                    loudnessBarWidth,
                                     heightOfLoudnessBar);
     integratedLoudnessNumeric.setBounds (integratedLoudnessBarX,
                                          loudnessBarNumericTopPosition,

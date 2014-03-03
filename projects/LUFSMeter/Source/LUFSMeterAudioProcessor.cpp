@@ -304,6 +304,21 @@ float LUFSMeterAudioProcessor::getIntegratedLoudness()
     return ebu128LoudnessMeter.getIntegratedLoudness();
 }
 
+float LUFSMeterAudioProcessor::getLoudnessRangeStart()
+{
+    return ebu128LoudnessMeter.getLoudnessRangeStart();
+}
+
+float LUFSMeterAudioProcessor::getLoudnessRangeEnd()
+{
+    return ebu128LoudnessMeter.getLoudnessRangeEnd();
+}
+
+float LUFSMeterAudioProcessor::getLoudnessRange()
+{
+    return ebu128LoudnessMeter.getLoudnessRange();
+}
+
 
 //==============================================================================
 // This creates new instances of the plugin..

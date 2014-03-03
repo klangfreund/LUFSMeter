@@ -91,6 +91,7 @@ private:
     // not suited to be updated at e.g. 20Hz since it deallocates and allocates
     // new memory every time it gets updated.
     Value shortTermLoudnessValue;
+    Value loudnessRangeValue;
     Value integratedLoudnessValue;
     
     /** GUI parameters. */
@@ -110,11 +111,13 @@ private:
     /* Level values numeric. */
     LoudnessNumeric momentaryLoudnessNumeric;
     LoudnessNumeric shortTermLoudnessNumeric;
+    LoudnessNumeric loudnessRangeNumeric;
     LoudnessNumeric integratedLoudnessNumeric;
     
     /** Level meter captions. */
     Label momentaryLoudnessCaption;
     Label shortTermLoudnessCaption;
+    Label loudnessRangeCaption;
     Label integratedLoudnessCaption;
     
     /** Level history graph. */

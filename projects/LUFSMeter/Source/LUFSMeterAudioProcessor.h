@@ -119,6 +119,10 @@ public:
     
     float getIntegratedLoudness();
 
+    float getLoudnessRangeStart();
+    float getLoudnessRangeEnd();
+    float getLoudnessRange();
+
     //==============================================================================
     // this keeps a copy of the last set of time info that was acquired during an audio
     // callback - the UI component will read this and display it.

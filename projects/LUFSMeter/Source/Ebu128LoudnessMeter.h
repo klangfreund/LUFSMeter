@@ -81,6 +81,10 @@ public:
     
     float getIntegratedLoudness();
     
+    float getLoudnessRangeStart();
+    float getLoudnessRangeEnd();
+    float getLoudnessRange();
+    
     void reset();
     
 private:
@@ -212,6 +216,14 @@ private:
      range need to be of length 3s. Vs 400ms.
      */
     vector<int> LRAhistogramOfBlockLoudness;
+    
+    /**
+     The return values for the corresponding get member functions.
+     
+     Loudness Range = loudnessRangeEnd - loudnessRangeStart.
+     */
+    float loudnessRangeStart;
+    float loudnessRangeEnd;
     
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);

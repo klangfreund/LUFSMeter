@@ -74,7 +74,9 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     histogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0),
     integratedLoudness (minimalReturnValue),
     // Memory allocation for the histogram (LRA)
-    LRAhistogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0)
+    LRAhistogramOfBlockLoudness(ceil((highestBlockLoudnessToConsider-lowestBlockLoudnessToConsider)/histogramLoudnessStepSize), 0),
+    loudnessRangeStart(minimalReturnValue),
+    loudnessRangeEnd(minimalReturnValue)
 {
     DEB("The longest possible measurement until a bufferoverflow = "
         + String(INT_MAX / 10. / 3600. / 365.) + " years");
@@ -509,8 +511,8 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                         DEB("numberOfBlocks = " + String(numberOfBlocks))
                         DEB("numberOfBlocksBelowLRAstartIndex = " + String(numberOfBlocksBelowLRAstartIndex))
                         
-                        const double LRAstart = lowestBlockLoudnessToConsider + (LRAstartIndex + 0.5)*histogramLoudnessStepSize;
-                        DEB("LRA starts at " + String(LRAstart))
+                        loudnessRangeStart = lowestBlockLoudnessToConsider + (LRAstartIndex + 0.5)*histogramLoudnessStepSize;
+                        DEB("LRA starts at " + String(loudnessRangeStart))
                         
                         // Figure out the lower bound (start) of the loudness range.
                         int LRAendIndex = highestBinIndexToConsider;
@@ -524,10 +526,10 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                         ++LRAendIndex;  // Because the LRAstartIndex is closest above 10 percent,
                                         // accordingly the LRAendIndex should be closest ABOVE 95 percent.
                         
-                        const double LRAend = lowestBlockLoudnessToConsider + (LRAendIndex + 0.5)*histogramLoudnessStepSize;
-                        DEB("LRA ends at " + String(LRAend))
+                        loudnessRangeEnd = lowestBlockLoudnessToConsider + (LRAendIndex + 0.5)*histogramLoudnessStepSize;
+                        DEB("LRA ends at " + String(loudnessRangeEnd))
                         
-                        DEB("LRA = " + String(LRAend - LRAstart))
+                        DEB("LRA = " + String(loudnessRangeEnd - loudnessRangeStart))
                     }
                 }
                 
@@ -632,6 +634,21 @@ float Ebu128LoudnessMeter::getIntegratedLoudness()
     return integratedLoudness;
 }
 
+float Ebu128LoudnessMeter::getLoudnessRangeStart()
+{
+    return loudnessRangeStart;
+}
+
+float Ebu128LoudnessMeter::getLoudnessRangeEnd()
+{
+    return loudnessRangeEnd;
+}
+
+float Ebu128LoudnessMeter::getLoudnessRange()
+{
+    return loudnessRangeEnd - loudnessRangeStart;
+}
+
 void Ebu128LoudnessMeter::reset()
 {
     // the bins
@@ -676,4 +693,7 @@ void Ebu128LoudnessMeter::reset()
     {
         LRAhistogramOfBlockLoudness[i] = 0;
     }
+    
+    loudnessRangeStart = minimalReturnValue;
+    loudnessRangeEnd = minimalReturnValue;
 }
