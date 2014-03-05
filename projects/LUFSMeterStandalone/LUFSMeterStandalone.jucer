@@ -49,6 +49,10 @@
               file="../LUFSMeter/Source/gui/LoudnessNumeric.cpp"/>
         <FILE id="iqN6cu" name="LoudnessNumeric.h" compile="0" resource="0"
               file="../LUFSMeter/Source/gui/LoudnessNumeric.h"/>
+        <FILE id="aOFf6v" name="LoudnessRangeBar.cpp" compile="1" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessRangeBar.cpp"/>
+        <FILE id="zYlGtW" name="LoudnessRangeBar.h" compile="0" resource="0"
+              file="../LUFSMeter/Source/gui/LoudnessRangeBar.h"/>
         <FILE id="RDmuYP" name="MultiChannelLoudnessBar.cpp" compile="1" resource="0"
               file="../LUFSMeter/Source/gui/MultiChannelLoudnessBar.cpp"/>
         <FILE id="dXLlpa" name="MultiChannelLoudnessBar.h" compile="0" resource="0"

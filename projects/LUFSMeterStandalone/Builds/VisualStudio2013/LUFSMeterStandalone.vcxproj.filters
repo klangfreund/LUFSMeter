@@ -316,6 +316,9 @@
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessNumeric.cpp">
       <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeBar.cpp">
+      <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\MultiChannelLoudnessBar.cpp">
       <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
     </ClCompile>
@@ -1507,6 +1510,9 @@
       <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessNumeric.h">
+      <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeBar.h">
       <Filter>LUFSMeterStandalone\Source LUFSMeter Plugin\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\MultiChannelLoudnessBar.h">

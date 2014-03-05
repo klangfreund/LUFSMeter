@@ -36,6 +36,8 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
   : AudioProcessorEditor (ownerFilter),
     momentaryLoudnessValue (var(-300.0)),
     shortTermLoudnessValue (var(-300.0)),
+    loudnessRangeStartValue (var(-300.0)),
+    loudnessRangeEndValue (var(-300.0)),
     loudnessRangeValue(var(0.0)),
     integratedLoudnessValue (var(-300.0)),
     distanceBetweenLoudnessBarAndTop (10),
@@ -52,7 +54,11 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     shortTermLoudnessBar (shortTermLoudnessValue,
                           getProcessor()->loudnessBarMinValue, 
                           getProcessor()->loudnessBarMaxValue),
-    integratedLoudnessBar (integratedLoudnessValue, 
+    loudnessRangeBar (loudnessRangeStartValue,
+                      loudnessRangeEndValue,
+                      getProcessor()->loudnessBarMinValue,
+                      getProcessor()->loudnessBarMaxValue),
+    integratedLoudnessBar (integratedLoudnessValue,
                            getProcessor()->loudnessBarMinValue, 
                            getProcessor()->loudnessBarMaxValue),
     momentaryLoudnessCaption (String::empty, "M"),
@@ -94,6 +100,9 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     addAndMakeVisible (&momentaryLoudnessBar);
     
     addAndMakeVisible (&shortTermLoudnessBar);
+
+    loudnessRangeBar.setColour (loudnessRangeColour);
+    addAndMakeVisible (&loudnessRangeBar);
     
     integratedLoudnessBar.setColour (integratedLoudnessColour);
     addAndMakeVisible (&integratedLoudnessBar);
@@ -269,6 +278,14 @@ void LUFSMeterAudioProcessorEditor::timerCallback()
     jassert(loudnessRange > -400)
     loudnessRangeValue.setValue(loudnessRange);
     
+    float loudnessRangeStart = getProcessor()->getLoudnessRangeStart();
+    jassert (loudnessRangeStart > -400)
+    loudnessRangeStartValue.setValue(loudnessRangeStart);
+    
+    float loudnessRangeEnd = getProcessor()->getLoudnessRangeEnd();
+    jassert (loudnessRangeEnd > -400)
+    loudnessRangeEndValue.setValue(loudnessRangeEnd);
+    
     // integrated loudness values
     // --------------------------
     float integratedLoudness = getProcessor()->getIntegratedLoudness();
@@ -387,10 +404,10 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     
     // Loudness Range
     const int loudnessRangeBarX = shortTermLoudnessBarX - spaceBetweenBars - loudnessBarWidth;
-//    loudnessRangeBar.setBounds (loudnessRangeBarX,
-//                                distanceBetweenLoudnessBarAndTop,
-//                                loudnessBarWidth,
-//                                heightOfLoudnessBar);
+    loudnessRangeBar.setBounds (loudnessRangeBarX,
+                                distanceBetweenLoudnessBarAndTop,
+                                loudnessBarWidth,
+                                heightOfLoudnessBar);
     loudnessRangeNumeric.setBounds (loudnessRangeBarX,
                                     loudnessBarNumericTopPosition,
                                     loudnessBarWidth,

@@ -39,6 +39,7 @@
 #include "gui/LoudnessNumeric.h"
 #include "gui/LoudnessHistory.h"
 #include "gui/LoudnessHistoryGroup.h"
+#include "gui/LoudnessRangeBar.h"
 #include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
 // TEMP
@@ -91,6 +92,8 @@ private:
     // not suited to be updated at e.g. 20Hz since it deallocates and allocates
     // new memory every time it gets updated.
     Value shortTermLoudnessValue;
+    Value loudnessRangeStartValue;
+    Value loudnessRangeEndValue;
     Value loudnessRangeValue;
     Value integratedLoudnessValue;
     
@@ -106,6 +109,7 @@ private:
     MultiChannelLoudnessBar momentaryLoudnessBar;
     LoudnessBar momentaryLoudnessBarSum;
     LoudnessBar shortTermLoudnessBar;
+    LoudnessRangeBar loudnessRangeBar;
     LoudnessBar integratedLoudnessBar;
     
     /* Level values numeric. */
