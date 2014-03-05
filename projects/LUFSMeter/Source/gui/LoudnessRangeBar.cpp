@@ -72,7 +72,7 @@ Value & LoudnessRangeBar::getEndValueObject ()
 
 void LoudnessRangeBar::valueChanged (Value & value)
 {
-    if (value == startValue)
+    if (value.refersToSameSourceAs (startValue))
     {
         // Ensure that the currentLoudness is in the interval
         // [minimumLevel, maximumLevel].
@@ -98,7 +98,7 @@ void LoudnessRangeBar::valueChanged (Value & value)
             repaint();
         }
     }
-    else if (value == endValue)
+    else if (value.refersToSameSourceAs (endValue))
     {
         // Ensure that the currentEnd is in the interval
         // [minimumLevel, maximumLevel].
@@ -108,14 +108,14 @@ void LoudnessRangeBar::valueChanged (Value & value)
         
         if (currentEnd != previousEnd)
         {
-            previousStart = currentStart;
+            previousEnd = currentEnd;
 
             // Mesurements showed that it is more CPU efficient to draw the whole
             // bar and not only the section that has changed.
             repaint();
         }
     }
-    else if (value == minLoudness || value == maxLoudness)
+    else if (value.refersToSameSourceAs (minLoudness) || value.refersToSameSourceAs (maxLoudness))
     {
         determineStretchAndOffset();
         repaint();

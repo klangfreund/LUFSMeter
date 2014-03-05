@@ -44,8 +44,8 @@ public:
     
     ~BackgroundVerticalLinesAndCaption ();
     
-    void resized();
-    void paint (Graphics& g);
+    void resized() override;
+    void paint (Graphics& g) override;
     
 private:
     /** The time interval that is displayed.

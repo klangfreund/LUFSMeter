@@ -57,12 +57,12 @@ public:
     
     void setLoudness (const Array<float>& multiChannelLoudness);
     
-    void valueChanged (Value & value);
+    void valueChanged (Value & value) override;
     
     void setColour (const Colour & newColour);
 
-    void resized ();
-    void paint (Graphics& g);
+    void resized () override;
+    void paint (Graphics& g) override;
     
 private:
     /** Recalculates the values 'stretch' and 'offset' by the values of

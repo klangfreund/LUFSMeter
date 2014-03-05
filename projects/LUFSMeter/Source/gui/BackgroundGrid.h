@@ -43,7 +43,7 @@ public:
     
     ~BackgroundGrid ();
 
-    void paint (Graphics& g);
+    void paint (Graphics& g) override;
     
 private:
     

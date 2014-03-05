@@ -44,12 +44,12 @@
 class LoudnessBarRangeSlider  : public Slider
 {
 public:
-    LoudnessBarRangeSlider ();
+    LoudnessBarRangeSlider();
     
-    ~LoudnessBarRangeSlider ();
+    ~LoudnessBarRangeSlider();
     
 private:
-    void valueChanged ();
+    void valueChanged() override;
 
 };
 

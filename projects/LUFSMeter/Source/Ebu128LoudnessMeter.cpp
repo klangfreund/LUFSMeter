@@ -508,11 +508,11 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                             numberOfBlocksBelowLRAstartIndex += LRAhistogramOfBlockLoudness[LRAstartIndex];
                             ++LRAstartIndex;
                         }
-                        DEB("numberOfBlocks = " + String(numberOfBlocks))
-                        DEB("numberOfBlocksBelowLRAstartIndex = " + String(numberOfBlocksBelowLRAstartIndex))
+                        // DEB("numberOfBlocks = " + String(numberOfBlocks))
+                        // DEB("numberOfBlocksBelowLRAstartIndex = " + String(numberOfBlocksBelowLRAstartIndex))
                         
                         loudnessRangeStart = lowestBlockLoudnessToConsider + (LRAstartIndex + 0.5)*histogramLoudnessStepSize;
-                        DEB("LRA starts at " + String(loudnessRangeStart))
+                        // DEB("LRA starts at " + String(loudnessRangeStart))
                         
                         // Figure out the lower bound (start) of the loudness range.
                         int LRAendIndex = highestBinIndexToConsider;
@@ -527,9 +527,8 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
                                         // accordingly the LRAendIndex should be closest ABOVE 95 percent.
                         
                         loudnessRangeEnd = lowestBlockLoudnessToConsider + (LRAendIndex + 0.5)*histogramLoudnessStepSize;
-                        DEB("LRA ends at " + String(loudnessRangeEnd))
-                        
-                        DEB("LRA = " + String(loudnessRangeEnd - loudnessRangeStart))
+                        // DEB("LRA ends at " + String(loudnessRangeEnd))
+                        // DEB("LRA = " + String(loudnessRangeEnd - loudnessRangeStart))
                     }
                 }
                 

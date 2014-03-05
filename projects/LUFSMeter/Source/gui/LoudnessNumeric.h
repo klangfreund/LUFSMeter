@@ -48,11 +48,11 @@ public:
     
     Value & getLoudnessValueObject ();
     
-    void valueChanged (Value & value);
+    void valueChanged (Value & value) override;
     
     void setColour (const Colour & newColour);
 
-    void paint (Graphics& g);
+    void paint (Graphics& g) override;
     
 private:
     

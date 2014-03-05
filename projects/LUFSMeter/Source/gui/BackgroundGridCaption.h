@@ -48,10 +48,10 @@ public:
     
     ~BackgroundGridCaption ();
 
-    void paint (Graphics& g);
+    void paint (Graphics& g) override;
     
 private:
-    void valueChanged (Value & value);
+    void valueChanged (Value & value) override;
     
     int distanceBetweenLevelBarAndTop;
     int distanceBetweenLevelBarAndBottom;

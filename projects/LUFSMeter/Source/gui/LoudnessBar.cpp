@@ -61,7 +61,7 @@ Value & LoudnessBar::getLoudnessValueObject ()
 
 void LoudnessBar::valueChanged (Value & value)
 {
-    if (value == loudnessValue)
+    if (value.refersToSameSourceAs (loudnessValue))
     {
         
         currentLoudness = value.getValue();
@@ -89,7 +89,7 @@ void LoudnessBar::valueChanged (Value & value)
             repaint();
         }
     }
-    else if (value == minLoudness || value == maxLoudness)
+    else if (value.refersToSameSourceAs (minLoudness) || value.refersToSameSourceAs (maxLoudness))
     {
         determineStretchAndOffset();
         repaint();

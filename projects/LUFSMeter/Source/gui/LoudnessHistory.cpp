@@ -52,9 +52,6 @@ LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
     minLoudness.addListener(this);
     maxLoudness.referTo (maxLoudnessToReferTo);
     maxLoudness.addListener(this);
-
-    DEB("minLoudness = " + minLoudness.getValue().toString())
-    DEB("maxLoudness = " + maxLoudness.getValue().toString())
     
     determineStretchAndOffset();
     
