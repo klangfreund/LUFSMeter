@@ -163,6 +163,7 @@ public:
     Value loudnessBarMaxValue;
     
     Value showIntegratedLoudnessHistory;
+    Value showLoudnessRangeHistory;
     Value showShortTermLoudnessHistory;
     Value showMomentaryLoudnessHistory;
     

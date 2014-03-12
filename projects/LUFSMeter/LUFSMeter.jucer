@@ -62,6 +62,14 @@
               file="Source/gui/LoudnessNumeric.cpp"/>
         <FILE id="gLWvwG" name="LoudnessNumeric.h" compile="0" resource="0"
               file="Source/gui/LoudnessNumeric.h"/>
+        <FILE id="Fpzxpx" name="LoudnessRangeBar.cpp" compile="1" resource="0"
+              file="Source/gui/LoudnessRangeBar.cpp"/>
+        <FILE id="OkvA8y" name="LoudnessRangeBar.h" compile="0" resource="0"
+              file="Source/gui/LoudnessRangeBar.h"/>
+        <FILE id="GZiana" name="LoudnessRangeHistory.cpp" compile="1" resource="0"
+              file="Source/gui/LoudnessRangeHistory.cpp"/>
+        <FILE id="sMbbia" name="LoudnessRangeHistory.h" compile="0" resource="0"
+              file="Source/gui/LoudnessRangeHistory.h"/>
         <FILE id="sdzhkA" name="MultiChannelLoudnessBar.cpp" compile="1" resource="0"
               file="Source/gui/MultiChannelLoudnessBar.cpp"/>
         <FILE id="WZAog6" name="MultiChannelLoudnessBar.h" compile="0" resource="0"

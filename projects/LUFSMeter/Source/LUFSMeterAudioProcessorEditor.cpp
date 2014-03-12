@@ -67,11 +67,13 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     integratedLoudnessCaption (String::empty, "I"),
     momentaryLoudnessHistory (momentaryLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     shortTermLoudnessHistory (shortTermLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
+    loudnessRangeHistory (loudnessRangeStartValue, loudnessRangeEndValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     integratedLoudnessHistory (integratedLoudnessValue, getProcessor()->loudnessBarMinValue, getProcessor()->loudnessBarMaxValue),
     preferencesPane(getProcessor()->loudnessBarWidth,
                     getProcessor()->loudnessBarMinValue,
                     getProcessor()->loudnessBarMaxValue,
                     getProcessor()->showIntegratedLoudnessHistory,
+                    getProcessor()->showLoudnessRangeHistory,
                     getProcessor()->showShortTermLoudnessHistory,
                     getProcessor()->showMomentaryLoudnessHistory)
 {
@@ -161,6 +163,10 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
 
     shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
     loudnessHistoryGroup.addChildComponent(&shortTermLoudnessHistory);
+    
+    loudnessRangeHistory.setColour (loudnessRangeColour);
+    loudnessRangeHistory.setVisible (bool(getProcessor()->showLoudnessRangeHistory.getValue()));
+    loudnessHistoryGroup.addChildComponent(&loudnessRangeHistory);
 
     integratedLoudnessHistory.setColour (integratedLoudnessColour);
     integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));
@@ -191,11 +197,13 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // Listen to some Values
     getProcessor()->loudnessBarWidth.addListener (this);
     getProcessor()->showIntegratedLoudnessHistory.addListener (this);
+    getProcessor()->showLoudnessRangeHistory.addListener (this);
     getProcessor()->showShortTermLoudnessHistory.addListener (this);
     getProcessor()->showMomentaryLoudnessHistory.addListener (this);
     
     momentaryLoudnessHistory.reset();
     shortTermLoudnessHistory.reset();
+    loudnessRangeHistory.reset();
     integratedLoudnessHistory.reset();
     
     // Start the timer which will refresh the GUI elements.
@@ -301,28 +309,34 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
         getProcessor()->reset();
         momentaryLoudnessHistory.reset();
         shortTermLoudnessHistory.reset();
+        loudnessRangeHistory.reset();
         integratedLoudnessHistory.reset();
     }
 }
 
 void LUFSMeterAudioProcessorEditor::valueChanged (Value & value)
 {
-    if (value == getProcessor()->loudnessBarWidth)
+    if (value.refersToSameSourceAs (getProcessor()->loudnessBarWidth))
     {
         resizeGuiComponents();
     }
     
-    if (value == getProcessor()->showIntegratedLoudnessHistory)
+    else if (value.refersToSameSourceAs (getProcessor()->showIntegratedLoudnessHistory))
     {
         integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));
     }
     
-    if (value == getProcessor()->showShortTermLoudnessHistory)
+    else if (value.refersToSameSourceAs (getProcessor()->showLoudnessRangeHistory))
+    {
+        loudnessRangeHistory.setVisible (bool(getProcessor()->showLoudnessRangeHistory.getValue()));
+    }
+    
+    else if (value.refersToSameSourceAs (getProcessor()->showShortTermLoudnessHistory))
     {
         shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
     }
     
-    if (value == getProcessor()->showMomentaryLoudnessHistory)
+    else if (value.refersToSameSourceAs (getProcessor()->showMomentaryLoudnessHistory))
     {
         momentaryLoudnessHistory.setVisible (bool(getProcessor()->showMomentaryLoudnessHistory.getValue()));
     }

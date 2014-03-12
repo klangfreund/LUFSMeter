@@ -56,12 +56,12 @@ public:
     int getDesiredRefreshIntervalInMilliseconds ();
     void timerCallback ();
     
-    void resized () override;
-    void paint (Graphics& g) override;
+    void virtual resized () override;
+    void virtual paint (Graphics& g) override;
     
     void reset ();
     
-private:
+protected:
     void valueChanged (Value & value);
     
     /** Recalculates the values 'stretch' and 'offset' by the values of

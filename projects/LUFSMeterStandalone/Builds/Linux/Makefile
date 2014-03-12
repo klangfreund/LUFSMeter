@@ -62,6 +62,7 @@ OBJECTS := \
   $(OBJDIR)/LoudnessHistoryGroup_2bb7fea6.o \
   $(OBJDIR)/LoudnessNumeric_efac845c.o \
   $(OBJDIR)/LoudnessRangeBar_4a58eb71.o \
+  $(OBJDIR)/LoudnessRangeHistory_ee6beef2.o \
   $(OBJDIR)/MultiChannelLoudnessBar_40cd37f8.o \
   $(OBJDIR)/PreferencesPane_b62376b8.o \
   $(OBJDIR)/AnimatedSidePanel_46aaab02.o \
@@ -151,6 +152,11 @@ $(OBJDIR)/LoudnessNumeric_efac845c.o: ../../../LUFSMeter/Source/gui/LoudnessNume
 $(OBJDIR)/LoudnessRangeBar_4a58eb71.o: ../../../LUFSMeter/Source/gui/LoudnessRangeBar.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LoudnessRangeBar.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LoudnessRangeHistory_ee6beef2.o: ../../../LUFSMeter/Source/gui/LoudnessRangeHistory.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LoudnessRangeHistory.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MultiChannelLoudnessBar_40cd37f8.o: ../../../LUFSMeter/Source/gui/MultiChannelLoudnessBar.cpp

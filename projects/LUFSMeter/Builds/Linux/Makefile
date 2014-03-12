@@ -62,6 +62,8 @@ OBJECTS := \
   $(OBJDIR)/LoudnessHistory_72b215b8.o \
   $(OBJDIR)/LoudnessHistoryGroup_e711e871.o \
   $(OBJDIR)/LoudnessNumeric_61d467b1.o \
+  $(OBJDIR)/LoudnessRangeBar_1d2d72bc.o \
+  $(OBJDIR)/LoudnessRangeHistory_a9c5d8bd.o \
   $(OBJDIR)/MultiChannelLoudnessBar_851af64d.o \
   $(OBJDIR)/PreferencesPane_284b5a0d.o \
   $(OBJDIR)/LUFSMeterAudioProcessor_8eb00650.o \
@@ -148,6 +150,16 @@ $(OBJDIR)/LoudnessHistoryGroup_e711e871.o: ../../Source/gui/LoudnessHistoryGroup
 $(OBJDIR)/LoudnessNumeric_61d467b1.o: ../../Source/gui/LoudnessNumeric.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LoudnessNumeric.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LoudnessRangeBar_1d2d72bc.o: ../../Source/gui/LoudnessRangeBar.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LoudnessRangeBar.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LoudnessRangeHistory_a9c5d8bd.o: ../../Source/gui/LoudnessRangeHistory.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LoudnessRangeHistory.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MultiChannelLoudnessBar_851af64d.o: ../../Source/gui/MultiChannelLoudnessBar.cpp

@@ -40,6 +40,7 @@
 #include "gui/LoudnessHistory.h"
 #include "gui/LoudnessHistoryGroup.h"
 #include "gui/LoudnessRangeBar.h"
+#include "gui/LoudnessRangeHistory.h"
 #include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
 // TEMP
@@ -128,6 +129,7 @@ private:
     LoudnessHistoryGroup loudnessHistoryGroup;
     LoudnessHistory momentaryLoudnessHistory;
     LoudnessHistory shortTermLoudnessHistory;
+    LoudnessRangeHistory loudnessRangeHistory;
     LoudnessHistory integratedLoudnessHistory;
     
     

@@ -45,6 +45,7 @@ public:
                      const Value& loudnessBarMinValue,
                      const Value& loudnessBarMaxValue,
                      const Value& showIntegratedLoudnessHistoryValue,
+                     const Value& showLoudnessRangeHistoryValue,
                      const Value& showShortTermLoudnessHistoryValue,
                      const Value& showMomentaryLoudnessHistoryValue);
     
@@ -64,6 +65,7 @@ private:
     
     GroupComponent loudnessHistoryGroup;
     TextButton showIntegratedLoudnessHistory;
+    TextButton showLoudnessRangeHistory;
     TextButton showShortTimeLoudnessHistory;
     TextButton showMomentaryLoudnessHistory;
 };

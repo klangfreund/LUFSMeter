@@ -250,6 +250,7 @@
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessHistoryGroup.cpp"/>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessNumeric.cpp"/>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeBar.cpp"/>
+    <ClCompile Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeHistory.cpp"/>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\MultiChannelLoudnessBar.cpp"/>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\PreferencesPane.cpp"/>
     <ClCompile Include="..\..\..\LUFSMeter\Source\gui\AnimatedSidePanel.cpp"/>
@@ -1319,6 +1320,7 @@
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessHistoryGroup.h"/>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessNumeric.h"/>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeBar.h"/>
+    <ClInclude Include="..\..\..\LUFSMeter\Source\gui\LoudnessRangeHistory.h"/>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\MultiChannelLoudnessBar.h"/>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\PreferencesPane.h"/>
     <ClInclude Include="..\..\..\LUFSMeter\Source\gui\AnimatedSidePanel.h"/>

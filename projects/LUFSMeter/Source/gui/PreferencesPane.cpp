@@ -35,10 +35,12 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
                                   const Value& loudnessBarMinValue,
                                   const Value& loudnessBarMaxValue,
                                   const Value& showIntegratedLoudnessHistoryValue,
+                                  const Value& showLoudnessRangeHistoryValue,
                                   const Value& showShortTermLoudnessHistoryValue,
                                   const Value& showMomentaryLoudnessHistoryValue)
   : loudnessHistoryGroup (String::empty, "History Graph"),
     showIntegratedLoudnessHistory ("I"),
+    showLoudnessRangeHistory("LRA"),
     showShortTimeLoudnessHistory ("S"),
     showMomentaryLoudnessHistory ("M")
 {
@@ -105,6 +107,11 @@ PreferencesPane::PreferencesPane (const Value& loudnessBarWidth,
     showIntegratedLoudnessHistory.setWantsKeyboardFocus (false);
     loudnessHistoryGroup.addAndMakeVisible (&showIntegratedLoudnessHistory);
     
+    showLoudnessRangeHistory.setClickingTogglesState (true);
+    showLoudnessRangeHistory.getToggleStateValue().referTo (showLoudnessRangeHistoryValue);
+    showLoudnessRangeHistory.setWantsKeyboardFocus (false);
+    loudnessHistoryGroup.addAndMakeVisible (&showLoudnessRangeHistory);
+    
     showShortTimeLoudnessHistory.setClickingTogglesState (true);
     showShortTimeLoudnessHistory.getToggleStateValue().referTo (showShortTermLoudnessHistoryValue);
     showShortTimeLoudnessHistory.setWantsKeyboardFocus (false);
@@ -142,6 +149,10 @@ void PreferencesPane::paint (Graphics &g)
     showIntegratedLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
     showIntegratedLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
     showIntegratedLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
+    showLoudnessRangeHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showLoudnessRangeHistory.setColour(TextButton::textColourOnId, textColourOn);
+    showLoudnessRangeHistory.setColour(TextButton::buttonColourId, buttonOffColour);
+    showLoudnessRangeHistory.setColour(TextButton::textColourOffId, textColourOff);
     showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
     showShortTimeLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
     showShortTimeLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
@@ -183,10 +194,12 @@ void PreferencesPane::resized()
     
     const int buttonSize = 24;
     const int spaceBetweenButtons = 6;
-    int buttonX = (loudnessHistoryGroup.getWidth() - 3 * buttonSize - 2 * spaceBetweenButtons) / 2;
+    int buttonX = (loudnessHistoryGroup.getWidth() - 5 * buttonSize - 3 * spaceBetweenButtons) / 2;
     const int buttonY = 15; // loudnessBarRangeY + sliderHeight + borderSize + 6;
     showIntegratedLoudnessHistory.setBounds (buttonX, buttonY, buttonSize, buttonSize);
     buttonX += buttonSize + borderSize + 6;
+    showLoudnessRangeHistory.setBounds (buttonX, buttonY, 2 * buttonSize, buttonSize);
+    buttonX += 2 * buttonSize + borderSize + 6;
     showShortTimeLoudnessHistory.setBounds(buttonX, buttonY, buttonSize, buttonSize);
     buttonX += buttonSize + borderSize + 6;
     showMomentaryLoudnessHistory.setBounds(buttonX, buttonY, buttonSize, buttonSize);
