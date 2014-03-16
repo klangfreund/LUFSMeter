@@ -12,10 +12,10 @@ LUFS Meter 0.4
 
 * Reworked the preferences pane.
 
-* Icons added to the preferences pane (vector graphics).
+* Icons added (vector graphics).
 
 * Redrawing of the loudness history graphs is done simultaneously
-  (one triggering timer instead of one timer for each graph).
+  (one triggering timer instead of one timer for each history graph).
 
 
 LUFS Meter 0.3

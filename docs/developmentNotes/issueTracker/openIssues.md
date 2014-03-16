@@ -46,6 +46,12 @@ Rework the GUI
 Website: Improve usability, add a klangfreund.com index page and add a getting started tutorial
 -----------------------------------------------------------------------------------------------
 
+Embedded fonts:
+https://news.ycombinator.com/item?id=7406287
+https://github.com/alfredxing/brick
+https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face
+
+
 Website: Implement a notification function for interested customers
 -------------------------------------------------------------------
 
