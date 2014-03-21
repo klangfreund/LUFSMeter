@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -34,20 +34,18 @@
 LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
                                   const Value & minLoudnessToReferTo,
                                   const Value & maxLoudnessToReferTo)
-  : currentLevelValue (var(0.0f)),
-//    timeRange (240),
+  : currentLoudnessValue (var(0.0f)),
     colour (Colours::green),
     specifiedTimeRange (20), // seconds
     lineThickness (2.0f),
-//    desiredNumberOfPixelsBetweenTwoPoints (3.0f),
     desiredNumberOfPixelsBetweenTwoPoints (6.0f),
     textBoxWidth (40),
     distanceBetweenLeftBorderAndText (3),
     desiredRefreshIntervalInMilliseconds (1000),
-    mostRecentYPosition (circularBufferForYPositions.begin()),
+    mostRecentLoudnessInTheBuffer (circularLoudnessBuffer.begin()),
     distanceBetweenGraphAndBottom (32)
 {
-    currentLevelValue.referTo (loudnessValueToReferTo);
+    currentLoudnessValue.referTo (loudnessValueToReferTo);
     minLoudness.referTo (minLoudnessToReferTo);
     minLoudness.addListener(this);
     maxLoudness.referTo (maxLoudnessToReferTo);
@@ -55,8 +53,7 @@ LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
     
     determineStretchAndOffset();
     
-    // Memory allocation for the circularLevelBuffer as well as starting
-    // the timer will be done by this.
+    // Memory allocation for the circularLoudnessBuffer.
     resized();
 }
 
@@ -64,9 +61,9 @@ LoudnessHistory::~LoudnessHistory ()
 {
 }
 
-Value & LoudnessHistory::getLevelValueObject ()
+Value & LoudnessHistory::getLoudnessValueObject ()
 {
-    return currentLevelValue;
+    return currentLoudnessValue;
 }
 
 void LoudnessHistory::setColour (const Colour & newColour)
@@ -79,29 +76,18 @@ int LoudnessHistory::getDesiredRefreshIntervalInMilliseconds ()
     return desiredRefreshIntervalInMilliseconds;
 }
 
-void LoudnessHistory::timerCallback()
+void LoudnessHistory::refresh()
 {
-    // Ensure that the currentLevel is in the interval
-    // [minimumLevel, maximumLevel].
-//    float currentLevel = jmax(float(currentLevelValue.getValue()), float(minLoudness.getValue()));
-//    currentLevel = jmin(currentLevel, float(maxLoudness.getValue()));
-    float currentLevel = currentLevelValue.getValue();
-    
-    float levelHeightInPercent = stretch*currentLevel + offset;
-    
-    float yPositionForCurrentLevel = (1.0f - levelHeightInPercent)*getHeight();
-    
-    
     // Adjust the position of the iterator...
-    mostRecentYPosition++;
-    if (mostRecentYPosition == circularBufferForYPositions.end())
+    mostRecentLoudnessInTheBuffer++;
+    if (mostRecentLoudnessInTheBuffer == circularLoudnessBuffer.end())
     {
-        mostRecentYPosition = circularBufferForYPositions.begin();
+        mostRecentLoudnessInTheBuffer = circularLoudnessBuffer.begin();
     }
-    // ...and put the current level into the circular buffer.
-    *mostRecentYPosition = yPositionForCurrentLevel;
-
-    // Mark this component as "dirty" to make the OS send a paint message soon.
+    // ...and put the current loudness into the circular buffer.
+    *mostRecentLoudnessInTheBuffer = currentLoudnessValue.getValue();
+    
+    // Mark this component as "dirty" to make the OS send a paint message asap.
     repaint();
 }
 
@@ -128,46 +114,43 @@ void LoudnessHistory::resized()
     
     // Rescaling, part 1
     // =================
-    if (circularBufferForYPositions.size() > 1)
+    if (circularLoudnessBuffer.size() > 1)
     {
         // Dimensions changed -> Stretching of the current graph is needed.
         // Therefore this strategy:
         
-        // Make a copy of circularBufferForYPositions and interpolate
-        // ----------------------------------------------------------
+        // Make a copy of the circularLoudnessBuffer and interpolate
+        // ---------------------------------------------------------
         
         // Sort the buffer, such that the most recent value is at the end.
         // I.e. the oldest value is at the begin and the newest one at end()-1.
-        if (mostRecentYPosition + 1 != circularBufferForYPositions.end())
+        if (mostRecentLoudnessInTheBuffer + 1 != circularLoudnessBuffer.end())
         {
-            std::rotate(circularBufferForYPositions.begin(), 
-                        mostRecentYPosition + 1, 
-                        circularBufferForYPositions.end());
+            std::rotate(circularLoudnessBuffer.begin(), 
+                        mostRecentLoudnessInTheBuffer + 1, 
+                        circularLoudnessBuffer.end());
         }
     }
     // Copy this old (sorted) state.
-    std::vector<float> oldCircularBufferForYPositions (circularBufferForYPositions);
+    std::vector<float> oldCircularLoudnessBuffer (circularLoudnessBuffer);
     
-    // Preallocate memory needed for the circularBufferForYPositions.
+    // Preallocate memory needed for the circularLoudnessBuffer.
     std::vector<float>::size_type numberOfValues = numberOfPoints;
-    circularBufferForYPositions.resize(numberOfValues);
+    circularLoudnessBuffer.resize(numberOfValues);
     reset();
      
     // Rescaling, part 2
     // =================
-    if (circularBufferForYPositions.size() > 1 
-        && oldCircularBufferForYPositions.size() > 1 
+    if (circularLoudnessBuffer.size() > 1 
+        && oldCircularLoudnessBuffer.size() > 1 
         && oldHeight > 0)
     {
-        // Figure out the new yPosition of every entry in the buffer.
-    
-        double stretchFactorYDirection = double(getHeight())/double(oldHeight);
-        double numberOfPixelsBetweenOldValues = double(getWidth())/double(oldCircularBufferForYPositions.size() - 1);
+        double numberOfPixelsBetweenOldValues = double(getWidth())/double(oldCircularLoudnessBuffer.size() - 1);
         double xPosition = 0.0;
         
         // Set all the values but the last.
-        for (std::vector<float>::iterator newYPosition = circularBufferForYPositions.begin();
-             newYPosition != circularBufferForYPositions.end()-1;
+        for (std::vector<float>::iterator newYPosition = circularLoudnessBuffer.begin();
+             newYPosition != circularLoudnessBuffer.end()-1;
              newYPosition++)
         {
             // Find the old value, that is closest to the new xPosition from
@@ -178,34 +161,31 @@ void LoudnessHistory::resized()
                 // of the newYPosition between the neighbouring values of the
                 // old circular buffer.
             jassert(indexInTheOldBuffer >= 0);
-            if (indexInTheOldBuffer < oldCircularBufferForYPositions.size() - 1)
+            if (indexInTheOldBuffer < oldCircularLoudnessBuffer.size() - 1)
             {
-                jassert(indexInTheOldBuffer < oldCircularBufferForYPositions.size() - 1);
+                jassert(indexInTheOldBuffer < oldCircularLoudnessBuffer.size() - 1);
                 // Linear interpolation between two points.
-                *newYPosition = (1.0 - delta) * oldCircularBufferForYPositions[indexInTheOldBuffer] + delta * oldCircularBufferForYPositions[indexInTheOldBuffer + 1];
+                *newYPosition = (1.0 - delta) * oldCircularLoudnessBuffer[indexInTheOldBuffer] + delta * oldCircularLoudnessBuffer[indexInTheOldBuffer + 1];
             }
             else
             {
-                // indexInTheOldBuffer >= oldCircularBufferForYPositions.size() - 1
+                // indexInTheOldBuffer >= oldCircularLoudnessBuffer.size() - 1
                 // might happen if delta == 0.0.
                 // In this case, the
-                // oldCircularBufferForYPositions[indexInTheOldBuffer + 1]
+                // oldCircularLoudnessBuffer[indexInTheOldBuffer + 1]
                 // will point to a not allocated memory region.
-                *newYPosition = oldCircularBufferForYPositions[indexInTheOldBuffer];
+                *newYPosition = oldCircularLoudnessBuffer[indexInTheOldBuffer];
             }
-            
-            // We also need to stretch into the y direction.
-            *newYPosition = *newYPosition * stretchFactorYDirection;
             
             xPosition += numberOfPixelsBetweenTwoPoints;
         }
         
         // Set the last value.
-        *(circularBufferForYPositions.end()-1) = *(oldCircularBufferForYPositions.end()-1) * stretchFactorYDirection;
+        *(circularLoudnessBuffer.end()-1) = *(oldCircularLoudnessBuffer.end()-1);
     }
 
     // Set the itator to the first value
-    mostRecentYPosition = circularBufferForYPositions.end() - 1;
+    mostRecentLoudnessInTheBuffer = circularLoudnessBuffer.end() - 1;
     
     // Calculate the time interval, at which the timerCallback() will be called by a instance of LoudnessHistoryGroup.
     desiredRefreshIntervalInMilliseconds = 1000*fullTimeRange/numberOfPoints;
@@ -213,28 +193,30 @@ void LoudnessHistory::resized()
 
 void LoudnessHistory::paint (Graphics& g)
 {
-    
     // Draw the graph.
     g.setColour (colour);
     float currentX = getWidth();
-    float currentY = *mostRecentYPosition;
+    const float mostRecentLoudnessHeightInPercent = stretch * *mostRecentLoudnessInTheBuffer + offset;
+    float currentY = (1.0f - mostRecentLoudnessHeightInPercent) * getHeight();
     float nextX;
     float nextY;
-    std::vector<float>::iterator nextYPosition = mostRecentYPosition;
+    std::vector<float>::iterator nextLoudness = mostRecentLoudnessInTheBuffer;
     
     do
     {
-        if (nextYPosition == circularBufferForYPositions.begin())
+        if (nextLoudness == circularLoudnessBuffer.begin())
         {
-            nextYPosition = circularBufferForYPositions.end();
+            nextLoudness = circularLoudnessBuffer.end();
         }
-        nextYPosition--;
+        nextLoudness--;
         
         nextX = floor(currentX - numberOfPixelsBetweenTwoPoints);
             // Without "floor", the line segments are not joined,
             // a little space between the segments is visible.
             // TODO: Report this to Jules.
-        nextY = *nextYPosition;
+
+        const float loudnessHeightInPercent = stretch * *nextLoudness + offset;
+        nextY = (1.0f - loudnessHeightInPercent) * getHeight();
         
         g.drawLine(currentX, currentY, nextX, nextY, lineThickness);
         
@@ -242,40 +224,26 @@ void LoudnessHistory::paint (Graphics& g)
         currentX = nextX;
         currentY = nextY;
     }
-    while (nextYPosition != mostRecentYPosition);
+    while (nextLoudness != mostRecentLoudnessInTheBuffer);
 }
 
 void LoudnessHistory::reset ()
 {
     float minLoudnessToSet = -300.0f;
-    float levelHeightInPercent = stretch*minLoudnessToSet + offset;
-    float yPosition = (1.0f - levelHeightInPercent)*getHeight();
     
-    
-    for (std::vector<float>::iterator i = circularBufferForYPositions.begin(); 
-         i != circularBufferForYPositions.end(); 
+    for (std::vector<float>::iterator i = circularLoudnessBuffer.begin(); 
+         i != circularLoudnessBuffer.end(); 
          i++)
     {
-        *i = yPosition;
+        *i = minLoudnessToSet;
     }
 }
 
 void LoudnessHistory::valueChanged (Value & value)
 {
-    const float oldStretch = stretch;
-    const float oldOffset = offset;
-    
     // minLoudness or maxLoudness has changed.
     // Therefore:
     determineStretchAndOffset();
-    
-    // And rescale
-    for (std::vector<float>::iterator yPos = circularBufferForYPositions.begin();
-         yPos != circularBufferForYPositions.end(); ++yPos)
-    {
-        // Derivation on 120817_loudness_history_min_max_value_changes.tif
-        *yPos = (1.0 - (stretch/oldStretch * (1.0 - *yPos/getHeight() - oldOffset) + offset)) * getHeight();
-    }
 }
 
 void LoudnessHistory::determineStretchAndOffset()
@@ -283,8 +251,8 @@ void LoudnessHistory::determineStretchAndOffset()
     // These two values define a linear mapping
     //    f(x) = stretch * x + offset
     // for which
-    //    f(minimumLevel) = 0
-    //    f(maximumLevel) = 1
+    //    f(minimumLoudness) = 0
+    //    f(maximumLoudness) = 1
     stretch = 1.0f/(double(maxLoudness.getValue()) - double(minLoudness.getValue()));
     offset = -double(minLoudness.getValue()) * stretch;
 }

@@ -75,7 +75,7 @@ void LoudnessHistoryGroup::timerCallback ()
         
         if (child != nullptr)
         {
-            child->timerCallback();
+            child->refresh();
         }
     }
 }

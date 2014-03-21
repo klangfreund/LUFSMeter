@@ -47,28 +47,30 @@ LoudnessRangeHistory::~LoudnessRangeHistory ()
 
 void LoudnessRangeHistory::paint (Graphics& g)
 {
-    
     // Draw the graph.
     g.setColour (colour);
     float currentX = getWidth();
-    float currentY = *mostRecentYPosition;
+    const float mostRecentLoudnessHeightInPercent = stretch * *mostRecentLoudnessInTheBuffer + offset;
+    float currentY = (1.0f - mostRecentLoudnessHeightInPercent) * getHeight();
     float nextX;
     float nextY;
-    std::vector<float>::iterator nextYPosition = mostRecentYPosition;
+    std::vector<float>::iterator nextLoudness = mostRecentLoudnessInTheBuffer;
     
     do
     {
-        if (nextYPosition == circularBufferForYPositions.begin())
+        if (nextLoudness == circularLoudnessBuffer.begin())
         {
-            nextYPosition = circularBufferForYPositions.end();
+            nextLoudness = circularLoudnessBuffer.end();
         }
-        nextYPosition--;
+        nextLoudness--;
         
         nextX = floor(currentX - numberOfPixelsBetweenTwoPoints);
         // Without "floor", the line segments are not joined,
         // a little space between the segments is visible.
         // TODO: Report this to Jules.
-        nextY = *nextYPosition;
+        
+        const float loudnessHeightInPercent = stretch * *nextLoudness + offset;
+        nextY = (1.0f - loudnessHeightInPercent) * getHeight();
         
         g.drawLine(currentX, currentY, nextX, nextY, lineThickness);
         
@@ -76,5 +78,5 @@ void LoudnessRangeHistory::paint (Graphics& g)
         currentX = nextX;
         currentY = nextY;
     }
-    while (nextYPosition != mostRecentYPosition);
+    while (nextLoudness != mostRecentLoudnessInTheBuffer);
 }

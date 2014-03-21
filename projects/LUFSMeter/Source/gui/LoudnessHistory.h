@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -49,12 +49,15 @@ public:
     
     ~LoudnessHistory ();
     
-    Value & getLevelValueObject ();
+    Value & getLoudnessValueObject ();
     
     void setColour (const Colour & newColour);
 
     int getDesiredRefreshIntervalInMilliseconds ();
-    void timerCallback ();
+    
+    /** Call this regularly to update and redraw the graph.
+     */
+    void refresh();
     
     void virtual resized () override;
     void virtual paint (Graphics& g) override;
@@ -62,6 +65,9 @@ public:
     void reset ();
     
 protected:
+    /** Called when minLoudnessToReferTo or maxLoudnessToReferTo
+     has changed.
+     */
     void valueChanged (Value & value);
     
     /** Recalculates the values 'stretch' and 'offset' by the values of
@@ -77,7 +83,7 @@ protected:
     
     void stretchTheHistoryGraph ();
     
-    Value currentLevelValue;
+    Value currentLoudnessValue;
     Value minLoudness;
     Value maxLoudness;
     
@@ -100,12 +106,12 @@ protected:
     
     int desiredRefreshIntervalInMilliseconds;
     
-    /** A circular buffer to hold the past level values.
+    /** A circular buffer to hold the past loudness values.
      
      Holds the y coordinates for the graph.
      */
-    std::vector<float> circularBufferForYPositions;
-    std::vector<float>::iterator mostRecentYPosition;
+    std::vector<float> circularLoudnessBuffer;
+    std::vector<float>::iterator mostRecentLoudnessInTheBuffer;
     
     int distanceBetweenGraphAndBottom;
 };

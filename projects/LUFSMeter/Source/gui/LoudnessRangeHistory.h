@@ -63,52 +63,14 @@ public:
 //    void reset ();
     
 private:
-//    void valueChanged (Value & value);
-//    
-//    /** Recalculates the values 'stretch' and 'offset' by the values of
-//     'minLoudness' and 'maxLoudness'.
-//     
-//     The two values stretch and offset define a linear mapping
-//     f(x) = stretch * x + offset
-//     for which
-//     f(minimumLevel) = 0
-//     f(maximumLevel) = 1 .
-//     */
-//    void determineStretchAndOffset ();
-//    
-//    void stretchTheHistoryGraph ();
-//    
-//    Value currentLevelValue;
-//    Value minLoudness;
-//    Value maxLoudness;
-//    
-//    float stretch;
-//    float offset;
-//    
-//    Colour colour;
-//    
-//    /** The time interval that is displayed.
-//     Measured in seconds.
-//     */
-//    int specifiedTimeRange;
-//    float lineThickness;
-//    float desiredNumberOfPixelsBetweenTwoPoints;
-//    int textBoxWidth;
-//    int distanceBetweenLeftBorderAndText;
-//    
-//    float fullTimeRange;
-//    float numberOfPixelsBetweenTwoPoints;
-//    
-//    int desiredRefreshIntervalInMilliseconds;
-//    
-//    /** A circular buffer to hold the past level values.
-//     
-//     Holds the y coordinates for the graph.
-//     */
-//    std::vector<float> circularBufferForYPositions;
-//    std::vector<float>::iterator mostRecentYPosition;
-//    
-//    int distanceBetweenGraphAndBottom;
+
+    
+    /** A circular buffer to hold the past level values.
+     
+     Holds the y coordinates for the graph.
+     */
+    std::vector<float> circularBufferForStartYPositions;
+    std::vector<float>::iterator mostRecentStartYPosition;
 };
 
 
