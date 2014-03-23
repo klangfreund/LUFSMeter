@@ -92,6 +92,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     Colour momentaryLoudnessColour = Colours::darkgreen;
     Colour momentaryLoudnessSumColour = Colours::darkgreen.darker().darker();
     Colour loudnessRangeColour = Colours::blue.darker();
+    Colour loudnessRangeColourTransparent = loudnessRangeColour.withAlpha(0.3f);
     Colour integratedLoudnessColour = Colours::yellow.darker().darker();
     
     
@@ -103,7 +104,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     
     addAndMakeVisible (&shortTermLoudnessBar);
 
-    loudnessRangeBar.setColour (loudnessRangeColour);
+    loudnessRangeBar.setColour (loudnessRangeColourTransparent);
     addAndMakeVisible (&loudnessRangeBar);
     
     integratedLoudnessBar.setColour (integratedLoudnessColour);
@@ -157,16 +158,16 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     // Add the loudness history graphs
     addAndMakeVisible(&loudnessHistoryGroup);
     
+    loudnessRangeHistory.setColour (loudnessRangeColourTransparent);
+    loudnessRangeHistory.setVisible (bool(getProcessor()->showLoudnessRangeHistory.getValue()));
+    loudnessHistoryGroup.addChildComponent(&loudnessRangeHistory);
+    
     momentaryLoudnessHistory.setColour(momentaryLoudnessSumColour);
     momentaryLoudnessHistory.setVisible (bool(getProcessor()->showMomentaryLoudnessHistory.getValue()));
     loudnessHistoryGroup.addChildComponent(&momentaryLoudnessHistory);
 
     shortTermLoudnessHistory.setVisible (bool(getProcessor()->showShortTermLoudnessHistory.getValue()));
     loudnessHistoryGroup.addChildComponent(&shortTermLoudnessHistory);
-    
-    loudnessRangeHistory.setColour (loudnessRangeColour);
-    loudnessRangeHistory.setVisible (bool(getProcessor()->showLoudnessRangeHistory.getValue()));
-    loudnessHistoryGroup.addChildComponent(&loudnessRangeHistory);
 
     integratedLoudnessHistory.setColour (integratedLoudnessColour);
     integratedLoudnessHistory.setVisible (bool(getProcessor()->showIntegratedLoudnessHistory.getValue()));

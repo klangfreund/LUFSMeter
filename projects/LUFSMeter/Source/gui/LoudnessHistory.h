@@ -54,15 +54,16 @@ public:
     void setColour (const Colour & newColour);
 
     int getDesiredRefreshIntervalInMilliseconds ();
+
+    void virtual paint (Graphics& g) override;
     
     /** Call this regularly to update and redraw the graph.
      */
-    void refresh();
+    void virtual refresh();
     
-    void virtual resized () override;
-    void virtual paint (Graphics& g) override;
+    void virtual reset();
     
-    void reset ();
+    void virtual resized() override;
     
 protected:
     /** Called when minLoudnessToReferTo or maxLoudnessToReferTo
@@ -82,6 +83,8 @@ protected:
     void determineStretchAndOffset ();
     
     void stretchTheHistoryGraph ();
+
+    float minLoudnessToSet;
     
     Value currentLoudnessValue;
     Value minLoudness;
@@ -107,8 +110,6 @@ protected:
     int desiredRefreshIntervalInMilliseconds;
     
     /** A circular buffer to hold the past loudness values.
-     
-     Holds the y coordinates for the graph.
      */
     std::vector<float> circularLoudnessBuffer;
     std::vector<float>::iterator mostRecentLoudnessInTheBuffer;

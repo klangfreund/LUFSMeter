@@ -43,34 +43,31 @@
 class LoudnessRangeHistory  : public LoudnessHistory
 {
 public:
-    LoudnessRangeHistory (const Value & startValueToReferTo,
-                          const Value & endValueToReferTo,
+    LoudnessRangeHistory (const Value & lowLoudnessToReferTo,
+                          const Value & highLoudnessToReferTo,
                           const Value & minLoudnessToReferTo,
                           const Value & maxLoudnessToReferTo);
     
     ~LoudnessRangeHistory ();
     
-//    Value & getLevelValueObject ();
-//    
-//    void setColour (const Colour & newColour);
-//
-//    int getDesiredRefreshIntervalInMilliseconds ();
-//    void timerCallback ();
-//    
-//    void resized () override;
     void virtual paint (Graphics& g) override;
-//    
-//    void reset ();
+    
+    /** Call this regularly to update and redraw the graph.
+     */
+    void virtual refresh() override;
+    
+    void virtual reset() override;
+    
+    void virtual resized () override;
     
 private:
 
+    Value currentLowLoudnessValue;
     
-    /** A circular buffer to hold the past level values.
-     
-     Holds the y coordinates for the graph.
+    /** A circular buffer to hold the past loudness values.
      */
-    std::vector<float> circularBufferForStartYPositions;
-    std::vector<float>::iterator mostRecentStartYPosition;
+    std::vector<float> circularLowLoudnessBuffer;
+    std::vector<float>::iterator mostRecentLowLoudnessInTheBuffer;
 };
 
 

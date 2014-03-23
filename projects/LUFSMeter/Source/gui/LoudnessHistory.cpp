@@ -34,7 +34,8 @@
 LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
                                   const Value & minLoudnessToReferTo,
                                   const Value & maxLoudnessToReferTo)
-  : currentLoudnessValue (var(0.0f)),
+  : minLoudnessToSet (-300.0f),
+    currentLoudnessValue (minLoudnessToSet),
     colour (Colours::green),
     specifiedTimeRange (20), // seconds
     lineThickness (2.0f),
@@ -76,6 +77,42 @@ int LoudnessHistory::getDesiredRefreshIntervalInMilliseconds ()
     return desiredRefreshIntervalInMilliseconds;
 }
 
+void LoudnessHistory::paint (Graphics& g)
+{
+    // Draw the graph.
+    g.setColour (colour);
+    float currentX = getWidth();
+    const float mostRecentLoudnessHeightInPercent = stretch * *mostRecentLoudnessInTheBuffer + offset;
+    float currentY = (1.0f - mostRecentLoudnessHeightInPercent) * getHeight();
+    float nextX;
+    float nextY;
+    std::vector<float>::iterator nextLoudness = mostRecentLoudnessInTheBuffer;
+    
+    do
+    {
+        if (nextLoudness == circularLoudnessBuffer.begin())
+        {
+            nextLoudness = circularLoudnessBuffer.end();
+        }
+        --nextLoudness;
+        
+        nextX = floor(currentX - numberOfPixelsBetweenTwoPoints);
+        // Without "floor", the line segments are not joined,
+        // a little space between the segments is visible.
+        // TODO: Report this to Jules.
+        
+        const float loudnessHeightInPercent = stretch * *nextLoudness + offset;
+        nextY = (1.0f - loudnessHeightInPercent) * getHeight();
+        
+        g.drawLine(currentX, currentY, nextX, nextY, lineThickness);
+        
+        // Prepare for the next iteration.
+        currentX = nextX;
+        currentY = nextY;
+    }
+    while (nextLoudness != mostRecentLoudnessInTheBuffer);
+}
+
 void LoudnessHistory::refresh()
 {
     // Adjust the position of the iterator...
@@ -91,23 +128,28 @@ void LoudnessHistory::refresh()
     repaint();
 }
 
-//==============================================================================
+void LoudnessHistory::reset ()
+{
+    for (std::vector<float>::iterator i = circularLoudnessBuffer.begin();
+         i != circularLoudnessBuffer.end();
+         i++)
+    {
+        *i = minLoudnessToSet;
+    }
+}
+
 void LoudnessHistory::resized()
 {
     // Figure out the full time range.
     if (getWidth() > distanceBetweenLeftBorderAndText + textBoxWidth)
     {
-        double borderToLeftVerticalLine = distanceBetweenLeftBorderAndText + textBoxWidth/2.0;
+        const double borderToLeftVerticalLine = distanceBetweenLeftBorderAndText + textBoxWidth/2.0;
         fullTimeRange = getWidth()/(getWidth() - borderToLeftVerticalLine) * specifiedTimeRange;
     }
     else
     {
         fullTimeRange = specifiedTimeRange;
     }
-    
-    // Some old values, needed for the rescaling
-    int oldHeight = getHeight();
-    
     
     int numberOfPoints = getWidth()/desiredNumberOfPixelsBetweenTwoPoints + 1;
     numberOfPixelsBetweenTwoPoints = getWidth()/jmax(double(numberOfPoints-1.0),1.0);
@@ -134,24 +176,24 @@ void LoudnessHistory::resized()
     // Copy this old (sorted) state.
     std::vector<float> oldCircularLoudnessBuffer (circularLoudnessBuffer);
     
-    // Preallocate memory needed for the circularLoudnessBuffer.
+    // Allocate memory needed for the circularLoudnessBuffer.
     std::vector<float>::size_type numberOfValues = numberOfPoints;
-    circularLoudnessBuffer.resize(numberOfValues);
-    reset();
+    circularLoudnessBuffer.resize (numberOfValues);
+    //reset();
      
     // Rescaling, part 2
     // =================
     if (circularLoudnessBuffer.size() > 1 
         && oldCircularLoudnessBuffer.size() > 1 
-        && oldHeight > 0)
+        && getHeight() > 0)
     {
         double numberOfPixelsBetweenOldValues = double(getWidth())/double(oldCircularLoudnessBuffer.size() - 1);
         double xPosition = 0.0;
         
         // Set all the values but the last.
-        for (std::vector<float>::iterator newYPosition = circularLoudnessBuffer.begin();
-             newYPosition != circularLoudnessBuffer.end()-1;
-             newYPosition++)
+        for (std::vector<float>::iterator newLoudness = circularLoudnessBuffer.begin();
+             newLoudness != circularLoudnessBuffer.end()-1;
+             newLoudness++)
         {
             // Find the old value, that is closest to the new xPosition from
             // the left.
@@ -165,7 +207,7 @@ void LoudnessHistory::resized()
             {
                 jassert(indexInTheOldBuffer < oldCircularLoudnessBuffer.size() - 1);
                 // Linear interpolation between two points.
-                *newYPosition = (1.0 - delta) * oldCircularLoudnessBuffer[indexInTheOldBuffer] + delta * oldCircularLoudnessBuffer[indexInTheOldBuffer + 1];
+                *newLoudness = (1.0 - delta) * oldCircularLoudnessBuffer[indexInTheOldBuffer] + delta * oldCircularLoudnessBuffer[indexInTheOldBuffer + 1];
             }
             else
             {
@@ -174,7 +216,7 @@ void LoudnessHistory::resized()
                 // In this case, the
                 // oldCircularLoudnessBuffer[indexInTheOldBuffer + 1]
                 // will point to a not allocated memory region.
-                *newYPosition = oldCircularLoudnessBuffer[indexInTheOldBuffer];
+                *newLoudness = oldCircularLoudnessBuffer[indexInTheOldBuffer];
             }
             
             xPosition += numberOfPixelsBetweenTwoPoints;
@@ -189,54 +231,6 @@ void LoudnessHistory::resized()
     
     // Calculate the time interval, at which the timerCallback() will be called by a instance of LoudnessHistoryGroup.
     desiredRefreshIntervalInMilliseconds = 1000*fullTimeRange/numberOfPoints;
-}
-
-void LoudnessHistory::paint (Graphics& g)
-{
-    // Draw the graph.
-    g.setColour (colour);
-    float currentX = getWidth();
-    const float mostRecentLoudnessHeightInPercent = stretch * *mostRecentLoudnessInTheBuffer + offset;
-    float currentY = (1.0f - mostRecentLoudnessHeightInPercent) * getHeight();
-    float nextX;
-    float nextY;
-    std::vector<float>::iterator nextLoudness = mostRecentLoudnessInTheBuffer;
-    
-    do
-    {
-        if (nextLoudness == circularLoudnessBuffer.begin())
-        {
-            nextLoudness = circularLoudnessBuffer.end();
-        }
-        nextLoudness--;
-        
-        nextX = floor(currentX - numberOfPixelsBetweenTwoPoints);
-            // Without "floor", the line segments are not joined,
-            // a little space between the segments is visible.
-            // TODO: Report this to Jules.
-
-        const float loudnessHeightInPercent = stretch * *nextLoudness + offset;
-        nextY = (1.0f - loudnessHeightInPercent) * getHeight();
-        
-        g.drawLine(currentX, currentY, nextX, nextY, lineThickness);
-        
-        // Prepare for the next iteration.
-        currentX = nextX;
-        currentY = nextY;
-    }
-    while (nextLoudness != mostRecentLoudnessInTheBuffer);
-}
-
-void LoudnessHistory::reset ()
-{
-    float minLoudnessToSet = -300.0f;
-    
-    for (std::vector<float>::iterator i = circularLoudnessBuffer.begin(); 
-         i != circularLoudnessBuffer.end(); 
-         i++)
-    {
-        *i = minLoudnessToSet;
-    }
 }
 
 void LoudnessHistory::valueChanged (Value & value)
