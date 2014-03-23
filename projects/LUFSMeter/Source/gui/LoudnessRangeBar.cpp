@@ -35,11 +35,7 @@ LoudnessRangeBar::LoudnessRangeBar (const Value & startValueToReferTo,
                                     const Value & endValueToReferTo,
                                     const Value & minValueToReferTo,
                                     const Value & maxValueToReferTo)
-:   colour (Colours::green),
-    currentStart (minValueToReferTo.getValue()),
-    currentEnd (minValueToReferTo.getValue()),
-    previousStart (currentStart),
-    previousEnd (currentEnd)
+:   colour (Colours::green)
 {
     startValue.referTo(startValueToReferTo);
     startValue.addListener(this);
@@ -72,49 +68,11 @@ Value & LoudnessRangeBar::getEndValueObject ()
 
 void LoudnessRangeBar::valueChanged (Value & value)
 {
-    if (value.refersToSameSourceAs (startValue))
+    if (value.refersToSameSourceAs (startValue) || value.refersToSameSourceAs (endValue))
     {
-        // Ensure that the currentLoudness is in the interval
-        // [minimumLevel, maximumLevel].
-        currentStart = jlimit(float(minLoudness.getValue()),
-                              float(maxLoudness.getValue()),
-                              float(value.getValue()));
-        
-        if (currentStart != previousStart)
-        {
-            //        float topBorderInPercent = stretch*jmax(currentLoudness,previousLoudness) + offset;
-            //        float bottomBorderInPercent = stretch*jmin(currentLoudness,previousLoudness) + offset;
-            //        
-            //        const int topLeftX = 0;
-            //        const int topLeftY = floor((1-topBorderInPercent) * (float) getHeight()) -3;
-            //        const int heightOfSectionToDraw = ceil((topBorderInPercent-bottomBorderInPercent) * (float) getHeight()) + 3;
-            //        
-            previousStart = currentStart;
-            //    
-            //        repaint(topLeftX, topLeftY, getWidth(), heightOfSectionToDraw);
-            
-            // Mesurements showed that it is more CPU efficient to draw the whole
-            // bar and not only the section that has changed.
-            repaint();
-        }
+        repaint();
     }
-    else if (value.refersToSameSourceAs (endValue))
-    {
-        // Ensure that the currentEnd is in the interval
-        // [minimumLevel, maximumLevel].
-        currentEnd = jlimit(float(minLoudness.getValue()),
-                            float(maxLoudness.getValue()),
-                            float(value.getValue()));
-        
-        if (currentEnd != previousEnd)
-        {
-            previousEnd = currentEnd;
 
-            // Mesurements showed that it is more CPU efficient to draw the whole
-            // bar and not only the section that has changed.
-            repaint();
-        }
-    }
     else if (value.refersToSameSourceAs (minLoudness) || value.refersToSameSourceAs (maxLoudness))
     {
         determineStretchAndOffset();
@@ -133,18 +91,11 @@ void LoudnessRangeBar::paint (Graphics& g)
     const float width = (float) getWidth();
     const float height = (float) getHeight();
     
-    // Draw a background
-//    g.setColour(Colours::black);
-//    float x = 0.0f;
-//    float y = 0.0f;
-//    float cornerSize = 3.0f;
-//    g.fillRoundedRectangle(x, y, width, height, cornerSize);
-    
     g.setColour(colour);
     const float topLeftX = 0.0f;
-    float barTop = stretch*currentEnd + offset;
+    float barTop = stretch * float(endValue.getValue()) + offset;
     float topLeftY = (1.0f - barTop) * height;
-    float barBottom = stretch*currentStart + offset;
+    float barBottom = stretch * float(startValue.getValue()) + offset;
     float bottomY = (1.0f - barBottom) * height;
     g.fillRect(topLeftX,
                topLeftY,
