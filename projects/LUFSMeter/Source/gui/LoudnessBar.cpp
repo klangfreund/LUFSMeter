@@ -34,9 +34,7 @@
 LoudnessBar::LoudnessBar (const Value & loudnessValueToReferTo,
                           const Value & minValueToReferTo,
                           const Value & maxValueToReferTo)
-:   colour (Colours::green),
-    currentLoudness (minValueToReferTo.getValue()),
-    previousLoudness (minValueToReferTo.getValue())
+:   colour (Colours::green)
 {
     loudnessValue.referTo(loudnessValueToReferTo);
     loudnessValue.addListener(this);
@@ -63,31 +61,9 @@ void LoudnessBar::valueChanged (Value & value)
 {
     if (value.refersToSameSourceAs (loudnessValue))
     {
-        
-        currentLoudness = value.getValue();
-        
-        // Ensure that the currentLoudness is in the interval
-        // [minimumLevel, maximumLevel].
-        currentLoudness = jmax(currentLoudness, float(minLoudness.getValue()));
-        currentLoudness = jmin(currentLoudness, float(maxLoudness.getValue()));
-        
-        if (currentLoudness != previousLoudness)
-        {
-            //        float topBorderInPercent = stretch*jmax(currentLoudness,previousLoudness) + offset;
-            //        float bottomBorderInPercent = stretch*jmin(currentLoudness,previousLoudness) + offset;
-            //        
-            //        const int topLeftX = 0;
-            //        const int topLeftY = floor((1-topBorderInPercent) * (float) getHeight()) -3;
-            //        const int heightOfSectionToDraw = ceil((topBorderInPercent-bottomBorderInPercent) * (float) getHeight()) + 3;
-            //        
-            previousLoudness = currentLoudness;
-            //    
-            //        repaint(topLeftX, topLeftY, getWidth(), heightOfSectionToDraw);
-            
-            // Mesurements showed that it is more CPU efficient to draw the whole
-            // bar and not only the section that has changed.
-            repaint();
-        }
+        // Mesurements have shown that it is more CPU efficient to draw the whole
+        // bar and not only the section that has changed.
+        repaint();
     }
     else if (value.refersToSameSourceAs (minLoudness) || value.refersToSameSourceAs (maxLoudness))
     {
@@ -114,15 +90,15 @@ void LoudnessBar::paint (Graphics& g)
 //    float cornerSize = 3.0f;
 //    g.fillRoundedRectangle(x, y, width, height, cornerSize);
     
-    float barHeightInPercent = stretch*currentLoudness + offset;
-    g.setColour(colour);
+    float barHeightInPercent = stretch * float (loudnessValue.getValue()) + offset;
+    g.setColour (colour);
     const float topLeftX = 0.0f;
     float topLeftY = (1.0f - barHeightInPercent) * height;
     float bottomY = height;
-    g.fillRect(topLeftX,
-               topLeftY,
-               width,
-               bottomY-topLeftY);
+    g.fillRect (topLeftX,
+                topLeftY,
+                width,
+                bottomY - topLeftY);
 }
 
 void LoudnessBar::determineStretchAndOffset()

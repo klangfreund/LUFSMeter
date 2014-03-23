@@ -83,7 +83,6 @@ private:
     Colour colour;
     
     Array<float> currentMultiChannelLoudness;
-//    Value loudnessValue;
     Value minLoudness;
     Value maxLoudness;
 };

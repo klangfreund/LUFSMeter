@@ -67,11 +67,6 @@ void MultiChannelLoudnessBar::setLoudness (const Array<float>& multiChannelLoudn
 
 void MultiChannelLoudnessBar::valueChanged (Value & value)
 {
-//    if (value == loudnessValue)
-//    {
-//        repaint();
-//    }
-//    else
     if (value == minLoudness || value == maxLoudness)
     {
         determineStretchOffsetAndWidthOfIndividualChannel();
@@ -99,72 +94,27 @@ void MultiChannelLoudnessBar::paint (Graphics& g)
     float topLeftX = 0.0f;
     for (int channel = 0; channel < currentMultiChannelLoudness.size(); ++channel)
     {
-        float currentLoudness = currentMultiChannelLoudness[channel];
+        float loudnessOfThisChannel = currentMultiChannelLoudness[channel];
         
-        // Ensure that the currentLoudness is in the interval
-        // [minimumLevel, maximumLevel].
-        currentLoudness = jmax(currentLoudness, float(minLoudness.getValue()));
-        currentLoudness = jmin(currentLoudness, float(maxLoudness.getValue()));
-        
-        float barHeightInPercent = stretch*currentLoudness + offset;
-        
-        float topLeftY = (1.0f - barHeightInPercent) * height;
-        float bottomY = height;
-        g.fillRect(topLeftX,
-                   topLeftY,
-                   widthOfIndividualChannel,
-                   bottomY-topLeftY);
-        
-        topLeftX += widthOfIndividualChannel;
-    }
-
-/*
-    const float width = float (getWidth());
-    const float height = float (getHeight());
-    
-    Array<var>* loudnessArray = loudnessValue.getValue().getArray();
-    
-//    Array<var> temp;
-//    temp.clear();
-//    temp.add(-5.0);
-//    temp.add(-5.0);
-//    loudnessArray = &temp;
-    
-    if (loudnessArray)
-    {
-        const int numberOfChannels = loudnessArray->size();
-        
-        const float widthPerChannel = width / float(numberOfChannels);
-        
-        // Draw a background
-        //    g.setColour(Colours::black);
-        //    float x = 0.0f;
-        //    float y = 0.0f;
-        //    float cornerSize = 3.0f;
-        //    g.fillRoundedRectangle(x, y, width, height, cornerSize);
-        
-        g.setColour(Colours::green);
-        for (int k = 0; k != numberOfChannels; ++k)
+        // It's only necessary to draw a bar for this channel, if its loudness
+        // is inside the visible area of this component.
+        if (loudnessOfThisChannel > float(minLoudness.getValue()))
         {
-            //loudnessArray->set(k, -5.0);
+            // Don't draw the rectangle above (outside) of the visible area.
+            loudnessOfThisChannel = jmin(loudnessOfThisChannel, float(maxLoudness.getValue()));
             
-            // Ensure that the current loudness is in the range ( minLoudness, maxLoudness ) .
-            double currentLoudnessOfChannelK = double ((*loudnessArray)[k]);
-            currentLoudnessOfChannelK = jmax(currentLoudnessOfChannelK, double (minLoudness.getValue()));
-            currentLoudnessOfChannelK = jmin(currentLoudnessOfChannelK, double (maxLoudness.getValue()));
+            float barHeightInPercent = stretch * loudnessOfThisChannel + offset;
             
-            float barHeightInPercent = stretch*currentLoudnessOfChannelK + offset;
-            
-            float topLeftX = float(k) * widthPerChannel;
             float topLeftY = (1.0f - barHeightInPercent) * height;
             float bottomY = height;
             g.fillRect(topLeftX,
                        topLeftY,
-                       widthPerChannel,
+                       widthOfIndividualChannel,
                        bottomY-topLeftY);
         }
+        
+        topLeftX += widthOfIndividualChannel;
     }
-*/
 }
 
 void MultiChannelLoudnessBar::determineStretchOffsetAndWidthOfIndividualChannel()
