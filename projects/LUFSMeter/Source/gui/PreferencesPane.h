@@ -5,7 +5,7 @@
   
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2012 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2012-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  

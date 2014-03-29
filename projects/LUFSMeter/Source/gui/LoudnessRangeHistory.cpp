@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-12 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -137,7 +137,7 @@ void LoudnessRangeHistory::paint (Graphics& g)
 
 void LoudnessRangeHistory::refresh()
 {
-    DEB("LoudnessRangeHistory refresh called.")
+    // DEB("LoudnessRangeHistory refresh called.")
     
     // Store the low loudness
     // ----------------------

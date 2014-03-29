@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2012 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2012-14 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -145,19 +145,19 @@ void PreferencesPane::paint (Graphics &g)
     Colour buttonOnColour = JUCE_LIVE_CONSTANT (Colour (0xffffff00));
     Colour textColourOff = JUCE_LIVE_CONSTANT (Colour (0xff9a9a9a));
     Colour buttonOffColour = JUCE_LIVE_CONSTANT (Colour (0xff383838));
-    showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showIntegratedLoudnessHistory.setColour(TextButton::buttonOnColourId, Colours::yellow.darker().darker());
     showIntegratedLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
     showIntegratedLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
     showIntegratedLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
-    showLoudnessRangeHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showLoudnessRangeHistory.setColour(TextButton::buttonOnColourId, Colours::blue.darker());
     showLoudnessRangeHistory.setColour(TextButton::textColourOnId, textColourOn);
     showLoudnessRangeHistory.setColour(TextButton::buttonColourId, buttonOffColour);
     showLoudnessRangeHistory.setColour(TextButton::textColourOffId, textColourOff);
-    showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showShortTimeLoudnessHistory.setColour(TextButton::buttonOnColourId, Colours::green);
     showShortTimeLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
     showShortTimeLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
     showShortTimeLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
-    showMomentaryLoudnessHistory.setColour(TextButton::buttonOnColourId, buttonOnColour);
+    showMomentaryLoudnessHistory.setColour(TextButton::buttonOnColourId, Colours::darkgreen);
     showMomentaryLoudnessHistory.setColour(TextButton::textColourOnId, textColourOn);
     showMomentaryLoudnessHistory.setColour(TextButton::buttonColourId, buttonOffColour);
     showMomentaryLoudnessHistory.setColour(TextButton::textColourOffId, textColourOff);
