@@ -230,7 +230,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     // --------------------
     for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
     {
-        float* theKthChannelData = bufferForMeasurement.getSampleData (k);
+        float* theKthChannelData = bufferForMeasurement.getWritePointer (k);
         for (int i = 0; i != bufferForMeasurement.getNumSamples(); ++i)
             theKthChannelData[i] = theKthChannelData[i] * theKthChannelData[i];
     }
@@ -245,7 +245,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
     {
         for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
         {
-            float* bufferOfChannelK = bufferForMeasurement.getSampleData (k);
+            float* bufferOfChannelK = bufferForMeasurement.getWritePointer (k);
             double* theBinToSumTo = bin[k]->getUnchecked(currentBin);
             for (int i=0; i != bufferForMeasurement.getNumSamples(); ++i)
             {
@@ -284,7 +284,7 @@ void Ebu128LoudnessMeter::processBlock(juce::AudioSampleBuffer &buffer)
             // Add the samples to the bin.
             for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
             {
-                float* bufferOfChannelK = bufferForMeasurement.getSampleData (k);
+                float* bufferOfChannelK = bufferForMeasurement.getWritePointer (k);
                 double* theBinToSumTo = bin[k]->getUnchecked(currentBin);
                 for (int i=positionInBuffer; 
                      i != positionInBuffer+numberOfSamplesToPutIntoTheCurrentBin;

@@ -755,6 +755,9 @@
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_events\broadcasters\juce_ChangeBroadcaster.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\libraries\juce\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1544,6 +1547,7 @@
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\broadcasters\juce_ChangeBroadcaster.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\broadcasters\juce_ChangeListener.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\broadcasters\juce_ListenerList.h"/>
+    <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\interprocess\juce_ConnectedChildProcess.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\interprocess\juce_InterprocessConnection.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\interprocess\juce_InterprocessConnectionServer.h"/>
     <ClInclude Include="..\..\..\..\libraries\juce\modules\juce_events\native\juce_osx_MessageQueue.h"/>

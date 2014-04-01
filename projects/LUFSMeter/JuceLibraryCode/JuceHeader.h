@@ -34,8 +34,8 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "LUFSMeter";
-    const char* const  versionString  = "0.3.0";
-    const int          versionNumber  = 0x300;
+    const char* const  versionString  = "0.5.0";
+    const int          versionNumber  = 0x500;
 }
 
 #endif   // __APPHEADERFILE_I07HNS__

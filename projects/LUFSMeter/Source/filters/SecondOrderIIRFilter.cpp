@@ -111,7 +111,7 @@ void SecondOrderIIRFilter::processBlock (AudioSampleBuffer& buffer)
 {
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-        float* samples = buffer.getSampleData (channel);
+        float* samples = buffer.getWritePointer (channel);
 
         for (int i = 0; i < buffer.getNumSamples(); ++i)
         {

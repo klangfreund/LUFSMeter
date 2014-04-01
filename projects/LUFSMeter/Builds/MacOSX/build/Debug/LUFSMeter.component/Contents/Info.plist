@@ -6,7 +6,7 @@
 	<array>
 		<dict>
 			<key>description</key>
-			<string>Measures loudness according to EBU R128.</string>
+			<string>Measures loudness according to ITU 1770-3 and EBU R128.</string>
 			<key>factoryFunction</key>
 			<string>LUFSMeterAUFactory</string>
 			<key>manufacturer</key>
@@ -18,7 +18,7 @@
 			<key>type</key>
 			<string>aufx</string>
 			<key>version</key>
-			<integer>768</integer>
+			<integer>1280</integer>
 		</dict>
 	</array>
 	<key>BuildMachineOSBuild</key>
@@ -32,11 +32,11 @@
 	<key>CFBundlePackageType</key>
 	<string>TDMw</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.0</string>
+	<string>0.5.0</string>
 	<key>CFBundleSignature</key>
 	<string>PTul</string>
 	<key>CFBundleVersion</key>
-	<string>0.3.0</string>
+	<string>0.5.0</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>

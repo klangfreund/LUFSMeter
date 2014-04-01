@@ -134,13 +134,13 @@
  #define JucePlugin_Name                   "LUFS Meter"
 #endif
 #ifndef  JucePlugin_Desc
- #define JucePlugin_Desc                   "Measures loudness according to EBU R128."
+ #define JucePlugin_Desc                   "Measures loudness according to ITU 1770-3 and EBU R128."
 #endif
 #ifndef  JucePlugin_Manufacturer
  #define JucePlugin_Manufacturer           "Klangfreund"
 #endif
 #ifndef  JucePlugin_ManufacturerWebsite
- #define JucePlugin_ManufacturerWebsite    "www.yourcompany.com"
+ #define JucePlugin_ManufacturerWebsite    ""
 #endif
 #ifndef  JucePlugin_ManufacturerEmail
  #define JucePlugin_ManufacturerEmail      "support@yourcompany.com"
@@ -176,13 +176,13 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
- #define JucePlugin_Version                0.3.0
+ #define JucePlugin_Version                0.5.0
 #endif
 #ifndef  JucePlugin_VersionCode
- #define JucePlugin_VersionCode            0x300
+ #define JucePlugin_VersionCode            0x500
 #endif
 #ifndef  JucePlugin_VersionString
- #define JucePlugin_VersionString          "0.3.0"
+ #define JucePlugin_VersionString          "0.5.0"
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode
@@ -232,14 +232,14 @@
 #ifndef  JucePlugin_AAXProductId
  #define JucePlugin_AAXProductId           JucePlugin_PluginCode
 #endif
-#ifndef  JucePlugin_AAXPluginId
- #define JucePlugin_AAXPluginId            JucePlugin_PluginCode
-#endif
 #ifndef  JucePlugin_AAXCategory
  #define JucePlugin_AAXCategory            AAX_ePlugInCategory_Dynamics
 #endif
 #ifndef  JucePlugin_AAXDisableBypass
  #define JucePlugin_AAXDisableBypass       0
+#endif
+#ifndef  JucePlugin_AAXDisableMultiMono
+ #define JucePlugin_AAXDisableMultiMono    0
 #endif
 
 #endif  // __JUCE_APPCONFIG_I07HNS__
