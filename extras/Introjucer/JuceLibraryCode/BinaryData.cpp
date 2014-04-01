@@ -10,7 +10,7 @@ namespace BinaryData
 //================== AudioPluginXCodeScript.txt ==================
 static const unsigned char temp_binary_data_0[] =
 "\r\n"
-"# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \r\n"
+"# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on \r\n"
 "# which plugin types you've built\r\n"
 "\r\n"
 "original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
@@ -18,6 +18,7 @@ static const unsigned char temp_binary_data_0[] =
 "# this looks inside the binary to detect which platforms are needed.. \r\n"
 "copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
 "copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
+"copyVST3=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetPluginFactory' | wc -l`\r\n"
 "copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
 "copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'ACFStartup' | wc -l`\r\n"
 "\r\n"
@@ -51,6 +52,18 @@ static const unsigned char temp_binary_data_0[] =
 "  cp -r \"$original\" \"$VST\"\r\n"
 "  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
 "  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST3 -gt 0 ]; then\r\n"
+"  echo \"Copying to VST3 folder...\"\r\n"
+"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
+"  if [ -d \"$VST3\" ]; then \r\n"
+"    rm -r \"$VST3\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST3\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST3/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST3/Contents/$INFOPLIST_FILE\"\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyRTAS -gt 0 ]; then\r\n"
@@ -373,7 +386,7 @@ static const unsigned char temp_binary_data_6[] =
 "    // audio processing...\r\n"
 "    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
 "    {\r\n"
-"        float* channelData = buffer.getSampleData (channel);\r\n"
+"        float* channelData = buffer.getWritePointer (channel);\r\n"
 "\r\n"
 "        // ..do something to the data...\r\n"
 "    }\r\n"
@@ -1215,13 +1228,13 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:  numBytes = 2464; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2916; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4638; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 4640; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2488; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;

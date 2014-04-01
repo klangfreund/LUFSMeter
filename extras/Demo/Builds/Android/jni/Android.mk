@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/AudioSynthesiserDemo.cpp\
   ../../../Source/Demos/Box2DDemo.cpp\
   ../../../Source/Demos/CameraDemo.cpp\
+  ../../../Source/Demos/ChildProcessDemo.cpp\
   ../../../Source/Demos/CodeEditorDemo.cpp\
   ../../../Source/Demos/ComponentTransformsDemo.cpp\
   ../../../Source/Demos/CryptographyDemo.cpp\
@@ -29,12 +30,14 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/JavaScript.cpp\
   ../../../Source/Demos/KeyMappingsDemo.cpp\
   ../../../Source/Demos/LiveConstantDemo.cpp\
+  ../../../Source/Demos/LookAndFeelDemo.cpp\
   ../../../Source/Demos/MDIDemo.cpp\
   ../../../Source/Demos/MidiDemo.cpp\
   ../../../Source/Demos/MultithreadingDemo.cpp\
   ../../../Source/Demos/MultiTouch.cpp\
   ../../../Source/Demos/NetworkingDemo.cpp\
   ../../../Source/Demos/OpenGLDemo.cpp\
+  ../../../Source/Demos/OpenGLDemo2D.cpp\
   ../../../Source/Demos/PropertiesDemo.cpp\
   ../../../Source/Demos/SystemInfoDemo.cpp\
   ../../../Source/Demos/TimersAndEventsDemo.cpp\

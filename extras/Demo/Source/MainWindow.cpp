@@ -215,7 +215,14 @@ public:
 
     bool isShowingOpenGLDemo() const
     {
-        return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL");
+        return currentDemo != nullptr
+                && currentDemo->getName().contains ("OpenGL")
+                && ! isShowingOpenGL2DDemo();
+    }
+
+    bool isShowingOpenGL2DDemo() const
+    {
+        return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL 2D");
     }
 
 private:
@@ -556,17 +563,17 @@ void MainAppWindow::handleAsyncUpdate()
 
 void MainAppWindow::showMessageBubble (const String& text)
 {
-    BubbleMessageComponent* bm = new BubbleMessageComponent (500);
-    getContentComponent()->addChildComponent (bm);
+    currentBubbleMessage = new BubbleMessageComponent (500);
+    getContentComponent()->addChildComponent (currentBubbleMessage);
 
     AttributedString attString;
     attString.append (text, Font (15.0f));
 
-    bm->showAt (Rectangle<int> (getLocalBounds().getCentreX(), 10, 1, 1),
-                attString,
-                500,  // numMillisecondsBeforeRemoving
-                true,  // removeWhenMouseClicked
-                true); // deleteSelfAfterUse
+    currentBubbleMessage->showAt (Rectangle<int> (getLocalBounds().getCentreX(), 10, 1, 1),
+                                  attString,
+                                  500,  // numMillisecondsBeforeRemoving
+                                  true,  // removeWhenMouseClicked
+                                  false); // deleteSelfAfterUse
 }
 
 static const char* openGLRendererName = "OpenGL Renderer";
@@ -603,6 +610,11 @@ void MainAppWindow::setRenderingEngine (int index)
 
     if (ComponentPeer* peer = getPeer())
         peer->setCurrentRenderingEngine (index);
+}
+
+void MainAppWindow::setOpenGLRenderingEngine()
+{
+    setRenderingEngine (getRenderingEngines().indexOf (openGLRendererName));
 }
 
 int MainAppWindow::getActiveRenderingEngine() const

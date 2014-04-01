@@ -62,6 +62,7 @@ OBJECTS := \
   $(OBJDIR)/AudioSynthesiserDemo_1b3666f6.o \
   $(OBJDIR)/Box2DDemo_51053c42.o \
   $(OBJDIR)/CameraDemo_a10f7e50.o \
+  $(OBJDIR)/ChildProcessDemo_2c2b949e.o \
   $(OBJDIR)/CodeEditorDemo_d5c17a65.o \
   $(OBJDIR)/ComponentTransformsDemo_377f7889.o \
   $(OBJDIR)/CryptographyDemo_232d46d7.o \
@@ -72,12 +73,14 @@ OBJECTS := \
   $(OBJDIR)/JavaScript_d6e42eb5.o \
   $(OBJDIR)/KeyMappingsDemo_cf05c709.o \
   $(OBJDIR)/LiveConstantDemo_e3b18a9b.o \
+  $(OBJDIR)/LookAndFeelDemo_25c558a3.o \
   $(OBJDIR)/MDIDemo_c476c2d7.o \
   $(OBJDIR)/MidiDemo_75ebc30c.o \
   $(OBJDIR)/MultithreadingDemo_ff566eaa.o \
   $(OBJDIR)/MultiTouch_595f3a2e.o \
   $(OBJDIR)/NetworkingDemo_fbd1b19f.o \
   $(OBJDIR)/OpenGLDemo_fdac55da.o \
+  $(OBJDIR)/OpenGLDemo2D_48eeadec.o \
   $(OBJDIR)/PropertiesDemo_8ff1a8de.o \
   $(OBJDIR)/SystemInfoDemo_984acd28.o \
   $(OBJDIR)/TimersAndEventsDemo_f2656547.o \
@@ -177,6 +180,11 @@ $(OBJDIR)/CameraDemo_a10f7e50.o: ../../Source/Demos/CameraDemo.cpp
 	@echo "Compiling CameraDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/ChildProcessDemo_2c2b949e.o: ../../Source/Demos/ChildProcessDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ChildProcessDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/CodeEditorDemo_d5c17a65.o: ../../Source/Demos/CodeEditorDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling CodeEditorDemo.cpp"
@@ -227,6 +235,11 @@ $(OBJDIR)/LiveConstantDemo_e3b18a9b.o: ../../Source/Demos/LiveConstantDemo.cpp
 	@echo "Compiling LiveConstantDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/LookAndFeelDemo_25c558a3.o: ../../Source/Demos/LookAndFeelDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LookAndFeelDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/MDIDemo_c476c2d7.o: ../../Source/Demos/MDIDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling MDIDemo.cpp"
@@ -255,6 +268,11 @@ $(OBJDIR)/NetworkingDemo_fbd1b19f.o: ../../Source/Demos/NetworkingDemo.cpp
 $(OBJDIR)/OpenGLDemo_fdac55da.o: ../../Source/Demos/OpenGLDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling OpenGLDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OpenGLDemo2D_48eeadec.o: ../../Source/Demos/OpenGLDemo2D.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OpenGLDemo2D.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/PropertiesDemo_8ff1a8de.o: ../../Source/Demos/PropertiesDemo.cpp

@@ -908,6 +908,8 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Common.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Headers.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -2224,6 +2226,17 @@
           <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h"/>
         </Filter>
         <Filter Name="interprocess">
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

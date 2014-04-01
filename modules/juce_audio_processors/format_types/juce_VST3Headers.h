@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3HEADER_H_INCLUDED
-#define JUCE_VST3HEADER_H_INCLUDED
+#ifndef JUCE_VST3HEADERS_H_INCLUDED
+#define JUCE_VST3HEADERS_H_INCLUDED
 
 #undef Point
 #undef Component
@@ -43,6 +43,7 @@
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
  #pragma clang diagnostic ignored "-Wshadow"
+ #pragma clang diagnostic ignored "-Wdeprecated-register"
 #endif
 
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
@@ -159,7 +160,6 @@ namespace Steinberg
 #undef OBJ_METHODS
 #undef QUERY_INTERFACE
 #undef LICENCE_UID
-#undef DEF_CLASS_IID
 #undef BEGIN_FACTORY
 #undef DEF_CLASS
 #undef DEF_CLASS1
@@ -169,4 +169,4 @@ namespace Steinberg
 #undef Point
 #undef Component
 
-#endif //JUCE_VST3HEADER_H_INCLUDED
+#endif   // JUCE_VST3HEADERS_H_INCLUDED

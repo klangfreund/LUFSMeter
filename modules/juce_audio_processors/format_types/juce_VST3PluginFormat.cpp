@@ -98,7 +98,7 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
     description.version  = toString (object.version).trim();
     description.category = toString (object.subCategories).trim();
 
-    if (description.manufacturerName.isEmpty())
+    if (description.manufacturerName.trim().isEmpty())
         description.manufacturerName = toString (object.vendor).trim();
 }
 
@@ -175,9 +175,9 @@ static void setStateForAllBussesOfType (Vst::IComponent* component,
 
 //==============================================================================
 /** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, const AudioSampleBuffer& buffer) noexcept
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, AudioSampleBuffer& buffer) noexcept
 {
-    vstBuffers.channelBuffers32 = buffer.getArrayOfChannels();
+    vstBuffers.channelBuffers32 = buffer.getArrayOfWritePointers();
     vstBuffers.numChannels      = buffer.getNumChannels();
     vstBuffers.silenceFlags     = 0;
 }
@@ -223,6 +223,8 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
                     context.frameRate.flags |= FrameRate::kPullDownRate;
             }
             break;
+
+            case AudioPlayHead::fpsUnknown: break;
 
             default:    jassertfalse; break; // New frame rate?
         }
@@ -459,13 +461,13 @@ public:
     {
         *obj = nullptr;
 
-        if (! doIdsMatch (cid, iid))
+        if (! doUIDsMatch (cid, iid))
         {
             jassertfalse;
             return kInvalidArgument;
         }
 
-        if (doIdsMatch (cid, Vst::IMessage::iid) && doIdsMatch (iid, Vst::IMessage::iid))
+        if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
             ComSmartPtr<Message> m (new Message (*this, attributeList));
             messageQueue.add (m);
@@ -473,7 +475,7 @@ public:
             *obj = m;
             return kResultOk;
         }
-        else if (doIdsMatch (cid, Vst::IAttributeList::iid) && doIdsMatch (iid, Vst::IAttributeList::iid))
+        else if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
             ComSmartPtr<AttributeList> l (new AttributeList (this));
             l->addRef();
@@ -526,7 +528,7 @@ public:
     //==============================================================================
     tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
     {
-        if (doIdsMatch (iid, Vst::IAttributeList::iid))
+        if (doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
             *obj = attributeList.get();
             return kResultOk;
@@ -539,6 +541,7 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IHostApplication)
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IParamValueQueue)
         TEST_FOR_AND_RETURN_IF_VALID (Vst::IUnitHandler)
+        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (FUnknown, Vst::IComponentHandler)
 
         *obj = nullptr;
         return kNotImplemented;
@@ -549,12 +552,6 @@ private:
     Atomic<int32> refCount;
     String appName;
     VST3PluginInstance* owner;
-
-    //==============================================================================
-    static bool doIdsMatch (const TUID a, const TUID b) noexcept
-    {
-        return std::memcmp (a, b, sizeof (TUID)) == 0;
-    }
 
     //==============================================================================
     class Message  : public Vst::IMessage
@@ -998,7 +995,8 @@ private:
 
     void releaseFactory()
     {
-        const Steinberg::FReleaser releaser (factory);
+        if (factory != nullptr)
+            factory->release();
     }
 
    #if JUCE_WINDOWS
@@ -1205,7 +1203,7 @@ public:
         setOpaque (true);
         setVisible (true);
 
-        view->setFrame (this);
+        warnOnFailure (view->setFrame (this));
 
         ViewRect rect;
         warnOnFailure (view->getSize (&rect));
@@ -1214,15 +1212,14 @@ public:
 
     ~VST3PluginWindow()
     {
-        view->removed();
+        warnOnFailure (view->removed());
         getAudioProcessor()->editorBeingDeleted (this);
 
        #if JUCE_MAC
         dummyComponent.setView (nullptr);
-        [pluginHandle release];
        #endif
 
-       const Steinberg::FReleaser releaser (view);
+        view = nullptr;
     }
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -1273,7 +1270,7 @@ public:
             }
             else
             {
-                view->getSize (&rect);
+                warnOnFailure (view->getSize (&rect));
             }
 
            #if JUCE_WINDOWS
@@ -1284,7 +1281,8 @@ public:
             dummyComponent.setBounds (0, 0, (int) rect.getWidth(), (int) rect.getHeight());
            #endif
 
-            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate(); // Some plugins don't update their cursor correctly when mousing out the window
+            // Some plugins don't update their cursor correctly when mousing out the window
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
 
             recursiveResize = false;
         }
@@ -1316,7 +1314,7 @@ public:
 private:
     //==============================================================================
     Atomic<int> refCount;
-    IPlugView* view; // N.B.: Don't use a ComSmartPtr here! The view should start with a refCount of 1, and does NOT need to be incremented!
+    ComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
     class ChildComponent  : public Component
@@ -1335,14 +1333,14 @@ private:
     ScopedPointer<ComponentPeer> peer;
     typedef HWND HandleFormat;
    #elif JUCE_MAC
-    NSViewComponent dummyComponent;
+    AutoResizingNSViewComponentWithParent dummyComponent;
     typedef NSView* HandleFormat;
    #else
     Component dummyComponent;
     typedef void* HandleFormat;
    #endif
 
-    HandleFormat pluginHandle; // Don't delete this
+    HandleFormat pluginHandle;
     bool recursiveResize;
 
     //==============================================================================
@@ -1368,17 +1366,12 @@ private:
            #elif JUCE_MAC
             dummyComponent.setBounds (getBounds().withZeroOrigin());
             addAndMakeVisible (dummyComponent);
-            pluginHandle = [[NSView alloc] init];
-            dummyComponent.setView (pluginHandle);
+            pluginHandle = (NSView*) dummyComponent.getView();
+            jassert (pluginHandle != nil);
            #endif
 
             if (pluginHandle != nullptr)
-                view->attached (pluginHandle,
-                               #if JUCE_WINDOWS
-                                kPlatformTypeHWND);
-                               #else
-                                kPlatformTypeNSView);
-                               #endif
+                warnOnFailure (view->attached (pluginHandle, defaultVST3WindowType));
         }
     }
 
@@ -1452,7 +1445,8 @@ public:
         if (! fetchComponentAndController (factory, factory->countClasses()))
             return false;
 
-        editController->initialize (host->getFUnknown()); // (May return an error if the plugin combines the IComponent and IEditController implementations)
+        // (May return an error if the plugin combines the IComponent and IEditController implementations)
+        editController->initialize (host->getFUnknown());
 
         isControllerInitialised = true;
         editController->setComponentHandler (host);
@@ -1488,12 +1482,6 @@ public:
     {
         using namespace Vst;
 
-        const int numInputs = getNumInputChannels();
-        const int numOutputs = getNumOutputChannels();
-
-        // Needed for having the same sample rate in processBlock(); some plugins need this!
-        setPlayConfigDetails (numInputs, numOutputs, sampleRate, estimatedSamplesPerBlock);
-
         ProcessSetup setup;
         setup.symbolicSampleSize    = kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
@@ -1507,15 +1495,27 @@ public:
 
         editController->setComponentHandler (host);
 
-        setStateForAllBusses (true);
-
         Array<SpeakerArrangement> inArrangements, outArrangements;
 
-        fillWithCorrespondingSpeakerArrangements (inArrangements, numInputs);
-        fillWithCorrespondingSpeakerArrangements (outArrangements, numOutputs);
+        for (int i = 0; i < numInputAudioBusses; ++i)
+            inArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (true, true, i).channelCount)));
+
+        for (int i = 0; i < numOutputAudioBusses; ++i)
+            outArrangements.add (getArrangementForNumChannels (jmax (0, (int) getBusInfo (false, true, i).channelCount)));
 
         warnOnFailure (processor->setBusArrangements (inArrangements.getRawDataPointer(), numInputAudioBusses,
                                                       outArrangements.getRawDataPointer(), numOutputAudioBusses));
+
+        // Update the num. busses in case the configuration has been modified by the plugin. (May affect number of channels!):
+        numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
+        numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
+
+        // Needed for having the same sample rate in processBlock(); some plugins need this!
+        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
+                              getNumSingleDirectionChannelsFor (component, false, true),
+                              sampleRate, estimatedSamplesPerBlock);
+
+        setStateForAllBusses (true);
 
         warnOnFailure (component->setActive (true));
         warnOnFailure (processor->setProcessing (true));
@@ -1636,7 +1636,11 @@ public:
 
     bool hasEditor() const override
     {
-        ComSmartPtr<IPlugView> view (tryCreatingView()); //N.B.: Must use a ComSmartPtr to not delete the view from the plugin permanently!
+        // (if possible, avoid creating a second instance of the editor, because that crashes some plugins)
+        if (getActiveEditor() != nullptr)
+            return true;
+
+        ComSmartPtr<IPlugView> view (tryCreatingView());
         return view != nullptr;
     }
 
@@ -1719,7 +1723,7 @@ public:
 
         if (head != nullptr)
         {
-            ScopedPointer<Steinberg::MemoryStream> s (createMemoryStreamForState (*head, "IComponent"));
+            ComSmartPtr<Steinberg::MemoryStream> s (createMemoryStreamForState (*head, "IComponent"));
 
             if (s != nullptr && component != nullptr)
                 component->setState (s);

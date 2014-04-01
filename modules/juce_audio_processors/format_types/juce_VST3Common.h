@@ -27,11 +27,11 @@
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
-    Steinberg::uint32 JUCE_CALLTYPE addRef() override   { return (Steinberg::uint32) ++refCount; } \
-    Steinberg::uint32 JUCE_CALLTYPE release() override  { const int r = --refCount; if (r == 0) delete this; return (Steinberg::uint32) r; }
+    Steinberg::uint32 PLUGIN_API addRef() override   { return (Steinberg::uint32) ++refCount; } \
+    Steinberg::uint32 PLUGIN_API release() override  { const int r = --refCount; if (r == 0) delete this; return (Steinberg::uint32) r; }
 
 #define JUCE_DECLARE_VST3_COM_QUERY_METHODS \
-    Steinberg::tresult PLUGIN_API JUCE_CALLTYPE queryInterface (const Steinberg::TUID, void** obj) override \
+    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID, void** obj) override \
     { \
         jassertfalse; \
         *obj = nullptr; \
@@ -51,6 +51,14 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
         return Steinberg::kResultOk; \
     }
 
+#define TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID(CommonClassType, SourceClassType) \
+    if (doUIDsMatch (iid, CommonClassType::iid)) \
+    { \
+        addRef(); \
+        *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
+        return Steinberg::kResultOk; \
+    }
+
 //==============================================================================
 static juce::String toString (const Steinberg::char8* string) noexcept      { return juce::String (string); }
 static juce::String toString (const Steinberg::char16* string) noexcept     { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
@@ -59,7 +67,7 @@ static juce::String toString (const Steinberg::char16* string) noexcept     { re
 static juce::String toString (const Steinberg::UString128& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 static juce::String toString (const Steinberg::UString256& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 
-static void toString (Steinberg::Vst::String128 result, const juce::String& source)
+static void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
 {
     Steinberg::UString (result, 128).fromAscii (source.toUTF8());
 }
@@ -69,76 +77,47 @@ static Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
     return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress());
 }
 
+#if JUCE_WINDOWS
+ static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
+#else
+ static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
+#endif
+
+
 //==============================================================================
-/** The equivalent numChannels and speaker arrangements should always
-    match between this function and fillWithCorrespondingSpeakerArrangements().
-
-    There can only be 1 arrangement per channel count. (i.e.: 4 channels == k31Cine OR k40Cine)
-
-    @see fillWithCorrespondingSpeakerArrangements
+/** For the sake of simplicity, there can only be 1 arrangement type per channel count.
+    i.e.: 4 channels == k31Cine OR k40Cine
 */
 static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numChannels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if (numChannels >= 24)  return k222;
-    if (numChannels >= 14)  return k131;
-    if (numChannels >= 13)  return k130;
-    if (numChannels >= 12)  return k111;
-    if (numChannels >= 11)  return k101;
-    if (numChannels >= 10)  return k91;
-    if (numChannels >= 9)   return k90;
-    if (numChannels >= 8)   return k71CineFullFront;
-    if (numChannels >= 7)   return k61Cine;
-    if (numChannels >= 6)   return k51;
-    if (numChannels >= 5)   return k50;
-    if (numChannels >= 4)   return k31Cine;
-    if (numChannels >= 3)   return k30Cine;
-    if (numChannels >= 2)   return kStereo;
-    if (numChannels >= 1)   return kMono;
-
-    return kEmpty;
-}
-
-/** The equivalent numChannels and speaker arrangements should always
-    match between this function and getArrangementForNumChannels().
-
-    There can only be 1 arrangement per channel count. (i.e.: 4 channels == k31Cine OR k40Cine)
-
-    @see getArrangementForNumChannels
-*/
-static void fillWithCorrespondingSpeakerArrangements (Array<Steinberg::Vst::SpeakerArrangement>& destination,
-                                                      int numChannels)
-{
-    using namespace Steinberg::Vst::SpeakerArr;
-
-    destination.clearQuick();
-
-    if (numChannels <= 0)
+    switch (numChannels)
     {
-        destination.add (kEmpty);
-        return;
+        case 0:     return kEmpty;
+        case 1:     return kMono;
+        case 2:     return kStereo;
+        case 3:     return k30Cine;
+        case 4:     return k31Cine;
+        case 5:     return k50;
+        case 6:     return k51;
+        case 7:     return k61Cine;
+        case 8:     return k71CineFullFront;
+        case 9:     return k90;
+        case 10:    return k91;
+        case 11:    return k101;
+        case 12:    return k111;
+        case 13:    return k130;
+        case 14:    return k131;
+        case 24:    return (Steinberg::Vst::SpeakerArrangement) 1929904127; // k222
+        default:    break;
     }
 
-    /*
-        The order of the arrangement checks must be descending, since most plugins test for
-        the first arrangement to match their number of specified channels.
-    */
-    if (numChannels >= 24)  destination.add (k222);
-    if (numChannels >= 14)  destination.add (k131);
-    if (numChannels >= 13)  destination.add (k130);
-    if (numChannels >= 12)  destination.add (k111);
-    if (numChannels >= 11)  destination.add (k101);
-    if (numChannels >= 10)  destination.add (k91);
-    if (numChannels >= 9)   destination.add (k90);
-    if (numChannels >= 8)   destination.add (k71CineFullFront);
-    if (numChannels >= 7)   destination.add (k61Cine);
-    if (numChannels >= 6)   destination.add (k51);
-    if (numChannels >= 5)   destination.add (k50);
-    if (numChannels >= 4)   destination.add (k31Cine);
-    if (numChannels >= 3)   destination.add (k30Cine);
-    if (numChannels >= 2)   destination.add (kStereo);
-    if (numChannels >= 1)   destination.add (kMono);
+    jassert (numChannels >= 0);
+
+    juce::BigInteger bi;
+    bi.setRange (0, jmin (numChannels, (int) (sizeof (Steinberg::Vst::SpeakerArrangement) * 8)), true);
+    return (Steinberg::Vst::SpeakerArrangement) bi.toInt64();
 }
 
 //==============================================================================
@@ -227,7 +206,9 @@ public:
     //==============================================================================
     static void toMidiBuffer (MidiBuffer& result, Steinberg::Vst::IEventList& eventList)
     {
-        for (Steinberg::int32 i = 0; i < eventList.getEventCount(); ++i)
+        const int32 numEvents = eventList.getEventCount();
+
+        for (Steinberg::int32 i = 0; i < numEvents; ++i)
         {
             Steinberg::Vst::Event e;
 
@@ -358,7 +339,7 @@ namespace VST3BufferExchange
     */
     void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
                             Bus& bus,
-                            const AudioSampleBuffer& buffer,
+                            AudioSampleBuffer& buffer,
                             int numChannels, int channelStartOffset,
                             int sampleOffset = 0) noexcept
     {
@@ -368,7 +349,7 @@ namespace VST3BufferExchange
         bus.clearQuick();
 
         for (int i = channelStartOffset; i < channelEnd; ++i)
-            bus.add (buffer.getSampleData (i, sampleOffset));
+            bus.add (buffer.getWritePointer (i, sampleOffset));
 
         vstBuffers.channelBuffers32 = bus.getRawDataPointer();
         vstBuffers.numChannels      = numChannels;
@@ -409,4 +390,4 @@ namespace VST3BufferExchange
     }
 }
 
-#endif //JUCE_VST3COMMON_H_INCLUDED
+#endif   // JUCE_VST3COMMON_H_INCLUDED
