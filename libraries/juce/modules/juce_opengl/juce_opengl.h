@@ -32,7 +32,6 @@
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 0
 #endif
 
 #if JUCE_WINDOWS
@@ -57,20 +56,47 @@
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS
- #include <OpenGLES/ES2/gl.h>
+ #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+  #include <OpenGLES/ES3/gl.h>
+ #else
+  #include <OpenGLES/ES2/gl.h>
+ #endif
 #elif JUCE_MAC
- #include <OpenGL/gl.h>
- #include "OpenGL/glext.h"
+ #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
+  #define JUCE_OPENGL3  1
+  #include <OpenGL/gl3.h>
+  #include <OpenGL/gl3ext.h>
+ #else
+  #include <OpenGL/gl.h>
+  #include "OpenGL/glext.h"
+ #endif
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
 #endif
 
-#if ! defined (JUCE_USE_OPENGL_SHADERS)
- #define JUCE_USE_OPENGL_SHADERS 1
-#endif
+//=============================================================================
+#if JUCE_OPENGL_ES || defined (DOXYGEN)
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_MEDIUMP  "mediump"
 
-#ifndef JUCE_USE_OPENGL_FIXED_FUNCTION
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 1
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_HIGHP    "highp"
+
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_LOWP     "lowp"
+#else
+ #define JUCE_MEDIUMP
+ #define JUCE_HIGHP
+ #define JUCE_LOWP
 #endif
 
 //=============================================================================
@@ -79,6 +105,7 @@ namespace juce
 
 class OpenGLTexture;
 class OpenGLFrameBuffer;
+class OpenGLShaderProgram;
 
 #include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"

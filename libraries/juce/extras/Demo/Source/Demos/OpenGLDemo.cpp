@@ -24,6 +24,9 @@
 */
 
 #include "../JuceDemoHeader.h"
+
+#if JUCE_OPENGL
+
 #include "WavefrontObjParser.h"
 
 
@@ -97,7 +100,7 @@ struct OpenGLDemoClasses
                                                                 OpenGLShaderProgram& shader,
                                                                 const char* attributeName)
         {
-            if (openGLContext.extensions.glGetAttribLocation (shader.programID, attributeName) < 0)
+            if (openGLContext.extensions.glGetAttribLocation (shader.getProgramID(), attributeName) < 0)
                 return nullptr;
 
             return new OpenGLShaderProgram::Attribute (shader, attributeName);
@@ -112,7 +115,7 @@ struct OpenGLDemoClasses
         {
             projectionMatrix = createUniform (openGLContext, shader, "projectionMatrix");
             viewMatrix       = createUniform (openGLContext, shader, "viewMatrix");
-            texture          = createUniform (openGLContext, shader, "texture");
+            texture          = createUniform (openGLContext, shader, "demoTexture");
             lightPosition    = createUniform (openGLContext, shader, "lightPosition");
             bouncingNumber   = createUniform (openGLContext, shader, "bouncingNumber");
         }
@@ -124,7 +127,7 @@ struct OpenGLDemoClasses
                                                             OpenGLShaderProgram& shader,
                                                             const char* uniformName)
         {
-            if (openGLContext.extensions.glGetUniformLocation (shader.programID, uniformName) < 0)
+            if (openGLContext.extensions.glGetUniformLocation (shader.getProgramID(), uniformName) < 0)
                 return nullptr;
 
             return new OpenGLShaderProgram::Uniform (shader, uniformName);
@@ -792,8 +795,8 @@ struct OpenGLDemoClasses
                 ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
                 String statusText;
 
-                if (newShader->addVertexShader (newVertexShader)
-                      && newShader->addFragmentShader (newFragmentShader)
+                if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
+                      && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                       && newShader->link())
                 {
                     shape = nullptr;
@@ -807,11 +810,7 @@ struct OpenGLDemoClasses
                     attributes = new Attributes (openGLContext, *shader);
                     uniforms   = new Uniforms (openGLContext, *shader);
 
-                   #if ! JUCE_OPENGL_ES
                     statusText = "GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2);
-                   #else
-                    statusText = "GLSL ES";
-                   #endif
                 }
                 else
                 {
@@ -864,7 +863,7 @@ struct OpenGLDemoClasses
                 "varying vec2 textureCoordOut;\n"
                 "varying float lightIntensity;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
                 "    textureCoordOut = texureCoordIn;\n"
@@ -886,9 +885,9 @@ struct OpenGLDemoClasses
                 "varying float lightIntensity;\n"
                #endif
                 "\n"
-                "uniform sampler2D texture;\n"
+                "uniform sampler2D demoTexture;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = max (0.3, lightIntensity * 0.3);\n"
@@ -897,7 +896,7 @@ struct OpenGLDemoClasses
                 "   float l = max (0.3, lightIntensity * 0.3);\n"
                 "   vec4 colour = vec4 (l, l, l, 1.0);\n"
                #endif
-                "    gl_FragColor = colour * texture2D (texture, textureCoordOut);\n"
+                "    gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);\n"
                 "}\n"
             },
 
@@ -915,7 +914,7 @@ struct OpenGLDemoClasses
                 "varying vec4 destinationColour;\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
                 "    textureCoordOut = texureCoordIn;\n"
@@ -931,11 +930,11 @@ struct OpenGLDemoClasses
                 "varying vec2 textureCoordOut;\n"
                #endif
                 "\n"
-                "uniform sampler2D texture;\n"
+                "uniform sampler2D demoTexture;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
-                "    gl_FragColor = texture2D (texture, textureCoordOut);\n"
+                "    gl_FragColor = texture2D (demoTexture, textureCoordOut);\n"
                 "}\n"
             },
 
@@ -953,7 +952,7 @@ struct OpenGLDemoClasses
                 "varying vec4 destinationColour;\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
                 "    textureCoordOut = texureCoordIn;\n"
@@ -969,9 +968,7 @@ struct OpenGLDemoClasses
                 "varying vec2 textureCoordOut;\n"
                #endif
                 "\n"
-                "uniform sampler2D texture;\n"
-                "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    gl_FragColor = destinationColour;\n"
                 "}\n"
@@ -995,7 +992,7 @@ struct OpenGLDemoClasses
                 "varying float yPos;\n"
                 "varying float zPos;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    vec4 v = vec4 (position);\n"
                 "    xPos = clamp (v.x, 0.0, 1.0);\n"
@@ -1019,7 +1016,7 @@ struct OpenGLDemoClasses
                 "varying float zPos;\n"
                #endif
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
                 "}"
@@ -1037,7 +1034,7 @@ struct OpenGLDemoClasses
                 "\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    textureCoordOut = texureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
@@ -1054,7 +1051,7 @@ struct OpenGLDemoClasses
                #endif
                 "uniform float bouncingNumber;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "   float b = bouncingNumber;\n"
                 "   float n = b * PI * 2.0;\n"
@@ -1079,7 +1076,7 @@ struct OpenGLDemoClasses
                 "\n"
                 "varying float lightIntensity;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    vec4 light = viewMatrix * lightPosition;\n"
                 "    lightIntensity = dot (light, normal);\n"
@@ -1094,7 +1091,7 @@ struct OpenGLDemoClasses
                 "varying float lightIntensity;\n"
                #endif
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = lightIntensity * 0.25;\n"
@@ -1121,7 +1118,7 @@ struct OpenGLDemoClasses
                 "\n"
                 "varying float lightIntensity;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    vec4 light = viewMatrix * lightPosition;\n"
                 "    lightIntensity = dot (light, normal);\n"
@@ -1139,7 +1136,7 @@ struct OpenGLDemoClasses
                 "varying float lightIntensity;\n"
                #endif
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = lightIntensity * 0.25;\n"
@@ -1166,7 +1163,7 @@ struct OpenGLDemoClasses
                 "\n"
                 "varying float lightIntensity;\n"
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                 "    vec4 light = viewMatrix * lightPosition;\n"
                 "    lightIntensity = dot (light, normal);\n"
@@ -1181,7 +1178,7 @@ struct OpenGLDemoClasses
                 "varying float lightIntensity;\n"
                #endif
                 "\n"
-                "void main (void)\n"
+                "void main()\n"
                 "{\n"
                #if JUCE_OPENGL_ES
                 "    highp float intensity = lightIntensity * 0.5;\n"
@@ -1211,3 +1208,5 @@ struct OpenGLDemoClasses
 
 // This static object will register this demo type in a global list of demos..
 static JuceDemoType<OpenGLDemoClasses::OpenGLDemo> demo ("20 Graphics: OpenGL");
+
+#endif

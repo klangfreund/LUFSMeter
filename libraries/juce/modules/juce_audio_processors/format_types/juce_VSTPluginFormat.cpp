@@ -1062,17 +1062,17 @@ public:
 
             if ((effect->flags & effFlagsCanReplacing) != 0)
             {
-                effect->processReplacing (effect, buffer.getArrayOfChannels(), buffer.getArrayOfChannels(), numSamples);
+                effect->processReplacing (effect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), numSamples);
             }
             else
             {
                 tempBuffer.setSize (effect->numOutputs, numSamples);
                 tempBuffer.clear();
 
-                effect->process (effect, buffer.getArrayOfChannels(), tempBuffer.getArrayOfChannels(), numSamples);
+                effect->process (effect, buffer.getArrayOfWritePointers(), tempBuffer.getArrayOfWritePointers(), numSamples);
 
                 for (int i = effect->numOutputs; --i >= 0;)
-                    buffer.copyFrom (i, 0, tempBuffer.getSampleData (i), numSamples);
+                    buffer.copyFrom (i, 0, tempBuffer.getReadPointer (i), numSamples);
             }
         }
         else
@@ -1927,17 +1927,10 @@ public:
        #elif JUCE_MAC
         #if JUCE_SUPPORT_CARBON
         if (! plug.usesCocoaNSView)
-        {
             addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
-        }
         else
         #endif
-        {
-            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponent());
-            NSView* innerView = [[NSView alloc] init];
-            cocoaWrapper->setView (innerView);
-            [innerView release];
-        }
+            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponentWithParent());
        #endif
 
         activeVSTWindows.add (this);
@@ -2376,9 +2369,9 @@ private:
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)
         {
-            const VSTPluginWindow* const w = activeVSTWindows.getUnchecked (i);
+            Component::SafePointer<VSTPluginWindow> w (activeVSTWindows[i]);
 
-            if (w->pluginHWND == hW)
+            if (w != nullptr && w->pluginHWND == hW)
             {
                 if (message == WM_CHAR
                     || message == WM_KEYDOWN
@@ -2391,9 +2384,10 @@ private:
                                  message, wParam, lParam);
                 }
 
-                return CallWindowProc ((WNDPROC) w->originalWndProc,
-                                       (HWND) w->pluginHWND,
-                                       message, wParam, lParam);
+                if (w != nullptr) // (may have been deleted in SendMessage callback)
+                    return CallWindowProc ((WNDPROC) w->originalWndProc,
+                                           (HWND) w->pluginHWND,
+                                           message, wParam, lParam);
             }
         }
 
@@ -2599,7 +2593,7 @@ private:
     ScopedPointer<CarbonWrapperComponent> carbonWrapper;
    #endif
 
-    ScopedPointer<NSViewComponent> cocoaWrapper;
+    ScopedPointer<AutoResizingNSViewComponentWithParent> cocoaWrapper;
 
     void resized() override
     {

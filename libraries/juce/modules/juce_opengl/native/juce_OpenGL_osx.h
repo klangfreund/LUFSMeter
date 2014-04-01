@@ -28,11 +28,17 @@ public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixFormat,
                    void* contextToShare,
-                   bool /*useMultisampling*/)
+                   bool /*useMultisampling*/,
+                   OpenGLVersion version)
         : lastSwapTime (0), minSwapTimeMs (0), underrunCounter (0)
     {
+        (void) version;
+
         NSOpenGLPixelFormatAttribute attribs[] =
         {
+           #if JUCE_OPENGL3
+            NSOpenGLPFAOpenGLProfile, version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy,
+           #endif
             NSOpenGLPFADoubleBuffer,
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,

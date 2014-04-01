@@ -142,6 +142,7 @@
     <ClCompile Include="..\..\Source\Demos\AudioSynthesiserDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\Box2DDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\CameraDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\ChildProcessDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\CodeEditorDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\ComponentTransformsDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\CryptographyDemo.cpp"/>
@@ -152,12 +153,14 @@
     <ClCompile Include="..\..\Source\Demos\JavaScript.cpp"/>
     <ClCompile Include="..\..\Source\Demos\KeyMappingsDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\LiveConstantDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\LookAndFeelDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MDIDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MidiDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MultithreadingDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\MultiTouch.cpp"/>
     <ClCompile Include="..\..\Source\Demos\NetworkingDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\OpenGLDemo.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\OpenGLDemo2D.cpp"/>
     <ClCompile Include="..\..\Source\Demos\PropertiesDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\SystemInfoDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\TimersAndEventsDemo.cpp"/>
@@ -682,6 +685,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeBroadcaster.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
@@ -1350,6 +1356,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Common.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Headers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h"/>
@@ -1506,6 +1514,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeBroadcaster.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnectionServer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h"/>

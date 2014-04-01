@@ -133,7 +133,6 @@ namespace juce
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
-#include "network/juce_URL.cpp"
 #include "network/juce_IPAddress.cpp"
 #include "streams/juce_BufferedInputStream.cpp"
 #include "streams/juce_FileInputSource.cpp"
@@ -151,7 +150,6 @@ namespace juce
 #include "text/juce_StringPairArray.cpp"
 #include "text/juce_StringPool.cpp"
 #include "text/juce_TextDiff.cpp"
-#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_ReadWriteLock.cpp"
 #include "threads/juce_Thread.cpp"
 #include "threads/juce_ThreadPool.cpp"
@@ -218,6 +216,8 @@ namespace juce
 
 #endif
 
+#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
+#include "network/juce_URL.cpp"
 
 }
