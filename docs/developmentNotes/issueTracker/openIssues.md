@@ -11,8 +11,6 @@ In order of priority.
 Open issues / Roadmap
 =====================
 
-Implement Loudness Range
-------------------------
 
 Don't measure 100ms or 1s based on the expectedRequestRate
 ----------------------------------------------------------

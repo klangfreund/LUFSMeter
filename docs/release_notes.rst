@@ -5,6 +5,18 @@ Release Notes
 *************
 
 
+LUFS METER 0.5
+--------------
+
+2014 04 01
+
+* Implementation of the Loudness Range (LRA).
+
+* Created user interface elements for the LRA.
+
+* ITU BS.1770-3 compatibility.
+
+
 LUFS Meter 0.4
 --------------
 
