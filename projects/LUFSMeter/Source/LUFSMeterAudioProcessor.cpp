@@ -187,8 +187,6 @@ void LUFSMeterAudioProcessor::reset()
 {
     // Use this method as the place to clear any delay lines, buffers, etc, as it
     // means there's been a break in the audio's continuity.
-    
-    ebu128LoudnessMeter.reset();
 }
 
 void LUFSMeterAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
