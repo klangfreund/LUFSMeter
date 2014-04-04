@@ -31,7 +31,7 @@
         <key>description</key>
         <string>Measures loudness according to ITU 1770-3 and EBU R128.</string>
         <key>factoryFunction</key>
-        <string>LUFSMeterAUFactory</string>
+        <string>LUFSMeterMultichannelAUFactory</string>
         <key>manufacturer</key>
         <string>Klan</string>
         <key>type</key>

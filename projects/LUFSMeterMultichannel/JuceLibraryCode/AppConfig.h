@@ -152,13 +152,13 @@
  #define JucePlugin_PluginCode             'LufM'
 #endif
 #ifndef  JucePlugin_MaxNumInputChannels
- #define JucePlugin_MaxNumInputChannels    16
+ #define JucePlugin_MaxNumInputChannels    24
 #endif
 #ifndef  JucePlugin_MaxNumOutputChannels
- #define JucePlugin_MaxNumOutputChannels   16
+ #define JucePlugin_MaxNumOutputChannels   24
 #endif
 #ifndef  JucePlugin_PreferredChannelConfigurations
- #define JucePlugin_PreferredChannelConfigurations  {16, 16}, {15, 15}, {14, 14}, {13, 13}, {12, 12}, {11, 11}, {10, 10}, {9, 9}, {8, 8},  {7, 7}, {6, 6}, {5, 5}, {4, 4}, {3, 3}, {2, 2}, {1, 1}
+ #define JucePlugin_PreferredChannelConfigurations  {24, 24}, {23, 23}, {22, 22}, {21, 21}, {20, 20}, {19, 19}, {18, 18}, {17, 17}, {16, 16}, {15, 15}, {14, 14}, {13, 13}, {12, 12}, {11, 11}, {10, 10}, {9, 9}, {8, 8},  {7, 7}, {6, 6}, {5, 5}, {4, 4}, {3, 3}, {2, 2}, {1, 1}
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
@@ -197,10 +197,10 @@
  #define JucePlugin_AUSubType              JucePlugin_PluginCode
 #endif
 #ifndef  JucePlugin_AUExportPrefix
- #define JucePlugin_AUExportPrefix         LUFSMeterAU
+ #define JucePlugin_AUExportPrefix         LUFSMeterMultichannelAU
 #endif
 #ifndef  JucePlugin_AUExportPrefixQuoted
- #define JucePlugin_AUExportPrefixQuoted   "LUFSMeterAU"
+ #define JucePlugin_AUExportPrefixQuoted   "LUFSMeterMultichannelAU"
 #endif
 #ifndef  JucePlugin_AUManufacturerCode
  #define JucePlugin_AUManufacturerCode     JucePlugin_ManufacturerCode
@@ -224,7 +224,7 @@
  #define JucePlugin_RTASDisableMultiMono   0
 #endif
 #ifndef  JucePlugin_AAXIdentifier
- #define JucePlugin_AAXIdentifier          com.klangfreund.lufsmeter
+ #define JucePlugin_AAXIdentifier          com.klangfreund.lufsmetermultichannel
 #endif
 #ifndef  JucePlugin_AAXManufacturerCode
  #define JucePlugin_AAXManufacturerCode    JucePlugin_ManufacturerCode

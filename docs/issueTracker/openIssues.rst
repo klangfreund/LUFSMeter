@@ -1,4 +1,4 @@
-<!--- author: Samuel Gaehwiler (klangfreund.com) !-->
+.. author: Samuel Gaehwiler (klangfreund.com)
 
 
 Description of this file
@@ -13,15 +13,18 @@ Open issues / Roadmap
 
 
 
-
-AU: In Logic, 2 times Mono or 2 times Stereo is shown
------------------------------------------------------
-
-
 Don't measure 100ms or 1s based on the expectedRequestRate
 ----------------------------------------------------------
 
 Use a sample counter! 
+
+
+If an instance of the two channel and the multichannel LUFSMeter is loaded, one of them doesn't work
+----------------------------------------------------------------------------------------------------
+
+Host: Logic X
+
+As soon as the working one is removed, the non-working one starts to function.
 
 
 Implement some default plugin presets
