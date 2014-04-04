@@ -56,3 +56,7 @@ Add vectorgraphics to the GUI
 Implement Loudness Range
 ------------------------
 
+
+Reset button not working anymore
+--------------------------------
+

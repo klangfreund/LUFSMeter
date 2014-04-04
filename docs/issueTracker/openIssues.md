@@ -12,6 +12,14 @@ Open issues / Roadmap
 =====================
 
 
+Reset not working anymore
+-------------------------
+
+
+AU: In Logic, 2 times Mono or 2 times Stereo is shown
+-----------------------------------------------------
+
+
 Don't measure 100ms or 1s based on the expectedRequestRate
 ----------------------------------------------------------
 

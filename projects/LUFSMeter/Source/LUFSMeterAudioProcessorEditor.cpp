@@ -307,7 +307,7 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
 {
     if (button == &resetButton)
     {
-        getProcessor()->reset();
+        getProcessor()->ebu128LoudnessMeter.reset();
         momentaryLoudnessHistory.reset();
         shortTermLoudnessHistory.reset();
         loudnessRangeHistory.reset();
