@@ -152,13 +152,13 @@
  #define JucePlugin_PluginCode             'Lufs'
 #endif
 #ifndef  JucePlugin_MaxNumInputChannels
- #define JucePlugin_MaxNumInputChannels    12
+ #define JucePlugin_MaxNumInputChannels    2
 #endif
 #ifndef  JucePlugin_MaxNumOutputChannels
- #define JucePlugin_MaxNumOutputChannels   12
+ #define JucePlugin_MaxNumOutputChannels   2
 #endif
 #ifndef  JucePlugin_PreferredChannelConfigurations
- #define JucePlugin_PreferredChannelConfigurations  {12, 12}, {11, 11}, {10, 10}, {9, 9}, {8, 8},  {7, 7}, {6, 6}, {5, 5}, {4, 4}, {3, 3}, {2, 2}, {1, 1}
+ #define JucePlugin_PreferredChannelConfigurations  {2, 2}, {1, 1}
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0

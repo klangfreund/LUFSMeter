@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist>
+  <dict>
+    <key>CFBundleExecutable</key>
+    <string>${EXECUTABLE_NAME}</string>
+    <key>CFBundleIconFile</key>
+    <string></string>
+    <key>CFBundleIdentifier</key>
+    <string>com.klangfreund.lufsmetermultichannel</string>
+    <key>CFBundleName</key>
+    <string>LUFSMeterMultichannel</string>
+    <key>CFBundlePackageType</key>
+    <string>TDMw</string>
+    <key>CFBundleSignature</key>
+    <string>PTul</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.5.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.5.0</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>Klangfreund</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>AudioComponents</key>
+    <array>
+      <dict>
+        <key>name</key>
+        <string>Klangfreund: LUFS Meter (Multichannel)</string>
+        <key>description</key>
+        <string>Measures loudness according to ITU 1770-3 and EBU R128.</string>
+        <key>factoryFunction</key>
+        <string>LUFSMeterAUFactory</string>
+        <key>manufacturer</key>
+        <string>Klan</string>
+        <key>type</key>
+        <string>aufx</string>
+        <key>subtype</key>
+        <string>LufM</string>
+        <key>version</key>
+        <integer>1280</integer>
+      </dict>
+    </array>
+  </dict>
+</plist>
