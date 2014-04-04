@@ -34,17 +34,17 @@
 LoudnessHistory::LoudnessHistory (const Value & loudnessValueToReferTo,
                                   const Value & minLoudnessToReferTo,
                                   const Value & maxLoudnessToReferTo)
-  : minLoudnessToSet (-300.0f),
-    currentLoudnessValue (minLoudnessToSet),
-    colour (Colours::green),
-    specifiedTimeRange (20), // seconds
-    lineThickness (2.0f),
-    desiredNumberOfPixelsBetweenTwoPoints (6.0f),
-    textBoxWidth (40),
-    distanceBetweenLeftBorderAndText (3),
-    desiredRefreshIntervalInMilliseconds (1000),
-    mostRecentLoudnessInTheBuffer (circularLoudnessBuffer.begin()),
-    distanceBetweenGraphAndBottom (32)
+  : minLoudnessToSet {-300.0f},
+    currentLoudnessValue {minLoudnessToSet},
+    colour {Colours::green},
+    specifiedTimeRange {20}, // seconds
+    lineThickness {2.0f},
+    desiredNumberOfPixelsBetweenTwoPoints {6.0f},
+    textBoxWidth {40},
+    distanceBetweenLeftBorderAndText {3},
+    desiredRefreshIntervalInMilliseconds {1000},
+    mostRecentLoudnessInTheBuffer {circularLoudnessBuffer.begin()},
+    distanceBetweenGraphAndBottom {32}
 {
     currentLoudnessValue.referTo (loudnessValueToReferTo);
     minLoudness.referTo (minLoudnessToReferTo);

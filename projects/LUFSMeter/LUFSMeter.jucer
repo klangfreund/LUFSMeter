@@ -4,14 +4,16 @@
               bundleIdentifier="com.klangfreund.lufsmeter" buildVST="1" buildAU="1"
               pluginName="LUFS Meter" pluginDesc="Measures loudness according to ITU 1770-3 and EBU R128."
               pluginManufacturer="Klangfreund" pluginManufacturerCode="Klan"
-              pluginCode="Lufs" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
-              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="1"
-              pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="LUFSMeterAU"
-              pluginAUViewClass="LUFSMeterAU_V1" pluginRTASCategory="" aaxIdentifier="com.klangfreund.lufsmeter"
+              pluginCode="Lufs" pluginChannelConfigs="{12, 12}, {11, 11}, {10, 10}, {9, 9}, {8, 8},  {7, 7}, {6, 6}, {5, 5}, {4, 4}, {3, 3}, {2, 2}, {1, 1}"
+              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
+              pluginSilenceInIsSilenceOut="1" pluginTailLength="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="LUFSMeterAU" pluginAUViewClass="LUFSMeterAU_V1"
+              pluginRTASCategory="" aaxIdentifier="com.klangfreund.lufsmeter"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0"
               companyName="Klangfreund" includeBinaryInAppConfig="1" buildVST3="0"
               buildRTAS="0" buildAAX="0" pluginManufacturerWebsite="www.yourcompany.com"
-              pluginManufacturerEmail="support@yourcompany.com">
+              pluginManufacturerEmail="support@yourcompany.com" companyEmail="support@klangfreund.com"
+              companyWebsite="http://www.klangfreund.com">
   <MAINGROUP id="V1nBQh" name="LUFSMeter">
     <GROUP id="{5911D4B8-831C-F08F-0713-55C5B38BE96B}" name="Resources">
       <FILE id="fiSHqD" name="icons.zip" compile="0" resource="1" file="Resources/icons.zip"/>

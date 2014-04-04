@@ -100,6 +100,14 @@ protected:
      */
     int specifiedTimeRange;
     float lineThickness;
+    
+    /** The horizontal distance between two points of this line-segment-graph.
+     
+     Together with the size of the plugin window, this determines
+     the refreshrate of the history graph.
+     
+     A small value will quite increase the CPU usage.
+     */
     float desiredNumberOfPixelsBetweenTwoPoints;
     int textBoxWidth;
     int distanceBetweenLeftBorderAndText;
