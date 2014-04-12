@@ -216,7 +216,11 @@ LUFSMeterAudioProcessorEditor::~LUFSMeterAudioProcessorEditor()
 {
     if (getProcessor())
     {
-        getProcessor()->loudnessBarWidth.removeListener(this);
+        getProcessor()->loudnessBarWidth.removeListener (this);
+        getProcessor()->showIntegratedLoudnessHistory.removeListener (this);
+        getProcessor()->showLoudnessRangeHistory.removeListener (this);
+        getProcessor()->showShortTermLoudnessHistory.removeListener (this);
+        getProcessor()->showMomentaryLoudnessHistory.removeListener (this);
     }
 }
 

@@ -11,7 +11,7 @@
               pluginAUExportPrefix="LUFSMeterMultichannelAU" pluginAUViewClass="LUFSMeterAU_V1"
               pluginRTASCategory="" aaxIdentifier="com.klangfreund.lufsmetermultichannel"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.1.0"
-              companyName="Klangfreund" includeBinaryInAppConfig="1" buildVST3="0"
+              companyName="Klangfreund" includeBinaryInAppConfig="1" buildVST3="1"
               buildRTAS="0" buildAAX="0" pluginManufacturerWebsite="www.yourcompany.com"
               pluginManufacturerEmail="support@yourcompany.com" companyEmail="support@klangfreund.com"
               companyWebsite="http://www.klangfreund.com">
