@@ -8,13 +8,15 @@ Release Notes
 LUFS METER 0.5
 --------------
 
-2014 04 01
+2014 04 14
 
 * Implementation of the Loudness Range (LRA).
 
-* Created user interface elements for the LRA.
+* User interface elements for the LRA.
 
 * ITU BS.1770-3 compatibility.
+
+* Fixed stability issues in Bitwig (Mac) and Reaper (Windows)
 
 
 LUFS Meter 0.4

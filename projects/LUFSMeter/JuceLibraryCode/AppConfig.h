@@ -143,7 +143,7 @@
  #define JucePlugin_ManufacturerWebsite    "http://www.klangfreund.com"
 #endif
 #ifndef  JucePlugin_ManufacturerEmail
- #define JucePlugin_ManufacturerEmail      "support@yourcompany.com"
+ #define JucePlugin_ManufacturerEmail      "support@klangfreund.com"
 #endif
 #ifndef  JucePlugin_ManufacturerCode
  #define JucePlugin_ManufacturerCode       'Klan'

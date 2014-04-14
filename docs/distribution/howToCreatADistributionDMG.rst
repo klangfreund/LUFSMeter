@@ -3,6 +3,8 @@
 How to create a distribution DMG
 ================================
 
+
+
 1. create the dmg
 -----------------
 
@@ -14,8 +16,10 @@ How to create a distribution DMG
 2. customize the dmg
 --------------------
 
-- Customize the content and look to your liking.
+- Customize the content and the look as you desire.
     - Hint: Command-J -> Always open in icon view
+    - Open the terminal to create a shortcut (static link) to e.g. the audio-unit folder:
+        ln -s ~/Library/Audio/Plug-Ins/Components/ Components
 
 3. compress the dmg
 -------------------
