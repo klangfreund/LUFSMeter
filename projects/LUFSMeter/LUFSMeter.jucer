@@ -129,13 +129,13 @@
             vst3Folder="c:\SDKs\VST3 SDK">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug 32bit" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="LUFSMeter"/>
+                       isDebug="1" optimisation="1" targetName="LUFSMeter32BitDebug"/>
         <CONFIGURATION name="Release 32bit" winWarningLevel="4" generateManifest="1"
-                       winArchitecture="32-bit" isDebug="0" optimisation="2" targetName="LUFSMeter"/>
+                       winArchitecture="32-bit" isDebug="0" optimisation="2" targetName="LUFSMeter32Bit"/>
         <CONFIGURATION name="Debug 64bit" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="LUFSMeter"/>
+                       isDebug="1" optimisation="1" targetName="LUFSMeter64BitDebug"/>
         <CONFIGURATION name="Release 64bit" winWarningLevel="4" generateManifest="1"
-                       winArchitecture="x64" isDebug="0" optimisation="2" targetName="LUFSMeter"/>
+                       winArchitecture="x64" isDebug="0" optimisation="2" targetName="LUFSMeter64Bit"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>

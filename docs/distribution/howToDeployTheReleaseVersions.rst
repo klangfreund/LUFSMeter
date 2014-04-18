@@ -26,4 +26,16 @@ Windows 7
 =========
 
 - Copy the Steinberg VST SDK 2.4 to the folder c:\SDKs\vstsdk2.4 .
-  (It's the default location for the SDK... just do it)
+  (It's the default location for the SDK...)
+
+- If Notepad doesn't break the lines of your textfiles as you have intended,
+  use the command::
+
+    :w ++ff=dos /path/to/file.txt
+
+  in VIM. More about it::
+
+    :help 'ff'
+    :help ++opt 
+  
+  (Source: http://vim.1045645.n5.nabble.com/Working-with-windows-line-endings-td1151082.html )

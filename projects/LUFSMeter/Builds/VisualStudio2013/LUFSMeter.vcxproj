@@ -60,16 +60,16 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">.\Debug 32bit\</OutDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">LUFSMeter</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">LUFSMeter32BitDebug</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">.\Release 32bit\</OutDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">LUFSMeter</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">LUFSMeter32Bit</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">.\Debug 64bit\</OutDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">LUFSMeter</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">LUFSMeter64BitDebug</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">.\Release 64bit\</OutDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">LUFSMeter</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">LUFSMeter64Bit</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">true</GenerateManifest>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
@@ -100,11 +100,11 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\LUFSMeter.dll</OutputFile>
+      <OutputFile>$(OutDir)\LUFSMeter32BitDebug.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\LUFSMeter.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\LUFSMeter32BitDebug.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -113,7 +113,7 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\LUFSMeter.bsc</OutputFile>
+      <OutputFile>$(IntDir)\LUFSMeter32BitDebug.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
@@ -145,11 +145,11 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\LUFSMeter.dll</OutputFile>
+      <OutputFile>$(OutDir)\LUFSMeter32Bit.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\LUFSMeter.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\LUFSMeter32Bit.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <OptimizeReferences>true</OptimizeReferences>
@@ -159,7 +159,7 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\LUFSMeter.bsc</OutputFile>
+      <OutputFile>$(IntDir)\LUFSMeter32Bit.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
@@ -192,18 +192,18 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\LUFSMeter.dll</OutputFile>
+      <OutputFile>$(OutDir)\LUFSMeter64BitDebug.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\LUFSMeter.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\LUFSMeter64BitDebug.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/FORCE:multiple %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\LUFSMeter.bsc</OutputFile>
+      <OutputFile>$(IntDir)\LUFSMeter64BitDebug.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
@@ -235,11 +235,11 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\LUFSMeter.dll</OutputFile>
+      <OutputFile>$(OutDir)\LUFSMeter64Bit.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\LUFSMeter.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\LUFSMeter64Bit.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -248,7 +248,7 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\LUFSMeter.bsc</OutputFile>
+      <OutputFile>$(IntDir)\LUFSMeter64Bit.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>

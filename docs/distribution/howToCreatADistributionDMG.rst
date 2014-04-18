@@ -33,6 +33,6 @@ How to create a distribution DMG
 
 Enter::
 
-    ./licenseDMGmodified.py <finalName>.dmg gpl-2.0.txt
+    ./licenseDMG.py <finalName>.dmg gpl-2.0.txt
 
 in the Terminal.app
