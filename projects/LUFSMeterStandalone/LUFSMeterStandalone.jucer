@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="efOX8g" name="LUFSMeterStandalone" projectType="guiapp" version="0.0.3"
+<JUCERPROJECT id="efOX8g" name="LUFSMeterStandalone" projectType="guiapp" version="0.5.0"
               bundleIdentifier="com.klangfreund.LUFSMeterStandalone" jucerVersion="3.1.0"
               companyName="Klangfreund" defines="LUFSMETER_STANDALONE=1" includeBinaryInAppConfig="1">
   <MAINGROUP id="AO7N4d" name="LUFSMeterStandalone">

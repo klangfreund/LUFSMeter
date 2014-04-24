@@ -5,7 +5,7 @@ Release Notes
 *************
 
 
-LUFS METER 0.5
+LUFS Meter 0.5
 --------------
 
 2014 04 14
@@ -16,7 +16,7 @@ LUFS METER 0.5
 
 * ITU BS.1770-3 compatibility.
 
-* Fixed stability issues in Bitwig (Mac) and Reaper (Windows)
+* Fixed stability issues in Bitwig (Mac) and Reaper (Windows).
 
 
 LUFS Meter 0.4

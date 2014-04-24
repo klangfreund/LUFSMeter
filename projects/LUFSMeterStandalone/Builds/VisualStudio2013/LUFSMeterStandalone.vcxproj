@@ -85,7 +85,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.0.3;JUCE_APP_VERSION_HEX=0x3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.5.0;JUCE_APP_VERSION_HEX=0x500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -126,7 +126,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.0.3;JUCE_APP_VERSION_HEX=0x3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.5.0;JUCE_APP_VERSION_HEX=0x500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -169,7 +169,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.0.3;JUCE_APP_VERSION_HEX=0x3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.5.0;JUCE_APP_VERSION_HEX=0x500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -208,7 +208,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\libraries\juce\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.0.3;JUCE_APP_VERSION_HEX=0x3;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;LUFSMETER_STANDALONE=1;JUCER_VS2013_78A5020=1;JUCE_APP_VERSION=0.5.0;JUCE_APP_VERSION_HEX=0x500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
