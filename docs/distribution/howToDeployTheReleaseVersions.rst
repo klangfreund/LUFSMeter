@@ -17,6 +17,10 @@ Mac OSX
   Select "Save Built Products" and choose a location to store it.
 
 - The component-File IS the audio unit plugin.
+  To validate this Audio Unit::
+    
+    auval  -v aufx Lufs Klan    // The 32 bit version
+    auval -64 -v aufx Lufs Klan // The 64 bit version
 
 - Copy this file and change the file extension to vst. Now you also have the
   VST plugin.
