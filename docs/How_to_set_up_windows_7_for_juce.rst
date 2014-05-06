@@ -29,6 +29,8 @@ http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-ex
 Windows SDK v7.1
 ----------------
 
+NOT NEEDED IN VS 2013 anymore
+
 Because Visual C++ only ships with a 32 bit C++ compiler. Here, a
 64 bit C++ compiler is included.
 
@@ -59,6 +61,9 @@ It should work out of the box. (Thank you so much, Jules!)
 
 LUFS Meter
 ----------
+
+For VS2013, be sure to set the Platform Toolset to v120_xp in the Introjucer ->
+Visual Studio 2013 Settings. This guarantees backwards compatibility back to XP.
 
 Open LUFSMeter.sln .
 Go to Project -> LUFSMeter Properties... 

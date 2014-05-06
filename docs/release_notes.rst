@@ -4,6 +4,15 @@
 Release Notes
 *************
 
+LUFS Meter 0.5.1
+----------------
+
+2014 05 04
+
+* OSX: Compatibile back to 10.4.
+
+* Windows: Compatible back to Windows XP.
+
 
 LUFS Meter 0.5
 --------------

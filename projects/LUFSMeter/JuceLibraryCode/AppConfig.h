@@ -158,7 +158,7 @@
  #define JucePlugin_MaxNumOutputChannels   2
 #endif
 #ifndef  JucePlugin_PreferredChannelConfigurations
- #define JucePlugin_PreferredChannelConfigurations  {1, 1}, {2, 2}
+ #define JucePlugin_PreferredChannelConfigurations  {2, 2}, {1, 1}
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
@@ -176,13 +176,13 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
- #define JucePlugin_Version                0.5.0
+ #define JucePlugin_Version                0.5.1
 #endif
 #ifndef  JucePlugin_VersionCode
- #define JucePlugin_VersionCode            0x500
+ #define JucePlugin_VersionCode            0x501
 #endif
 #ifndef  JucePlugin_VersionString
- #define JucePlugin_VersionString          "0.5.0"
+ #define JucePlugin_VersionString          "0.5.1"
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode

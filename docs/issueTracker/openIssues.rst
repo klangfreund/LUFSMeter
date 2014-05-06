@@ -13,8 +13,8 @@ Open issues / Roadmap
 
 
 
-Don't measure 100ms or 1s based on the expectedRequestRate
-----------------------------------------------------------
+Don't measure 100ms or 1s based on the expectedRequestRate !!!
+--------------------------------------------------------------
 
 Use a sample counter! 
 
@@ -25,6 +25,13 @@ If an instance of the two channel and the multichannel LUFSMeter is loaded, one 
 Host: Logic X
 
 As soon as the working one is removed, the non-working one starts to function.
+
+
+A non-readable font is used on OSX 10.6
+---------------------------------------
+
+Host: Logic Pro 8
+Computer: sam6
 
 
 Implement some default plugin presets

@@ -1961,6 +1961,7 @@
 					65AED919F0C1C52FFE2D6F23,
 					1529B150D8DFE275F321EDB5, ); name = Source; sourceTree = "<group>"; };
 		0772252B7D245F4E41CC6A5F = {isa = XCBuildConfiguration; buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1979,10 +1980,11 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../libraries/juce/modules", "$(inherited)");
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		CFBE2F70F70AA70A5870B23B = {isa = XCBuildConfiguration; buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2002,6 +2004,7 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../libraries/juce/modules", "$(inherited)");
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		30FCC18E67F53C95434B8824 = {isa = XCBuildConfiguration; buildSettings = {
