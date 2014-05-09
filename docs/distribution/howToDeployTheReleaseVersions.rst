@@ -43,3 +43,19 @@ Windows 7
     :help ++opt 
   
   (Source: http://vim.1045645.n5.nabble.com/Working-with-windows-line-endings-td1151082.html )
+
+  OR
+  edit your textfile (release_notes.txt) with Notepad.
+
+How to create a self extracting exe with WinRAR
+-----------------------------------------------
+
+- Create the folder that will be extracted.
+
+- Right click -> Add to archive...
+
+- Archiving options: Create SFX archive
+
+- Advanced -> Compression... -> Enable 32-bit executable: true, Enable 64-bit executable: false
+
+- SFX options... -> License -> Load text from file... -> Title: "LUFS Meter GPLv2 License", Load text from file...
