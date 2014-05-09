@@ -131,13 +131,17 @@
             vst3Folder="c:\SDKs\VST3 SDK" toolset="v120_xp" extraLinkerFlags="/SUBSYSTEM:WINDOWS,5.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug 32bit" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="LUFSMeterMultichannel32BitDebug"/>
+                       isDebug="1" optimisation="1" targetName="LUFSMeterMultichannel32BitDebug"
+                       useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release 32bit" winWarningLevel="4" generateManifest="1"
-                       winArchitecture="32-bit" isDebug="0" optimisation="2" targetName="LUFSMeterMultichannel32Bit"/>
+                       winArchitecture="32-bit" isDebug="0" optimisation="2" targetName="LUFSMeterMultichannel32Bit"
+                       useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Debug 64bit" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="LUFSMeterMultichannel64BitDebug"/>
+                       isDebug="1" optimisation="1" targetName="LUFSMeterMultichannel64BitDebug"
+                       useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release 64bit" winWarningLevel="4" generateManifest="1"
-                       winArchitecture="x64" isDebug="0" optimisation="2" targetName="LUFSMeterMultichannel64Bit"/>
+                       winArchitecture="x64" isDebug="0" optimisation="2" targetName="LUFSMeterMultichannel64Bit"
+                       useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../libraries/juce/modules"/>
