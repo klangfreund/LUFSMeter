@@ -60,3 +60,8 @@ Implement Loudness Range
 Reset button not working anymore
 --------------------------------
 
+Backwards compatibility to XP and OS X 10.4
+-------------------------------------------
+
+closed at 2014 05 09
+

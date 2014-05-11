@@ -1,47 +1,63 @@
+LUFSMeter open issues
+*********************
+
 .. author: Samuel Gaehwiler (klangfreund.com)
 
 
-Description of this file
-========================
+About
+=====
 
 This file is the issue tracker as well as a short term roadmap for the LUFS Meter.
-In order of priority.
+The issues are listed in order of priority.
+
 
 
 Open issues / Roadmap
 =====================
 
 
-
 Don't measure 100ms or 1s based on the expectedRequestRate !!!
---------------------------------------------------------------
+----------------------------------------------------------
 
-Use a sample counter! 
-
-
-If an instance of the two channel and the multichannel LUFSMeter is loaded, one of them doesn't work
-----------------------------------------------------------------------------------------------------
-
-Host: Logic X
-
-As soon as the working one is removed, the non-working one starts to function.
+Use a sample counter!
 
 
-A non-readable font is used on OSX 10.6
----------------------------------------
+The LRA measurement is not accurate
+-----------------------------------
 
-Host: Logic Pro 8
-Computer: sam6
+The EBU test files come in handy here.
+
+
+BUG: The font is all messed up in OSX 10.6
+------------------------------------------
+
+At the moment, the font is not specified i.e. it uses the JUCE default one.
+-> Use the example plugin to demonstrate the issue.
+
+
+Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
+------------------------------------------------------------------------------
+
+
+Transport control
+-----------------
+
+Add a toggle to the preferences pane: Enable transport control.
+-> Automatically reset if the playhead is moved.
+-> Pause the measurement when stopped.
+-> Continue measurement when play is engaged again in the DAW.
 
 
 Implement some default plugin presets
 -------------------------------------
 
-Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
-------------------------------------------------------------------------------
 
-Numeric Gain (Weighting) for each channel user adjustable
----------------------------------------------------------
+User-adjustable colours
+-----------------------
+ 
+
+Numeric Gain (Weighting) for each channel user adjustable (pro)
+---------------------------------------------------------------
 
 Part of my answer to an Email at 130204:
 To get the accurate LUFS value for 6 channels with my LUFS Meter:
@@ -50,12 +66,32 @@ Ensure that the two surround channels are on channel 4 and 5. Also make sure tha
 
 It's on my todo-list to implement this internally, such that you only have to choose a preset for e.g. 6 channel surround... and off you go.
 
+
+BUG: If an instance of the two channel and the multichannel LUFSMeter is loaded, one of them doesn't work
+---------------------------------------------------------------------------------------------------------
+
+Host: Logic X
+
+As soon as the working one is removed, the non-working one starts to operate.
+
+
+Gain Fader on the right (pro)
+-----------------------------
+
+Which can be set automatically after an analysis.
+
+
+True Peak Measurement (pro)
+---------------------------
+
+Implement True Peak Measurement.
+
+
 Rework the GUI
 --------------
 
-- Give the plugin an overall look (Skinnable via Look and feel!)
 - How to implement the history meter more efficient?
-- Settings panel as overlay? Or any other idea such that it's intuitive?
+- Settings panel as overlay? Or any other idea such that it's more intuitive?
 
 Website: Improve usability, add a klangfreund.com index page and add a getting started tutorial
 -----------------------------------------------------------------------------------------------
