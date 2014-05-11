@@ -1,5 +1,3 @@
-.. author: Samuel Gaehwiler
-
 *************
 Release Notes
 *************
@@ -7,14 +5,14 @@ Release Notes
 LUFS Meter 0.5.1
 ----------------
 
-2014 05 04
+2014 05 09
 
-* OSX: Compatibile back to 10.4.
+* OSX: Compatible back to 10.4.
 
 * Windows: Compatible back to Windows XP.
 
 
-LUFS Meter 0.5
+LUFS METER 0.5
 --------------
 
 2014 04 14
@@ -25,7 +23,7 @@ LUFS Meter 0.5
 
 * ITU BS.1770-3 compatibility.
 
-* Fixed stability issues in Bitwig (Mac) and Reaper (Windows).
+* Fixed stability issues in Bitwig (Mac) and Reaper (Windows)
 
 
 LUFS Meter 0.4
