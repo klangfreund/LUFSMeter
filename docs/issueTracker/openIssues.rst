@@ -16,8 +16,14 @@ Open issues / Roadmap
 =====================
 
 
+Get rid of the ugly offset on the right of the MultiChannelLoudnessBar
+----------------------------------------------------------------------
+
+Cause: Rounding involved by integer devision.
+
+
 Don't measure 100ms or 1s based on the expectedRequestRate !!!
-----------------------------------------------------------
+--------------------------------------------------------------
 
 Use a sample counter!
 
