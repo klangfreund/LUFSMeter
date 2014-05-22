@@ -78,7 +78,7 @@ private:
     
     float stretch;
     float offset;
-    float widthOfIndividualChannel;
+    int widthOfIndividualChannel;
     
     Colour colour;
     

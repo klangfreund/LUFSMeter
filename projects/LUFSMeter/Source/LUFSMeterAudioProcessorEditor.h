@@ -43,8 +43,6 @@
 #include "gui/LoudnessRangeHistory.h"
 #include "gui/MultiChannelLoudnessBar.h"
 #include "gui/PreferencesPane.h"
-// TEMP
-#include "gui/AnimatedSidePanel.h"
 
 
 //==============================================================================

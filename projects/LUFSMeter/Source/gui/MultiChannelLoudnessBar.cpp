@@ -109,7 +109,7 @@ void MultiChannelLoudnessBar::paint (Graphics& g)
             float bottomY = height;
             g.fillRect(topLeftX,
                        topLeftY,
-                       widthOfIndividualChannel,
+                       float (widthOfIndividualChannel),
                        bottomY-topLeftY);
         }
         
@@ -130,13 +130,13 @@ void MultiChannelLoudnessBar::determineStretchOffsetAndWidthOfIndividualChannel(
     // Determine widthOfIndividualChannel.
     if (currentMultiChannelLoudness.size() != 0)
     {
-        widthOfIndividualChannel = getWidth()/currentMultiChannelLoudness.size();
+        widthOfIndividualChannel = getWidth() / currentMultiChannelLoudness.size();
     }
     else
     {
         widthOfIndividualChannel = getWidth();
     }
-    widthOfIndividualChannel = jmax(widthOfIndividualChannel, 1.0f);
+    widthOfIndividualChannel = jmax(widthOfIndividualChannel, 1);
         // Should not be smaller than 1 pixel, such that an individual channel
         // is always clearly recognizable.
         // This also avoids division by zero.

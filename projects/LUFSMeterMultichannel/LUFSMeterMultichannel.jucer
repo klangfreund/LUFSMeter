@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="I07HNs" name="LUFSMeterMultichannel" projectType="audioplug"
-              version="0.5.1" bundleIdentifier="com.klangfreund.lufsmetermultichannel"
+              version="0.6.0" bundleIdentifier="com.klangfreund.lufsmetermultichannel"
               buildVST="1" buildAU="1" pluginName="LUFS Meter (Multichannel)"
               pluginDesc="Measures loudness according to ITU 1770-3 and EBU R128."
               pluginManufacturer="Klangfreund" pluginManufacturerCode="Klan"

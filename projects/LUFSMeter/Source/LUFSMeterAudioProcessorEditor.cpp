@@ -201,6 +201,7 @@ LUFSMeterAudioProcessorEditor::LUFSMeterAudioProcessorEditor (LUFSMeterAudioProc
     getProcessor()->showLoudnessRangeHistory.addListener (this);
     getProcessor()->showShortTermLoudnessHistory.addListener (this);
     getProcessor()->showMomentaryLoudnessHistory.addListener (this);
+    getProcessor()->numberOfInputChannels.addListener (this);
     
     momentaryLoudnessHistory.reset();
     shortTermLoudnessHistory.reset();
@@ -321,7 +322,10 @@ void LUFSMeterAudioProcessorEditor::buttonClicked(Button* button)
 
 void LUFSMeterAudioProcessorEditor::valueChanged (Value & value)
 {
-    if (value.refersToSameSourceAs (getProcessor()->loudnessBarWidth))
+    if (value.refersToSameSourceAs (getProcessor()->loudnessBarWidth) ||
+        value.refersToSameSourceAs (getProcessor()->numberOfInputChannels))
+            // Because the width of the of the MultiChannelLoudnessBar needs to be a multiple
+            // of the numberOfInputChannels.
     {
         resizeGuiComponents();
     }
@@ -357,7 +361,20 @@ LUFSMeterAudioProcessor* LUFSMeterAudioProcessorEditor::getProcessor() const
 void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
 {
     // Distances
+    // ---------
     const int loudnessBarWidth = int(getProcessor()->loudnessBarWidth.getValue()) * -1;
+    
+    // Ensure that the momentaryLoudnessBarWidth % numberOfChannels = 0.
+    int momentaryLoudnessBarWidth = loudnessBarWidth;
+    // Determine widthOfIndividualChannel.
+    const int numberOfChannels = getProcessor()->getMomentaryLoudnessForIndividualChannels().size();
+    if (numberOfChannels != 0)
+    {
+        const int widthOfIndividualChannel = loudnessBarWidth / numberOfChannels;
+           // Integer division.
+        momentaryLoudnessBarWidth = numberOfChannels * widthOfIndividualChannel;
+    }
+    
     const int spaceBetweenBars = jmin (loudnessBarWidth/5, 10);
         // This distance is also used for the border on the right side.
     const int heightOfNumericValues = loudnessBarWidth/3;
@@ -386,22 +403,22 @@ void LUFSMeterAudioProcessorEditor::resizeGuiComponents ()
     
     // Momentary Loudness
     const int momentaryLoudnessBarX = getWidth() - spaceBetweenBars 
-                                                 - loudnessBarWidth;
+                                                 - momentaryLoudnessBarWidth;
     momentaryLoudnessBarSum.setBounds(momentaryLoudnessBarX,
                                       distanceBetweenLoudnessBarAndTop,
-                                      loudnessBarWidth,
+                                      momentaryLoudnessBarWidth,
                                       heightOfLoudnessBar);
     momentaryLoudnessBar.setBounds(momentaryLoudnessBarX,
                                    distanceBetweenLoudnessBarAndTop,
-                                   loudnessBarWidth,
+                                   momentaryLoudnessBarWidth,
                                    heightOfLoudnessBar);
     momentaryLoudnessNumeric.setBounds (momentaryLoudnessBarX,
                                         loudnessBarNumericTopPosition,
-                                        loudnessBarWidth,
+                                        momentaryLoudnessBarWidth,
                                         heightOfNumericValues);
     momentaryLoudnessCaption.setBounds(momentaryLoudnessBarX,
                                        loudnessBarCaptionTopPosition,
-                                       loudnessBarWidth,
+                                       momentaryLoudnessBarWidth,
                                        heightOfLoudnessCaptions);
     momentaryLoudnessCaption.setFont(fontForCaptions);
     

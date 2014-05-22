@@ -36,8 +36,8 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "LUFSMeterStandalone";
-    const char* const  versionString  = "0.5.0";
-    const int          versionNumber  = 0x500;
+    const char* const  versionString  = "0.6.0";
+    const int          versionNumber  = 0x600;
 }
 
 #endif   // __APPHEADERFILE_EFOX8G__
