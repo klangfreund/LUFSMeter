@@ -15,13 +15,6 @@ The issues are listed in order of priority.
 Open issues / Roadmap
 =====================
 
-
-Get rid of the ugly offset on the right of the MultiChannelLoudnessBar
-----------------------------------------------------------------------
-
-Cause: Rounding involved by integer devision.
-
-
 Don't measure 100ms or 1s based on the expectedRequestRate !!!
 --------------------------------------------------------------
 
@@ -41,17 +34,22 @@ At the moment, the font is not specified i.e. it uses the JUCE default one.
 -> Use the example plugin to demonstrate the issue.
 
 
-Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
-------------------------------------------------------------------------------
-
-
 Transport control
 -----------------
 
 Add a toggle to the preferences pane: Enable transport control.
 -> Automatically reset if the playhead is moved.
--> Pause the measurement when stopped.
+-> Pause the measurement when stopped and show a pause symbol in the middle of the plugin.
 -> Continue measurement when play is engaged again in the DAW.
+
+Instead of "reset" make a toggle button "start" and "stop".
+Make it automatable.
+
+
+Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
+------------------------------------------------------------------------------
+
+
 
 
 Implement some default plugin presets

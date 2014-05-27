@@ -4,7 +4,7 @@ Description of this file
 ========================
 
 A list of closed (i.e. implemented or fixed) issues.
-In chronological order.
+In reversed chronological order.
 
 
 
@@ -12,34 +12,30 @@ Closed issues
 =============
 
 
-Store the plugin parameters in a valuetree object
--------------------------------------------------
+Get rid of the ugly offset on the right of the MultiChannelLoudnessBar
+----------------------------------------------------------------------
 
-A valuetree is not well suited since it stores instances of var.
-A var can't have listeners. Values can.
+Cause: Rounding involved by integer devision.
 
-
-Multi-Channel Meter for the Momentary Loudness
-----------------------------------------------
+closed on 140522
 
 
-Add I, S and M to the loudness history
---------------------------------------
+Backwards compatibility to XP and OS X 10.4
+-------------------------------------------
 
-Create corresponding checkboxes on the preferences.
-
-
-Rework the preference pane into a self containing object
---------------------------------------------------------
-
-How to connect the sliders etc. to the main listener?
+closed on 140509
 
 
-Use JUCE_LIVE_CONSTANT to be able to tweak the colours used (only for developers)
----------------------------------------------------------------------------------
+Reset button not working anymore
+--------------------------------
 
-Estimated time needed: 2h
-Time needed: 3465s 
+
+Implement Loudness Range
+------------------------
+
+
+Add vectorgraphics to the GUI
+-----------------------------
 
 
 One timer for all LoudnessHistories
@@ -49,19 +45,48 @@ Estimated time: 2h
 Time: 9318s
 
 
-Add vectorgraphics to the GUI
------------------------------
+Use JUCE_LIVE_CONSTANT to be able to tweak the colours used (only for developers)
+---------------------------------------------------------------------------------
+
+Estimated time needed: 2h
+Time needed: 3465s 
 
 
-Implement Loudness Range
-------------------------
+Rework the preference pane into a self containing object
+--------------------------------------------------------
+
+How to connect the sliders etc. to the main listener?
 
 
-Reset button not working anymore
---------------------------------
+Add I, S and M to the loudness history
+--------------------------------------
 
-Backwards compatibility to XP and OS X 10.4
--------------------------------------------
+Create corresponding checkboxes on the preferences.
 
-closed at 2014 05 09
+
+Multi-Channel Meter for the Momentary Loudness
+----------------------------------------------
+
+
+Store the plugin parameters in a valuetree object
+-------------------------------------------------
+
+A valuetree is not well suited since it stores instances of var.
+A var can't have listeners. Values can.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
