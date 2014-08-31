@@ -4,16 +4,18 @@ LUFSMeter open issues
 .. author: Samuel Gaehwiler (klangfreund.com)
 
 
-About
-=====
-
-This file is the issue tracker as well as a short term roadmap for the LUFS Meter.
-The issues are listed in order of priority.
-
-
-
 Open issues / Roadmap
 =====================
+
+BUG: The font is all messed up in OSX 10.6
+------------------------------------------
+
+Description: At the moment, the font is not specified i.e. it uses the JUCE default one.
+-> Use the example plugin to demonstrate the issue.
+
+Comments: Since I work on 10.9 I can't directly test this. Instead I have installed OSX 10.6
+on a virtual machine. But I couldn't see any issue at all, neither in 10.6 nor in 10.6.8.
+
 
 Don't measure 100ms or 1s based on the expectedRequestRate !!!
 --------------------------------------------------------------
@@ -21,35 +23,38 @@ Don't measure 100ms or 1s based on the expectedRequestRate !!!
 Use a sample counter!
 
 
-The LRA measurement is not accurate
+Implement preset handling
+-------------------------
+
+Top row: Preset dropdown and a preset save button.
+
+Loading is done as soon as a preset is selected from the drop down.
+
+If the save button is pressed, a (non modal) dialog will appear:
+1: Save as new preset?
+2: Overwrite the current preset?
+3: Save as startup (default) setting?
+
+After 1 or 2 is pressed: Choose a preset name and a description (for the tooltip).
+
+
+Rework the Preferences pane
+---------------------------
+
+Tabs below the preset stuff.
+With the following tabs:
+- Scales
+- Look (including size, colours and history graph settings)
+- Weighting (only Pro)
+
+Rename Preferences to Settings?
+
+
+Extensive tooltip for every setting
 -----------------------------------
 
-The EBU test files come in handy here.
-
-
-BUG: The font is all messed up in OSX 10.6
-------------------------------------------
-
-At the moment, the font is not specified i.e. it uses the JUCE default one.
--> Use the example plugin to demonstrate the issue.
-
-
-Transport control
------------------
-
-Add a toggle to the preferences pane: Enable transport control.
--> Automatically reset if the playhead is moved.
--> Pause the measurement when stopped and show a pause symbol in the middle of the plugin.
--> Continue measurement when play is engaged again in the DAW.
-
-Instead of "reset" make a toggle button "start" and "stop".
-Make it automatable.
-
-
-Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
-------------------------------------------------------------------------------
-
-
+Add a "?" button to turn in on and off.
+Tooltips should appear immediately.
 
 
 Implement some default plugin presets
@@ -69,6 +74,29 @@ Open an instance of the LUFS-Meter with 5 or 6 input channels.
 Ensure that the two surround channels are on channel 4 and 5. Also make sure that the LFE channel is NOT connected at all (e.g. mute this channel, or use a utility plugin where you can pull the gain for this channel).
 
 It's on my todo-list to implement this internally, such that you only have to choose a preset for e.g. 6 channel surround... and off you go.
+
+
+Transport control
+-----------------
+
+Add a toggle to the preferences pane: Enable transport control.
+-> Automatically reset if the playhead is moved.
+-> Pause the measurement when stopped and show a pause symbol in the middle of the plugin.
+-> Continue measurement when play is engaged again in the DAW.
+
+Instead of "reset" make a toggle button "start" and "stop".
+Make it automatable.
+
+
+The LRA measurement is not accurate
+-----------------------------------
+
+The EBU test files come in handy here.
+
+
+Ensure the LUFS Meter complies to the plugin specifications on Windows and OSX
+------------------------------------------------------------------------------
+
 
 
 BUG: If an instance of the two channel and the multichannel LUFSMeter is loaded, one of them doesn't work
@@ -146,3 +174,10 @@ source: http://www.rawmaterialsoftware.com/viewtopic.php?f=2&t=611&hilit=meter :
 
 Look and feel:
 http://www.rawmaterialsoftware.com/viewtopic.php?f=2&t=8368&hilit=lookandfeel
+
+
+About
+=====
+
+This file is the issue tracker as well as a short term roadmap for the LUFS Meter.
+The issues are listed in order of priority.
