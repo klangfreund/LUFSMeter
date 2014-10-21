@@ -5,13 +5,13 @@ A VST and AudioUnit plugin (as well as a standalone application for testing) to 
 according to ITU BS.1770 and EBU R128.
 
 These sources correspond to the LUFSMeter version 0.5.1. The source code of newer versions
-are not published anymore.
+are not public anymore.
 But if any issues in the measurement algorithm are discovered, they will be fixed here as well.
 
 Official website: http://www.lufsmeter.com
 
 
-The excellent JUCE framework (http://www.juce.com) is used extensively (included in the sources).
+The excellent JUCE framework (http://www.juce.com) is used extensively (included here).
 
 
 Getting started
