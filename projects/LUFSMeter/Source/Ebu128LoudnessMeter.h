@@ -32,8 +32,10 @@
 
 #include "MacrosAndJuceHeaders.h"
 #include "filters/SecondOrderIIRFilter.h"
+#include <map>
 #include <vector>
 
+using std::map;
 using std::vector;
 
 /**
@@ -88,6 +90,7 @@ public:
     void reset();
     
 private:
+    static int round (double d);
     
     /** The buffer given to processBlock() will be copied to this buffer, such
      that the filtering and squaring won't affect the audio output. I.e. thanks
@@ -175,23 +178,19 @@ private:
     double sumOfAllBlocksToCalculateRelativeThreshold;
     double relativeThreshold;
     
-    int LRAnumberOfBlocksToCalculateRelativeThreshold;
-    double LRAsumOfAllBlocksToCalculateRelativeThreshold;
-    double LRArelativeThreshold;
+    int numberOfBlocksToCalculateRelativeThresholdLRA;
+    double sumOfAllBlocksToCalculateRelativeThresholdLRA;
+    double relativeThresholdLRA;
     
-    
+    /** A lower bound for the histograms (for I and LRA).
+        If a measured block has a value lower than this, it will not be
+        considered in the calculation for I and LRA.
+
+        Without the possibility to increase the pre-measurement-gain at any
+        point after the measurement has started, this could have been set
+        to the absoluteThreshold = -70 LUFS.
+     */
     static const double lowestBlockLoudnessToConsider;
-    static const double highestBlockLoudnessToConsider;
-    /** The difference in loudness between two adjacent bins in the histogram.
-     Measured in LU;
-     */
-    static const double histogramLoudnessStepSize;
-    
-    /** Two adjacant bins in the histogram also correspond to two weighted
-     sums. They are related by this factor.
-     WeightedSum2 = WeightedSum1 * histogramWeightedSumStepFactor.
-     */
-    static const double histogramWeightedSumStepFactor;
     
     /** Storage for the loudnesses of all 400ms blocks since the last reset.
      
@@ -199,8 +198,12 @@ private:
      bigger than the relative threshold are needed to calculate the gated
      loudness (integrated loudness), it is mandatory to keep track of all
      block loudnesses.
+     
+     Adjacent bins are set apart by 0.1 LU which seems to be sufficient.
+     
+     Key value = Loudness * 10 (to get an integer value).
      */
-    vector<int> histogramOfBlockLoudness;
+    map<int,int> histogramOfBlockLoudness;
     
     /** The main loudness value of interest.
      
@@ -215,7 +218,7 @@ private:
      loudness range, because the measurement blocks for the loudness
      range need to be of length 3s. Vs 400ms.
      */
-    vector<int> LRAhistogramOfBlockLoudness;
+    map<int,int> histogramOfBlockLoudnessLRA;
     
     /**
      The return values for the corresponding get member functions.

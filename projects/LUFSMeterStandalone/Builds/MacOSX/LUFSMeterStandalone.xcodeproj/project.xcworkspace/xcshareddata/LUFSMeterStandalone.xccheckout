@@ -10,22 +10,26 @@
 	<string>LUFSMeterStandalone</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
+		<key>0435A70A73BECB67A81D5F81D1D6E81A70DC1E78</key>
+		<string>github.com:klangfreund/LUFSMeter.git</string>
 		<key>D980D442-56CC-4E2C-AFA5-03125A986C87</key>
 		<string>ssh://github.com/klangfreund/LUFSMeter.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>projects/LUFSMeterStandalone/Builds/MacOSX/LUFSMeterStandalone.xcodeproj/project.xcworkspace</string>
+	<string>projects/LUFSMeterStandalone/Builds/MacOSX/LUFSMeterStandalone.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>D980D442-56CC-4E2C-AFA5-03125A986C87</key>
+		<key>0435A70A73BECB67A81D5F81D1D6E81A70DC1E78</key>
 		<string>../../../../../..</string>
+		<key>D980D442-56CC-4E2C-AFA5-03125A986C87</key>
+		<string>../../../../../../../LUFSMeter</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>ssh://github.com/klangfreund/LUFSMeter.git</string>
+	<string>github.com:klangfreund/LUFSMeter.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>D980D442-56CC-4E2C-AFA5-03125A986C87</string>
+	<string>0435A70A73BECB67A81D5F81D1D6E81A70DC1E78</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
@@ -35,6 +39,14 @@
 			<string>D980D442-56CC-4E2C-AFA5-03125A986C87</string>
 			<key>IDESourceControlWCCName</key>
 			<string>LUFSMeter</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>0435A70A73BECB67A81D5F81D1D6E81A70DC1E78</string>
+			<key>IDESourceControlWCCName</key>
+			<string>LUFSMeterOpenSource</string>
 		</dict>
 	</array>
 </dict>
