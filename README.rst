@@ -14,6 +14,18 @@ Official website: http://www.lufsmeter.com
 The excellent JUCE framework (http://www.juce.com) is used extensively (included in the sources).
 
 
+Getting started
+---------------
+
+Compile the standalone version for your platform first. You find a makefile, a Visualstudio project as well as an XCode project in projects/LUFSMeterStandalone/Builds/.
+In the same vein, you find similar data for the plugin version at projects/LUFSMeter/Builds/.
+
+The main sources are in projects/LUFSMeter/Source/.
+
+Additional help is provided in docs/.
+You can contact me at http://www.klangfreund.com/about/contact/
+
+
 Requirements
 ------------
 
