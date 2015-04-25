@@ -69,7 +69,7 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     loudnessRangeStart(minimalReturnValue),
     loudnessRangeEnd(minimalReturnValue)
 {
-    DEB("The longest possible measurement until a bufferoverflow = "
+    DBG ("The longest possible measurement until a bufferoverflow = "
         + String(INT_MAX / 10. / 3600. / 365.) + " years");
     
     // If this class is used without caution and processBlock
@@ -123,12 +123,12 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
         {
             expectedRequestRate = 10;
             DEB("Not possible to make expectedRequestRate a multiple of 10 and "
-                "a divisor of the samplerate.")
+                "a divisor of the samplerate.");
             break;
         }
     }
     
-    DEB("expectedRequestRate = " + String(expectedRequestRate))
+    DEB("expectedRequestRate = " + String(expectedRequestRate));
     
     // Figure out how many bins are needed.
     const int timeOfAccumulationForShortTerm = 3; // seconds.
@@ -585,7 +585,7 @@ const Array<float>& Ebu128LoudnessMeter::getShortTermLoudnessForIndividualChanne
     return shortTermLoudness;
 }
 
-float Ebu128LoudnessMeter::getShortTermLoudness()
+float Ebu128LoudnessMeter::getShortTermLoudness() const
 {
     // calculate the short term loudness
     double weightedSum = 0.0;
@@ -607,7 +607,7 @@ float Ebu128LoudnessMeter::getShortTermLoudness()
     }
 }
 
-const Array<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChannels()
+Array<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChannels()
 {
     
     // calculate the momentary loudness
@@ -627,7 +627,7 @@ const Array<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChanne
     return momentaryLoudness;
 }
 
-float Ebu128LoudnessMeter::getMomentaryLoudness()
+float Ebu128LoudnessMeter::getMomentaryLoudness() const
 {
     // calculate the short term loudness
     double weightedSum = 0.0;
@@ -649,22 +649,22 @@ float Ebu128LoudnessMeter::getMomentaryLoudness()
     }
 }
 
-float Ebu128LoudnessMeter::getIntegratedLoudness()
+float Ebu128LoudnessMeter::getIntegratedLoudness() const
 {
     return integratedLoudness;
 }
 
-float Ebu128LoudnessMeter::getLoudnessRangeStart()
+float Ebu128LoudnessMeter::getLoudnessRangeStart() const
 {
     return loudnessRangeStart;
 }
 
-float Ebu128LoudnessMeter::getLoudnessRangeEnd()
+float Ebu128LoudnessMeter::getLoudnessRangeEnd() const
 {
     return loudnessRangeEnd;
 }
 
-float Ebu128LoudnessMeter::getLoudnessRange()
+float Ebu128LoudnessMeter::getLoudnessRange() const
 {
     return loudnessRangeEnd - loudnessRangeStart;
 }
@@ -684,11 +684,21 @@ void Ebu128LoudnessMeter::reset()
     
     
     // momentary and short term loudness.
-    for (int k=0; k != momentaryLoudness.size(); ++k)
+    for (int k = 0; k != momentaryLoudness.size(); ++k)
     {
         momentaryLoudness.set(k, var(minimalReturnValue));
         shortTermLoudness.set(k, minimalReturnValue);
-    }    
+    }
+    // To ensure the returned momentary and short term loudness are at its 
+    // minimum, even if no audio is processed at the moment.
+    for (int k = 0; k < averageOfTheLast400ms.size(); ++k)
+    {
+        *averageOfTheLast400ms[k] = 0.0;
+    }
+    for (int k = 0; k < averageOfTheLast3s.size(); ++k)
+    {
+        *averageOfTheLast3s[k] = 0.0;
+    }
     
     // integrated loudness
     numberOfBlocksToCalculateRelativeThreshold = 0;

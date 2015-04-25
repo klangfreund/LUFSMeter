@@ -44,7 +44,7 @@ using std::vector;
  The loudness is measured according to the documents
  (List)
  - EBU - R 128
- - ITU 1770 Rev 2
+ - ITU 1770 Rev 3
  - EBU - Tech 3341 (EBU mode metering)
  - EBU - Tech 3342 (LRA, loudness range)
  - EBU - Tech 3343
@@ -52,8 +52,8 @@ using std::vector;
 class Ebu128LoudnessMeter     //: public AudioProcessor
 {
 public:
-    Ebu128LoudnessMeter ();
-    ~Ebu128LoudnessMeter ();
+    Ebu128LoudnessMeter();
+    ~Ebu128LoudnessMeter();
     
     // --------- AudioProcessor methods ---------
 //    const String getName ();
@@ -76,16 +76,16 @@ public:
     void processBlock (AudioSampleBuffer &buffer);
     
     const Array<float>& getShortTermLoudnessForIndividualChannels();
-    float getShortTermLoudness();
+    float getShortTermLoudness() const;
     
-    const Array<float>& getMomentaryLoudnessForIndividualChannels();
-    float getMomentaryLoudness();
+    Array<float>& getMomentaryLoudnessForIndividualChannels();
+    float getMomentaryLoudness() const;
     
-    float getIntegratedLoudness();
+    float getIntegratedLoudness() const;
     
-    float getLoudnessRangeStart();
-    float getLoudnessRangeEnd();
-    float getLoudnessRange();
+    float getLoudnessRangeStart() const;
+    float getLoudnessRangeEnd() const;
+    float getLoudnessRange() const;
     
     void reset();
     
