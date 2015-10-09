@@ -75,11 +75,12 @@ public:
     
     void processBlock (AudioSampleBuffer &buffer);
     
-    const Array<float>& getShortTermLoudnessForIndividualChannels();
     float getShortTermLoudness() const;
+    float getMaximumShortTermLoudness() const;
     
     Array<float>& getMomentaryLoudnessForIndividualChannels();
     float getMomentaryLoudness() const;
+    float getMaximumMomentaryLoudness() const;
     
     float getIntegratedLoudness() const;
     
@@ -111,7 +112,7 @@ private:
     
     int numberOfBinsToCover100ms;
     int numberOfBinsSinceLastGateMeasurementForI;
-    int millisecondsSinceLastGateMeasurementForLRA;
+    // int millisecondsSinceLastGateMeasurementForLRA;
     
     /**
      After the samples are filtered and squared, they need to be
@@ -157,8 +158,7 @@ private:
     
     Array<double> channelWeighting;
     
-    Array<float> shortTermLoudness;
-    Array<float> momentaryLoudness;
+    Array<float> momentaryLoudnessForIndividualChannels;
     
     /** If there is no signal at all, the methods getShortTermLoudness() and
      getMomentaryLoudness() would perform a log10(0) which would result in
@@ -205,11 +205,14 @@ private:
      */
     map<int,int> histogramOfBlockLoudness;
     
-    /** The main loudness value of interest.
-     
-     It is the return value of getIntegratedLoudness().
-     */
+    /** The main loudness value of interest. */
     float integratedLoudness;
+
+    float shortTermLoudness;
+    float maximumShortTermLoudness;
+
+    float momentaryLoudness;
+    float maximumMomentaryLoudness;
     
     /** Like histogramOfBlockLoudness, but for the measurement of the
      loudness range.
