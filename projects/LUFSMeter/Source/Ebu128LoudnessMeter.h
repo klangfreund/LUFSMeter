@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-2016 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -20,8 +20,7 @@
  -------------------------------------------------------------------------------
  
  To release a closed-source product which uses the LUFS Meter or parts of it,
- a commercial license is available. Visit www.klangfreund.com/lufsmeter for more
- information.
+ get in contact via www.klangfreund.com/contact/.
  
  ===============================================================================
  */
@@ -44,7 +43,7 @@ using std::vector;
  The loudness is measured according to the documents
  (List)
  - EBU - R 128
- - ITU 1770 Rev 3
+ - ITU 1770 Rev 2,3 and 4
  - EBU - Tech 3341 (EBU mode metering)
  - EBU - Tech 3342 (LRA, loudness range)
  - EBU - Tech 3343
@@ -78,7 +77,7 @@ public:
     float getShortTermLoudness() const;
     float getMaximumShortTermLoudness() const;
     
-    Array<float>& getMomentaryLoudnessForIndividualChannels();
+    vector<float>& getMomentaryLoudnessForIndividualChannels();
     float getMomentaryLoudness() const;
     float getMaximumMomentaryLoudness() const;
     
@@ -87,6 +86,13 @@ public:
     float getLoudnessRangeStart() const;
     float getLoudnessRangeEnd() const;
     float getLoudnessRange() const;
+    
+    /** Returns the time passed since the last reset.
+        In seconds.
+     */
+    float getMeasurementDuration() const;
+
+    void setFreezeLoudnessRangeOnSilence (bool freeze);
     
     void reset();
     
@@ -103,7 +109,7 @@ private:
     
     SecondOrderIIRFilter preFilter;
     SecondOrderIIRFilter revisedLowFrequencyBCurveFilter;
-    
+
     int numberOfBins;
     int numberOfSamplesPerBin;
     int numberOfSamplesInAllBins;
@@ -113,6 +119,12 @@ private:
     int numberOfBinsToCover100ms;
     int numberOfBinsSinceLastGateMeasurementForI;
     // int millisecondsSinceLastGateMeasurementForLRA;
+    
+    /** The duration of the current measurement.
+        
+        duration * 0.1 = the measurement duration in seconds.
+      */
+    int measurementDuration;
     
     /**
      After the samples are filtered and squared, they need to be
@@ -137,7 +149,7 @@ private:
      But if you ask for a measurement at time t, it will be the
      accurate measurement at time t - dt, where dt \in e.g. [0, 1/20s].
      */
-    OwnedArray <OwnedArray<double>> bin;
+    vector<vector<double>> bin;
     
     int currentBin;
     int numberOfSamplesInTheCurrentBin;
@@ -147,18 +159,18 @@ private:
      3 seconds.
      A value for each channel.
      */
-    OwnedArray<double> averageOfTheLast3s;
+    vector<double> averageOfTheLast3s;
     
     /*
      The average of the filtered and squared samples of the last
      400 milliseconds.
      A value for each channel.
      */
-    OwnedArray<double> averageOfTheLast400ms;
+    vector<double> averageOfTheLast400ms;
     
-    Array<double> channelWeighting;
+    vector<double> channelWeighting;
     
-    Array<float> momentaryLoudnessForIndividualChannels;
+    vector<float> momentaryLoudnessForIndividualChannels;
     
     /** If there is no signal at all, the methods getShortTermLoudness() and
      getMomentaryLoudness() would perform a log10(0) which would result in
@@ -230,10 +242,11 @@ private:
      */
     float loudnessRangeStart;
     float loudnessRangeEnd;
-    
+
+    bool freezeLoudnessRangeOnSilence;
+    bool currentBlockIsSilent;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);
-    
 };
 
 #endif // __EBU128_LOUDNESS_METER__

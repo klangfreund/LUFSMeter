@@ -5,7 +5,7 @@
  
  
  This file is part of the LUFS Meter audio measurement plugin.
- Copyright 2011-14 by Klangfreund, Samuel Gaehwiler.
+ Copyright 2011-2016 by Klangfreund, Samuel Gaehwiler.
  
  -------------------------------------------------------------------------------
  
@@ -20,8 +20,7 @@
  -------------------------------------------------------------------------------
  
  To release a closed-source product which uses the LUFS Meter or parts of it,
- a commercial license is available. Visit www.klangfreund.com/lufsmeter for more
- information.
+ get in contact via www.klangfreund.com/contact/.
  
  ===============================================================================
  */
@@ -57,8 +56,9 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     numberOfBinsToCover400ms (0),
     numberOfSamplesIn400ms (0),
     numberOfBinsToCover100ms (0),
-    numberOfBinsSinceLastGateMeasurementForI (0),
+    numberOfBinsSinceLastGateMeasurementForI (1),
     // millisecondsSinceLastGateMeasurementForLRA (0),
+    measurementDuration (0),
     numberOfBlocksToCalculateRelativeThreshold (0),
     sumOfAllBlocksToCalculateRelativeThreshold (0.0),
     relativeThreshold (absoluteThreshold),
@@ -71,10 +71,12 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     momentaryLoudness (minimalReturnValue),
     maximumMomentaryLoudness (minimalReturnValue),
     loudnessRangeStart (minimalReturnValue),
-    loudnessRangeEnd (minimalReturnValue)
+    loudnessRangeEnd (minimalReturnValue),
+    freezeLoudnessRangeOnSilence (false),
+    currentBlockIsSilent (false)
 {
     DBG ("The longest possible measurement until a buffer overflow = "
-        + String(INT_MAX / 10. / 3600. / 365.) + " years");
+        + String (INT_MAX / 10. / 3600. / 365.) + " years");
     
     // If this class is used without caution and processBlock
     // is called before prepareToPlay, divisions by zero
@@ -82,7 +84,7 @@ Ebu128LoudnessMeter::Ebu128LoudnessMeter()
     //
     // To prevent this, prepareToPlay is called here with
     // some arbitrary arguments.
-    prepareToPlay(44100.0, 2, 512, 20);
+    prepareToPlay (44100.0, 2, 512, 20);
 }
 
 Ebu128LoudnessMeter::~Ebu128LoudnessMeter()
@@ -110,7 +112,7 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
         expectedRequestRate = 10;
     else
     {
-        expectedRequestRate = (((expectedRequestRate-1) / 10) + 1)*10;
+        expectedRequestRate = (((expectedRequestRate-1) / 10) + 1) * 10;
             // examples
             //  19 -> 20
             //  20 -> 20
@@ -149,43 +151,30 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
     
     currentBin = 0;
     numberOfSamplesInTheCurrentBin = 0;
-    numberOfBinsSinceLastGateMeasurementForI = 0;
+    numberOfBinsSinceLastGateMeasurementForI = 1;
     // millisecondsSinceLastGateMeasurementForLRA = 0;
+    measurementDuration = 0;
     
-    // Initialize the bins and the measurement values.
-    bin.clear();
-    averageOfTheLast3s.clear();
-    averageOfTheLast400ms.clear();
-    
-    for (int k=0; k != numberOfInputChannels; ++k)
-    {
-        OwnedArray<double>* binsForTheKthChannel = new OwnedArray<double>;
-        for (int i=0; i<numberOfBins; ++i)
-        {
-            binsForTheKthChannel->add (new double (0));
-        }
-        bin.add (binsForTheKthChannel);
-        
-        averageOfTheLast3s.add (new double (0));
-        averageOfTheLast400ms.add (new double (0));
-    }
-    
+    // Initialize the bins.
+    bin.assign (numberOfInputChannels, vector<double> (numberOfBins, 0.0));
+
+    averageOfTheLast3s.assign (numberOfInputChannels, 0.0);
+    averageOfTheLast400ms.assign (numberOfInputChannels, 0.0);
+
     // Initialize the channel weighting.
     channelWeighting.clear();
-    for (int k=0; k != numberOfInputChannels; ++k)
+    for (int k = 0; k != numberOfInputChannels; ++k)
     {
-        if (k==3 || k==4)
+        if (k == 3 || k == 4)
             // The left and right surround channels have a higher weight
             // because they seem louder to the human ear.
-            channelWeighting.add (1.41);
+            channelWeighting.push_back (1.41);
         else
-            channelWeighting.add (1.0);
+            channelWeighting.push_back (1.0);
     }
     
     // Momentary loudness for the individual channels.
-    momentaryLoudnessForIndividualChannels.clear();
-    for (int k=0; k != numberOfInputChannels; ++k)
-        momentaryLoudnessForIndividualChannels.add (minimalReturnValue);
+    momentaryLoudnessForIndividualChannels.assign (numberOfInputChannels, minimalReturnValue);
     
     reset();
 }
@@ -197,6 +186,24 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
     // as the input!
     bufferForMeasurement = buffer; // This copies the audio to another memory
                                    // location using memcpy.
+    
+    if (freezeLoudnessRangeOnSilence)
+    {
+        // Detect if the block is silent.
+        // ------------------------------
+        const float silenceThreshold = std::pow (10, 0.1 * -120);
+            // -120dB -> approx. 1.0e-12
+
+        const float magnitude = buffer.getMagnitude (0, buffer.getNumSamples());
+        if (magnitude < silenceThreshold)
+        {
+            currentBlockIsSilent = true;
+            DEB ("Silence detected.")
+        }
+        else
+            currentBlockIsSilent = false;
+    }
+                         
     
     // STEP 1: K-weighted filter.
     // -----------------------------
@@ -219,14 +226,29 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
     
     // STEP 2: Mean square.
     // --------------------
-    for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
+    for (int k = 0; k != bufferForMeasurement.getNumChannels(); ++k)
     {
         float* theKthChannelData = bufferForMeasurement.getWritePointer (k);
         
         for (int i = 0; i != bufferForMeasurement.getNumSamples(); ++i)
             theKthChannelData[i] = theKthChannelData[i] * theKthChannelData[i];
     }
-        
+
+    // Intermezzo: Set the number of channels.
+    // ---------------------------------------
+    // To prevent EXC_BAD_ACCESS when the number of channels in the buffer
+    // suddenly changes without calling prepareToPlay() in advance.
+    const int numberOfChannels = jmin (bufferForMeasurement.getNumChannels(),
+                                       int (bin.size()),
+                                       int (averageOfTheLast400ms.size()),
+                                       jmin (int (averageOfTheLast3s.size()),
+                                             int (channelWeighting.size())));
+    jassert (bufferForMeasurement.getNumChannels() == int (bin.size()));
+    jassert (bufferForMeasurement.getNumChannels() == int (averageOfTheLast400ms.size()));
+    jassert (bufferForMeasurement.getNumChannels() == int (averageOfTheLast3s.size()));
+    jassert (bufferForMeasurement.getNumChannels() == int (channelWeighting.size()));
+
+    
     // STEP 3: Accumulate the samples and put the sum(s) into the right bin(s).
     // ------------------------------------------------------------------------
     
@@ -235,15 +257,17 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
     if (numberOfSamplesInTheCurrentBin + bufferForMeasurement.getNumSamples() 
         < numberOfSamplesPerBin)
     {
-        for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
+        for (int k = 0; k != numberOfChannels; ++k)
         {
             float* bufferOfChannelK = bufferForMeasurement.getWritePointer (k);
-            double* theBinToSumTo = bin[k]->getUnchecked(currentBin);
-            for (int i=0; i != bufferForMeasurement.getNumSamples(); ++i)
+            double& theBinToSumTo = bin[k][currentBin];
+            
+            for (int i = 0; i != bufferForMeasurement.getNumSamples(); ++i)
             {
-                *theBinToSumTo += bufferOfChannelK[i];
+                theBinToSumTo += bufferOfChannelK[i];
             }
         }
+        
         numberOfSamplesInTheCurrentBin += bufferForMeasurement.getNumSamples();    
     }
     
@@ -252,69 +276,77 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
     else        
     {
         int positionInBuffer = 0;
-        bool remainingSamplesInBuffer = true;
-        while (remainingSamplesInBuffer)
+        bool bufferStillContainsSamples = true;
+        
+        while (bufferStillContainsSamples)
         {
             // Figure out if the remaining samples in the buffer can all be
             // accumulated to the current bin.
-            int numberOfSamplesLeftInTheBuffer = bufferForMeasurement.getNumSamples()-positionInBuffer;
+            const int numberOfSamplesLeftInTheBuffer = bufferForMeasurement.getNumSamples()-positionInBuffer;
             int numberOfSamplesToPutIntoTheCurrentBin;
+            
             if (numberOfSamplesLeftInTheBuffer
                     < numberOfSamplesPerBin - numberOfSamplesInTheCurrentBin )
             {
+                // Case 1: Partially fill a bin (by using all the samples left in the buffer).
+                // ---------------------------------------------------------------------------
                 // If all the samples from the buffer can be added to the
                 // current bin.
                 numberOfSamplesToPutIntoTheCurrentBin = numberOfSamplesLeftInTheBuffer;
-                remainingSamplesInBuffer = false;
+                bufferStillContainsSamples = false;
             }
             else
             {
+                // Case 2: Completely fill a bin (most likely the buffer will still contain some samples for the next bin).
+                // --------------------------------------------------------------------------------------------------------
                 // Accumulate samples to the current bin until it is full.
                 numberOfSamplesToPutIntoTheCurrentBin = numberOfSamplesPerBin - numberOfSamplesInTheCurrentBin;
             }
             
             // Add the samples to the bin.
-            for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
+            for (int k = 0; k != numberOfChannels; ++k)
             {
                 float* bufferOfChannelK = bufferForMeasurement.getWritePointer (k);
-                double* theBinToSumTo = bin[k]->getUnchecked(currentBin);
-                for (int i=positionInBuffer; 
-                     i != positionInBuffer+numberOfSamplesToPutIntoTheCurrentBin;
+                double& theBinToSumTo = bin[k][currentBin];
+                for (int i = positionInBuffer;
+                     i != positionInBuffer + numberOfSamplesToPutIntoTheCurrentBin;
                      ++i)
                 {
-                    *theBinToSumTo += bufferOfChannelK[i];
+                    theBinToSumTo += bufferOfChannelK[i];
                 }
             }
             numberOfSamplesInTheCurrentBin += numberOfSamplesToPutIntoTheCurrentBin;
             
-            if (remainingSamplesInBuffer)
+            // If there are some samples left in the buffer
+            // => A bin has just been completely filled (case 2 above).
+            if (bufferStillContainsSamples)
             {
                 positionInBuffer = positionInBuffer
                                    + numberOfSamplesToPutIntoTheCurrentBin;
                 
                 // We have completely filled a bin.
                 // This is the moment the larger sums need to be updated.
-                for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
+                for (int k = 0; k != numberOfChannels; ++k)
                 {
                     double sumOfAllBins = 0.0;
                         // which covers the last 3s.
                     
-                    for (int b=0; b != numberOfBins; ++b)
-                        sumOfAllBins += *(bin[k]->getUnchecked(b));
+                    for (int b = 0; b != numberOfBins; ++b)
+                        sumOfAllBins += bin[k][b];
 
-                    *(averageOfTheLast3s[k]) = sumOfAllBins / numberOfSamplesInAllBins;
+                    averageOfTheLast3s[k] = sumOfAllBins / numberOfSamplesInAllBins;
 
                     // Short term loudness
                     // ===================
                     {
                         double weightedSum = 0.0;
 
-                        for (int k=0; k != averageOfTheLast3s.size(); ++k)
-                            weightedSum += channelWeighting[k] * *averageOfTheLast3s[k];
+                        for (int k = 0; k != numberOfChannels; ++k)
+                            weightedSum += channelWeighting[k] * averageOfTheLast3s[k];
                         
                         if (weightedSum > 0.0)
                             // This refers to equation (2) in ITU-R BS.1770-2
-                            shortTermLoudness = jmax(float(-0.691 + 10.* std::log10(weightedSum)), minimalReturnValue);
+                            shortTermLoudness = jmax (float (-0.691 + 10.* std::log10(weightedSum)), minimalReturnValue);
                         else
                             // Since returning a value of -nan most probably would lead to
                             // a malfunction, return the minimal return value.
@@ -327,10 +359,10 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                     
                     double sumOfBinsToCoverTheLast400ms = 0.0;
 
-                    for (int d=0; d != numberOfBinsToCover400ms; ++d)
+                    for (int d = 0; d != numberOfBinsToCover400ms; ++d)
                     {
                         // The index for the bin.
-                        int b = currentBin-d;
+                        int b = currentBin - d;
                             // this might be negative right now.
                         int n = numberOfBins;
                         b = (b % n + n) % n;
@@ -346,18 +378,18 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                             //  b%n = 16
                             //  (b%n +n)%n = 46%30 = 16
                         
-                        sumOfBinsToCoverTheLast400ms += *(bin[k]->getUnchecked(b));
+                        sumOfBinsToCoverTheLast400ms += bin[k][b];
                     }
 
-                    *(averageOfTheLast400ms[k]) = sumOfBinsToCoverTheLast400ms / numberOfSamplesIn400ms;
+                    averageOfTheLast400ms[k] = sumOfBinsToCoverTheLast400ms / numberOfSamplesIn400ms;
 
                     // Momentary loudness
                     // ==================
                     {
                         double weightedSum = 0.0;
 
-                        for (int k=0; k != averageOfTheLast400ms.size(); ++k)
-                            weightedSum += channelWeighting[k] * *averageOfTheLast400ms[k];
+                        for (int k = 0; k != int (averageOfTheLast400ms.size()); ++k)
+                            weightedSum += channelWeighting[k] * averageOfTheLast400ms[k];
                         
                         if (weightedSum > 0.0)
                             // This refers to equation (2) in ITU-R BS.1770-2
@@ -384,7 +416,11 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                 {
                     // Every 100ms this section is reached.
 
-                    numberOfBinsSinceLastGateMeasurementForI = 0;
+                    // The next time the condition above is checked, one bin has already been filled.
+                    // Therefore this is set to 1 (and not to 0).
+                    numberOfBinsSinceLastGateMeasurementForI = 1;
+                    
+                    ++measurementDuration;
                     
                     // Figure out if the current 400ms gated window (loudnessOfCurrentBlock =) l_j > /Gamma_a
                     // ( see ITU-R BS.1770-3 equation (4) ).
@@ -393,10 +429,10 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                     // (in 120725_integrated_loudness_revisited.tif, I call
                     // this s_j)
                     double weightedSumOfCurrentBlock = 0.0;
-                    const int numberOfChannels = averageOfTheLast400ms.size();
-                    for (int k=0; k != numberOfChannels; ++k)
+
+                    for (int k = 0; k != numberOfChannels; ++k)
                     {
-                        weightedSumOfCurrentBlock += channelWeighting[k] * *averageOfTheLast400ms[k];
+                        weightedSumOfCurrentBlock += channelWeighting[k] * averageOfTheLast400ms[k];
                     }
                     
                     // Calculate the j'th gating block loudness l_j
@@ -433,7 +469,7 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
 
                     if (histogramOfBlockLoudness.size() > 0)
                     {
-                        const double biggestLoudnessInHistogram = (--histogramOfBlockLoudness.end())->first / 10.0;
+                        const double biggestLoudnessInHistogram = (--histogramOfBlockLoudness.end())->first * 0.1;
                         // DEB ("biggestLoudnessInHistogram = " + String(biggestLoudnessInHistogram))
                         if (relativeThreshold < biggestLoudnessInHistogram)
                         {
@@ -454,13 +490,13 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                                 const int nrOfBlocksInBin = currentBin->second;
                                 nrOfAllBlocks += nrOfBlocksInBin;
                                 
-                                const double weightedSumOfCurrentBin = pow(10.0, (currentBin->first / 10.0 + 0.691)/10.0);
+                                const double weightedSumOfCurrentBin = pow (10.0, (currentBin->first * 0.1 + 0.691) * 0.1);
                                 sumForIntegratedLoudness += nrOfBlocksInBin * weightedSumOfCurrentBin;
                             }
                             
                             if (nrOfAllBlocks > 0) // nrOfAllBlocks > 0  =>  sumForIntegratedLoudness > 0.0
                             {
-                                integratedLoudness = float(-0.691 + 10.*std::log10(sumForIntegratedLoudness/nrOfAllBlocks));
+                                integratedLoudness = float(-0.691 + 10. * std::log10 (sumForIntegratedLoudness / nrOfAllBlocks));
                             }
                             else
                             {
@@ -499,10 +535,10 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                         // Using an analysis-window of 3 seconds, as specified in
                         // EBU 3342-2011.
                         double weightedSumOfCurrentBlockLRA = 0.0;
-                        const int numberOfChannels = averageOfTheLast3s.size();
-                        for (int k=0; k != numberOfChannels; ++k)
+                        
+                        for (int k = 0; k != numberOfChannels; ++k)
                         {
-                            weightedSumOfCurrentBlockLRA += channelWeighting[k] * *averageOfTheLast3s[k];
+                            weightedSumOfCurrentBlockLRA += channelWeighting[k] * averageOfTheLast3s[k];
                         }
                         
                         // Calculate the j'th gating block loudness l_j
@@ -576,8 +612,15 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                                 
 //                                ++startBinLRA;
                             
-                                loudnessRangeStart = startBinLRA->first * 0.1;
-                                // DEB("LRA starts at " + String (loudnessRangeStart))
+                                if (!(freezeLoudnessRangeOnSilence && currentBlockIsSilent))
+                                    loudnessRangeStart = startBinLRA->first * 0.1;
+                                    // DEB("LRA starts at " + String (loudnessRangeStart))
+                                // Else:
+                                // Holding the loudnessRangeStart on silence
+                                // helps reading it after the end of an audio
+                                // region or if the DAW has just been stopped.
+                                // The measurement does not get interrupted by
+                                // this! It's only a temporary freeze.
 
                                 // Figure out the upper bound (end) of the loudness range.
                                 // -------------------------------------------------------
@@ -590,8 +633,16 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                                     numberOfBlocksAboveEndBinLRA += endBinLRA->second;
                                 }
                             
-                                loudnessRangeEnd = endBinLRA->first * 0.1;
-                                // DEB("LRA ends at " + String (loudnessRangeEnd))
+                                if (!(freezeLoudnessRangeOnSilence && currentBlockIsSilent))
+                                    loudnessRangeEnd = endBinLRA->first * 0.1;
+                                    // DEB("LRA ends at " + String (loudnessRangeEnd))
+                                // Else:
+                                // Holding the loudnessRangeEnd on silence
+                                // helps reading it after the end of an audio
+                                // region or if the DAW has just been stopped.
+                                // The measurement does not get interrupted by
+                                // this! It's only a temporary freeze.
+                                
                                 // DEB("LRA = " + String (loudnessRangeEnd - loudnessRangeStart))
                             }
                         }
@@ -601,9 +652,9 @@ void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
                 // Move on to the next bin
                 currentBin = (currentBin + 1) % numberOfBins;
                 // Set it to zero.
-                for (int k=0; k != bufferForMeasurement.getNumChannels(); ++k)
+                for (int k = 0; k != numberOfChannels; ++k)
                 {
-                    *(bin[k]->getUnchecked(currentBin)) = 0.0;
+                    bin[k][currentBin] = 0.0;
                 }
                 numberOfSamplesInTheCurrentBin = 0;
             }
@@ -621,21 +672,22 @@ float Ebu128LoudnessMeter::getMaximumShortTermLoudness() const
     return maximumShortTermLoudness;
 }
 
-Array<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChannels()
+vector<float>& Ebu128LoudnessMeter::getMomentaryLoudnessForIndividualChannels()
 {
     
     // calculate the momentary loudness
-    for (int k=0; k != momentaryLoudnessForIndividualChannels.size(); ++k)
+
+    for (int k = 0; k != int (momentaryLoudnessForIndividualChannels.size()); ++k)
     {
         float kthChannelMomentaryLoudness = minimalReturnValue;
         
-        if (*averageOfTheLast400ms[k] > 0.0f)
+        if (averageOfTheLast400ms[k] > 0.0f)
         {
             // This refers to equation (2) in ITU-R BS.1770-2
-            kthChannelMomentaryLoudness = jmax (float (-0.691 + 10. * std::log10(*averageOfTheLast400ms[k])), minimalReturnValue);
+            kthChannelMomentaryLoudness = jmax (float (-0.691 + 10. * std::log10(averageOfTheLast400ms[k])), minimalReturnValue);
         }
 
-        momentaryLoudnessForIndividualChannels.set(k, kthChannelMomentaryLoudness);
+        momentaryLoudnessForIndividualChannels[k] = kthChannelMomentaryLoudness;
     }
     
     return momentaryLoudnessForIndividualChannels;
@@ -671,35 +723,35 @@ float Ebu128LoudnessMeter::getLoudnessRange() const
     return loudnessRangeEnd - loudnessRangeStart;
 }
 
+float Ebu128LoudnessMeter::getMeasurementDuration() const
+{
+    return measurementDuration * 0.1f;
+}
+
+void Ebu128LoudnessMeter::setFreezeLoudnessRangeOnSilence (bool freeze)
+{
+    freezeLoudnessRangeOnSilence = freeze;
+}
+
 void Ebu128LoudnessMeter::reset()
 {
     // the bins
-    for (int k=0; k != bin.size(); ++k)
-    {
-        OwnedArray<double>* binsForTheKthChannel = bin[k];
-        for (int i=0; i != binsForTheKthChannel->size(); ++i)
-        {
-            double* ithBin = binsForTheKthChannel->getUnchecked(i);
-            *ithBin = 0.0;
-        }
-    }
-        
-    // momentary loudness for the individual tracks.
-    for (int k = 0; k != momentaryLoudnessForIndividualChannels.size(); ++k)
-        momentaryLoudnessForIndividualChannels.set(k, var(minimalReturnValue));
+    // It is important to use assign() (replace all values) and not
+    // resize() (only set new elements to the provided value).
+    bin.assign (bin.size(), vector<double> (numberOfBins, 0.0));
 
     // To ensure the returned momentary and short term loudness are at its 
     // minimum, even if no audio is processed at the moment.
-    for (int k = 0; k < averageOfTheLast400ms.size(); ++k)
-    {
-        *averageOfTheLast400ms[k] = 0.0;
-    }
-    for (int k = 0; k < averageOfTheLast3s.size(); ++k)
-    {
-        *averageOfTheLast3s[k] = 0.0;
-    }
+    averageOfTheLast3s.assign (averageOfTheLast400ms.size(), 0.0);
+    averageOfTheLast400ms.assign (averageOfTheLast400ms.size(), 0.0);
+    
+    measurementDuration = 0;
+    
+    // momentary loudness for the individual tracks.
+    momentaryLoudnessForIndividualChannels.assign (momentaryLoudnessForIndividualChannels.size(), minimalReturnValue);
     
     // Integrated loudness
+    numberOfBinsSinceLastGateMeasurementForI = 1;
     numberOfBlocksToCalculateRelativeThreshold = 0;
     sumOfAllBlocksToCalculateRelativeThreshold = 0.0;
     relativeThreshold = absoluteThreshold;
