@@ -193,7 +193,7 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
     reset();
 }
 
-void Ebu128LoudnessMeter::processBlock (juce::AudioSampleBuffer &buffer)
+void Ebu128LoudnessMeter::processBlock (const juce::AudioSampleBuffer& buffer)
 {
     // Copy the buffer, such that all upcoming calculations won't affect
     // the audio output. We want the audio output to be exactly the same
