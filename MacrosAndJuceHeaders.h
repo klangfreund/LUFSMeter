@@ -2,8 +2,6 @@
  ===============================================================================
  
  Macros.h
- 
- 
  By Samuel Gaehwiler from Klangfreund.
  Used in the klangfreund.com/lufsmeter/
 
@@ -36,15 +34,11 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  
- -------------------------------------------------------------------------------
- 
- To release a closed-source product which uses the LUFS Meter or parts of it,
- a commercial license is available. Visit www.klangfreund.com/lufsmeter for more
- information.
- 
  ===============================================================================
  */
 
+
+#pragma once
 
 #ifndef __LUFSMETER_MACROS__
 #define __LUFSMETER_MACROS__
@@ -65,18 +59,18 @@
 #include <string.h> // Contains strrchr, which is used in DEB.
 
 /** Sams debug macro which also has a time stamp.
-	
-	Writes a string to the standard error stream, together with the time
+    
+    Writes a string to the standard error stream, together with the time
     of occurence.
     This is only compiled in a debug build.
     @see Logger::outputDebugString
  */
 // Windows Debug
 #if (JUCE_DEBUG || DOXYGEN) && JUCE_WINDOWS // Windows doesn't understand __func__
-		#define DEB(dbgtext)  { Time currentTime = Time::getCurrentTime(); const bool includeDate = false; const bool includeTime = true; const bool includeSeconds = true; const bool use24HourClock = true; String filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ", " + filename + ":" + String(__LINE__) + ": " + dbgtext) }
+        #define DEB(dbgtext)  { Time currentTime = Time::getCurrentTime(); const bool includeDate = false; const bool includeTime = true; const bool includeSeconds = true; const bool use24HourClock = true; String filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ", " + filename + ":" + String(__LINE__) + ": " + dbgtext) }
 // Mac Debug
 #elif (JUCE_DEBUG || DOXYGEN)
-		#define DEB(dbgtext)  { Time currentTime = Time::getCurrentTime(); const bool includeDate = false; const bool includeTime = true; const bool includeSeconds = true; const bool use24HourClock = true; String filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ", " + filename + "::" + __func__ + ":" + String(__LINE__) + ": " + dbgtext) }
+        #define DEB(dbgtext)  { Time currentTime = Time::getCurrentTime(); const bool includeDate = false; const bool includeTime = true; const bool includeSeconds = true; const bool use24HourClock = true; String filename = strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__; DBG(currentTime.toString(includeDate, includeTime, includeSeconds, use24HourClock) + ", " + filename + "::" + __func__ + ":" + String(__LINE__) + ": " + dbgtext) }
 // Release
 #else
     #define DEB(dbgtext)

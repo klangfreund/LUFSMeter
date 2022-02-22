@@ -1,9 +1,9 @@
 /*
  ===============================================================================
  
- SecondOrderIIRFilter.h
- 
- 
+ Ebu128LoudnessMeter
+
+
  By Samuel Gaehwiler from Klangfreund.
  Used in the klangfreund.com/lufsmeter/
 
@@ -36,13 +36,11 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  
- -------------------------------------------------------------------------------
- 
- To release a closed-source product which uses the LUFS Meter or parts of it,
- get in contact via www.klangfreund.com/contact/.
- 
  ===============================================================================
  */
+
+#pragma once
+
 
 #ifndef __FILTER_OF_SECOND_ORDER__
 #define __FILTER_OF_SECOND_ORDER__
@@ -77,15 +75,15 @@ public:
     virtual ~SecondOrderIIRFilter();
 
     //==============================================================================
-    // Call before the playback starts, to let the filter prepare itself. 
+    // Call before the playback starts, to let the filter prepare itself.
     virtual void prepareToPlay (double sampleRate, int numberOfChannels);
     
-    // Call after the playback has stopped, to let the filter free up any 
-    // resources it no longer needs. 
+    // Call after the playback has stopped, to let the filter free up any
+    // resources it no longer needs.
     virtual void releaseResources();
 
     // Renders the next block.
-    void processBlock (AudioSampleBuffer& buffer);
+    void processBlock (juce::AudioSampleBuffer& buffer);
     
     void reset();
 
@@ -111,11 +109,11 @@ private:
 
     /** Stores the previous value of the variable factorForB2 for every audio channel.
      */
-    HeapBlock<double> z1;
+    juce::HeapBlock<double> z1;
 
     /** Stores the previous value of z1 for every audio channel.
      */
-    HeapBlock<double> z2;
+    juce::HeapBlock<double> z2;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SecondOrderIIRFilter);
 };

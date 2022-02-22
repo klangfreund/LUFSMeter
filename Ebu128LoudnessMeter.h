@@ -1,7 +1,7 @@
 /*
  ===============================================================================
  
- Ebu128LoudnessMeter.h
+ Ebu128LoudnessMeter
 
 
  By Samuel Gaehwiler from Klangfreund.
@@ -39,10 +39,9 @@
  ===============================================================================
  */
 
+#pragma once
 
-#ifndef __EBU128_LOUDNESS_METER__
-#define __EBU128_LOUDNESS_METER__
-
+#include <JuceHeader.h>
 #include "MacrosAndJuceHeaders.h"
 #include "filters/SecondOrderIIRFilter.h"
 #include <map>
@@ -51,42 +50,51 @@
 using std::map;
 using std::vector;
 
+
+//==============================================================================
 /**
- Measures the loudness of an audio stream.
- 
- The loudness is measured according to the documents
- (List)
- - EBU - R 128
- - ITU 1770 Rev 2,3 and 4
- - EBU - Tech 3341 (EBU mode metering)
- - EBU - Tech 3342 (LRA, loudness range)
- - EBU - Tech 3343
- */
-class Ebu128LoudnessMeter     //: public AudioProcessor
+*/
+class Ebu128LoudnessMeterAudioProcessor  : public juce::AudioProcessor
 {
 public:
-    Ebu128LoudnessMeter();
-    ~Ebu128LoudnessMeter();
+    //==============================================================================
+    Ebu128LoudnessMeterAudioProcessor();
+    ~Ebu128LoudnessMeterAudioProcessor() override;
+
+    //==============================================================================
+    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void releaseResources() override;
+
+   #ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
+   #endif
+
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+
+    //==============================================================================
+    juce::AudioProcessorEditor* createEditor() override;
+    bool hasEditor() const override;
+
+    //==============================================================================
+    const juce::String getName() const override;
+
+    bool acceptsMidi() const override;
+    bool producesMidi() const override;
+    bool isMidiEffect() const override;
+    double getTailLengthSeconds() const override;
+
+    //==============================================================================
+    int getNumPrograms() override;
+    int getCurrentProgram() override;
+    void setCurrentProgram (int index) override;
+    const juce::String getProgramName (int index) override;
+    void changeProgramName (int index, const juce::String& newName) override;
+
+    //==============================================================================
+    void getStateInformation (juce::MemoryBlock& destData) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
     
-    // --------- AudioProcessor methods ---------
-//    const String getName ();
     
-    /**
-     @param sampleRate
-     @param numberOfChannels
-     @param estimatedSamplesPerBlock
-     @param expectedRequestRate         Assumption about how many times 
-        a second the measurement values will be requested. Internally,
-        this will be changed to a multiple of 10 because exactly every
-        0.1 second a gating block needs to be measured (for the
-        integrated loudness measurement).
-     */
-    void prepareToPlay (double sampleRate,
-                        int numberOfInputChannels,
-                        int estimatedSamplesPerBlock, 
-                        int expectedRequestRate);
-    
-    void processBlock (AudioSampleBuffer &buffer);
     
     float getShortTermLoudness() const;
     float getMaximumShortTermLoudness() const;
@@ -108,9 +116,16 @@ public:
 
     void setFreezeLoudnessRangeOnSilence (bool freeze);
     
-    void reset();
+    void reset1();
     
+    
+
 private:
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeterAudioProcessor)
+    
+    
+    
     static int round (double d);
     
     /** The buffer given to processBlock() will be copied to this buffer, such
@@ -119,7 +134,7 @@ private:
      
      It also stores the number of input channels implicitely, set in prepareToPlay.
      */
-    AudioSampleBuffer bufferForMeasurement;
+    juce::AudioSampleBuffer bufferForMeasurement;
     
     SecondOrderIIRFilter preFilter;
     SecondOrderIIRFilter revisedLowFrequencyBCurveFilter;
@@ -147,7 +162,7 @@ private:
      3 seconds of samples need to be accumulated. For the other
      measurements shorter windows are used.
      
-     This task could be solved using a ring buffer capable of 
+     This task could be solved using a ring buffer capable of
      holding 3 seconds of (multi-channel) audio and accumulate the
      samples every time the GUI wants to display the measurement.
      
@@ -260,7 +275,5 @@ private:
     bool freezeLoudnessRangeOnSilence;
     bool currentBlockIsSilent;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Ebu128LoudnessMeter);
-};
 
-#endif // __EBU128_LOUDNESS_METER__
+};

@@ -1,9 +1,9 @@
 /*
  ===============================================================================
  
- SecondOrderIIRFilter.cpp
- 
- 
+ Ebu128LoudnessMeter
+
+
  By Samuel Gaehwiler from Klangfreund.
  Used in the klangfreund.com/lufsmeter/
 
@@ -67,11 +67,11 @@ SecondOrderIIRFilter::SecondOrderIIRFilter(double b0_at48k_,
     // for the derivations of these equations.
     const double KoverQ = (2. - 2. * a2_at48k) / (a2_at48k - a1_at48k + 1.);
     const double K = sqrt ((a1_at48k + a2_at48k + 1.) / (a2_at48k - a1_at48k + 1.));
-    Q = K / KoverQ; 
+    Q = K / KoverQ;
     arctanK = atan (K);
     VB = (b0_at48k - b2_at48k)/(1. - a2_at48k);
     VH = (b0_at48k - b1_at48k + b2_at48k)/(a2_at48k - a1_at48k + 1.);
-    VL = (b0_at48k + b1_at48k + b2_at48k)/(a1_at48k + a2_at48k + 1.);   
+    VL = (b0_at48k + b1_at48k + b2_at48k)/(a1_at48k + a2_at48k + 1.);
 }
 
 SecondOrderIIRFilter::~SecondOrderIIRFilter()
@@ -79,7 +79,7 @@ SecondOrderIIRFilter::~SecondOrderIIRFilter()
 }
 
 //==============================================================================
-void SecondOrderIIRFilter::prepareToPlay (double sampleRate, 
+void SecondOrderIIRFilter::prepareToPlay (double sampleRate,
                                           int numberOfChannels_)
 {
     // DEB("prepareToPlay called.")
@@ -118,9 +118,9 @@ void SecondOrderIIRFilter::releaseResources()
 {
 }
 
-void SecondOrderIIRFilter::processBlock (AudioSampleBuffer& buffer)
+void SecondOrderIIRFilter::processBlock (juce::AudioSampleBuffer& buffer)
 {
-    const int numOfChannels = jmin (numberOfChannels, buffer.getNumChannels());
+    const int numOfChannels = juce::jmin (numberOfChannels, buffer.getNumChannels());
 
     for (int channel = 0; channel < numOfChannels; ++channel)
     {
