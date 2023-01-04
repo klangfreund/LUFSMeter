@@ -148,7 +148,7 @@ void Ebu128LoudnessMeter::prepareToPlay (double sampleRate,
         }
     }
     
-    DBG ("expectedRequestRate = " + String(expectedRequestRate));
+    DBG ("expectedRequestRate = " + juce::String(expectedRequestRate));
     
     // Figure out how many bins are needed.
     const int timeOfAccumulationForShortTerm = 3; // seconds.
