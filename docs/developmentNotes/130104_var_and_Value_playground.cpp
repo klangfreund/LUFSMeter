@@ -21,7 +21,7 @@ int main (int argc, char* argv[])
     cout << "Various var's     " << endl;
     cout << "------------------" << endl;
     
-    var aVar;
+    juce::var aVar;
     aVar.append (1.2);  // This also converts the value inside the var
                         // to an Array<var>.
     aVar.append (2.2);
@@ -55,9 +55,9 @@ int main (int argc, char* argv[])
     cout << "------------------" << endl;
     
     
-    const Array<var> tempArrayOfVars;
-    var tempVar (tempArrayOfVars);
-    Value valery (tempVar); // valery now contains a copy of v.
+    const juce::Array<juce::var> tempArrayOfVars;
+    juce::var tempVar (tempArrayOfVars);
+    juce::Value valery (tempVar); // valery now contains a copy of v.
     
     valery.getValue().append(0.0);
         // This does NOT WORK, since getValue returns a

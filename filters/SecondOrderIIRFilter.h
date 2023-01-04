@@ -85,7 +85,7 @@ public:
     virtual void releaseResources();
 
     // Renders the next block.
-    void processBlock (AudioSampleBuffer& buffer);
+    void processBlock (juce::AudioSampleBuffer& buffer);
     
     void reset();
 
@@ -111,11 +111,11 @@ private:
 
     /** Stores the previous value of the variable factorForB2 for every audio channel.
      */
-    HeapBlock<double> z1;
+    juce::HeapBlock<double> z1;
 
     /** Stores the previous value of z1 for every audio channel.
      */
-    HeapBlock<double> z2;
+    juce::HeapBlock<double> z2;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SecondOrderIIRFilter);
 };
