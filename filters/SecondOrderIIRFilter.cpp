@@ -118,9 +118,9 @@ void SecondOrderIIRFilter::releaseResources()
 {
 }
 
-void SecondOrderIIRFilter::processBlock (AudioSampleBuffer& buffer)
+void SecondOrderIIRFilter::processBlock (juce::AudioSampleBuffer& buffer)
 {
-    const int numOfChannels = jmin (numberOfChannels, buffer.getNumChannels());
+    const int numOfChannels = juce::jmin (numberOfChannels, buffer.getNumChannels());
 
     for (int channel = 0; channel < numOfChannels; ++channel)
     {

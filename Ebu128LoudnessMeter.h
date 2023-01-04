@@ -86,7 +86,7 @@ public:
                         int estimatedSamplesPerBlock, 
                         int expectedRequestRate);
     
-    void processBlock (const AudioSampleBuffer& buffer);
+    void processBlock (const juce::AudioSampleBuffer& buffer);
     
     float getShortTermLoudness() const;
     float getMaximumShortTermLoudness() const;
@@ -119,7 +119,7 @@ private:
      
      It also stores the number of input channels implicitely, set in prepareToPlay.
      */
-    AudioSampleBuffer bufferForMeasurement;
+    juce::AudioSampleBuffer bufferForMeasurement;
     
     SecondOrderIIRFilter preFilter;
     SecondOrderIIRFilter revisedLowFrequencyBCurveFilter;
